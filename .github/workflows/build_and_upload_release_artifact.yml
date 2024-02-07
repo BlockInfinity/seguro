@@ -5,7 +5,7 @@ name: Build and Upload Release Artifact
 
 on:
   push:
-    branches: [ "ttb" ]
+    branches: [ "master" ]
 
 jobs:
 
