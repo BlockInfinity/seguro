@@ -12,4 +12,4 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           repository: 'BlockInfinity/seguro'
-          name: seguro
+          pattern: seguro
