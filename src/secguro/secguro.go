@@ -7,7 +7,8 @@ import (
 )
 
 // TODO: turn into CLI parameter
-const directoryToScan = "/home/christoph/Development/Work/wallet/"
+// const directoryToScan = "/home/christoph/Development/Work/wallet/"
+const directoryToScan = "."
 
 func main() {
 	err := downloadDependencies()
