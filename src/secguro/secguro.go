@@ -28,6 +28,7 @@ func main() {
 		panic("did not receive output from gitleaks")
 	}
 
+	fmt.Println("Output by gitleaks:")
 	fmt.Println(string(out[:]))
 
 	os.Exit(0)
