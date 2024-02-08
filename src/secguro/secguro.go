@@ -6,7 +6,6 @@ import (
 	"os/exec"
 )
 
-// TODO: turn into CLI parameter
 // const directoryToScan = "/home/christoph/Development/Work/wallet/"
 const directoryToScan = "."
 
