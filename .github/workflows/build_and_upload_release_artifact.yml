@@ -26,6 +26,10 @@ jobs:
     - name: Build
       run: make
 
+      # Gitignore must be removed because ignored files will not be uploaded.
+    - name: Remove build gitignore
+      run: rm build/.gitignore
+
     - name: Upload Release Artifact
       uses: JamesIves/github-pages-deploy-action@v4
       with:
