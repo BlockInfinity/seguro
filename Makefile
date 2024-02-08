@@ -1,4 +1,4 @@
 default: compile
 
 compile:
-	go build -o build/secguro src/secguro/secguro.go
+	(cd src/secguro && go build -o ../../build/secguro .)
