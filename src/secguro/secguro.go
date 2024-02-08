@@ -24,6 +24,9 @@ func main() {
 	cmd.Dir = directoryToScan
 	// Ignore error because this is expected to deliver an exict code not equal to 0.
 	out, _ := cmd.Output()
+	if out == nil {
+		panic("did not receive output from gitleaks")
+	}
 
 	fmt.Println(string(out[:]))
 
