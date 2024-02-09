@@ -24,4 +24,4 @@ jobs:
       run: make
 
     - name: Test
-      run: build/secguro
+      run: build/secguro scan
