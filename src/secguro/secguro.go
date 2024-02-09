@@ -41,7 +41,12 @@ func main() {
 
 	unifiedFindings := Map(gitleaksFindings, convertGitleaksFindingToUnifiedFinding)
 
-	fmt.Println(unifiedFindings)
+	for i, unifiedFinding := range unifiedFindings {
+		fmt.Printf("Finding %d:\n", i)
+		fmt.Printf("  file: %v\n", unifiedFinding.file)
+		fmt.Printf("  line: %d\n", unifiedFinding.line)
+		fmt.Printf("\n")
+	}
 
 	os.Exit(0)
 }
