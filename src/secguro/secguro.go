@@ -39,7 +39,9 @@ func main() {
 	var gitleaksFindings []GitleaksFinding
 	json.Unmarshal(gitleaksOutputJson, &gitleaksFindings)
 
-	fmt.Println(gitleaksFindings)
+	unifiedFindings := Map(gitleaksFindings, convertGitleaksFindingToUnifiedFinding)
+
+	fmt.Println(unifiedFindings)
 
 	os.Exit(0)
 }
@@ -47,4 +49,16 @@ func main() {
 type GitleaksFinding struct {
 	File      string
 	StartLine int
+}
+
+type UnifiedFinding struct {
+	file string
+	line int
+}
+
+func convertGitleaksFindingToUnifiedFinding(gitleaksFinding GitleaksFinding) UnifiedFinding {
+	return UnifiedFinding{
+		file: gitleaksFinding.File,
+		line: gitleaksFinding.StartLine,
+	}
 }
