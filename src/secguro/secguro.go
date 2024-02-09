@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -39,15 +40,15 @@ func main() {
 			}
 
 			if name != "scan" {
-				log.Fatal("unsupported command")
+				return errors.New("unsupported command")
 			}
 
 			if flagScanGitGistory != "true" && flagScanGitGistory != "false" {
-				log.Fatal("unsupported value for --scan-git-history")
+				return errors.New("unsupported value for --scan-git-history")
 			}
 
 			if flagFormat != "text" && flagFormat != "json" {
-				log.Fatal("unsupported value for --format")
+				return errors.New("unsupported value for --format")
 			}
 
 			commandScan(flagScanGitGistory == "true", flagFormat == "json")
