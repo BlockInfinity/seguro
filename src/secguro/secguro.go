@@ -22,7 +22,7 @@ func main() {
 
 	cmd := exec.Command(dependenciesDir+"/gitleaks/gitleaks", "detect", "-v")
 	cmd.Dir = directoryToScan
-	// Ignore error because this is expected to deliver an exict code not equal to 0.
+	// Ignore error because this is expected to deliver an exit code not equal to 0.
 	out, _ := cmd.Output()
 	if out == nil {
 		panic("did not receive output from gitleaks")
