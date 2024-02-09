@@ -62,16 +62,19 @@ func main() {
 }
 
 func commandScan(scanGitHistory bool, printAsJson bool) {
+	fmt.Println("Downloading dependencies...")
 	err := downloadDependencies()
 	if err != nil {
 		panic(err)
 	}
 
+	fmt.Println("Extracting dependencies...")
 	err = extractDependencies()
 	if err != nil {
 		panic(err)
 	}
 
+	fmt.Println("Scanning...")
 	gitleaksOutputJsonPath := dependenciesDir + "/gitleaksOutput.json"
 
 	cmd := exec.Command(dependenciesDir+"/gitleaks/gitleaks", "detect", "--report-format", "json", "--report-path", gitleaksOutputJsonPath)
@@ -90,6 +93,7 @@ func commandScan(scanGitHistory bool, printAsJson bool) {
 	var gitleaksFindings []GitleaksFinding
 	json.Unmarshal(gitleaksOutputJson, &gitleaksFindings)
 
+	fmt.Println("Findings:")
 	unifiedFindings := Map(gitleaksFindings, convertGitleaksFindingToUnifiedFinding)
 
 	for i, unifiedFinding := range unifiedFindings {
