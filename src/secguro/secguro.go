@@ -43,6 +43,10 @@ func main() {
 				return errors.New("unsupported command")
 			}
 
+			if cCtx.NArg() > 1 {
+				return errors.New("too many commands")
+			}
+
 			if flagScanGitGistory != "true" && flagScanGitGistory != "false" {
 				return errors.New("unsupported value for --scan-git-history")
 			}
