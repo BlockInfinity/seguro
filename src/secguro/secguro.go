@@ -101,14 +101,35 @@ func commandScan(scanGitHistory bool, printAsJson bool) {
 	fmt.Println("Findings:")
 	unifiedFindings := Map(gitleaksFindings, convertGitleaksFindingToUnifiedFinding)
 
-	for i, unifiedFinding := range unifiedFindings {
-		fmt.Printf("Finding %d:\n", i)
-		fmt.Printf("  file: %v\n", unifiedFinding.file)
-		fmt.Printf("  line: %d\n", unifiedFinding.line)
-		fmt.Printf("\n")
+	if printAsJson {
+		err = printJson(unifiedFindings)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		printText(unifiedFindings)
 	}
 
 	os.Exit(0)
+}
+
+func printJson(unifiedFindings []UnifiedFinding) error {
+	resultJson, err := json.Marshal(unifiedFindings)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(string(resultJson[:]))
+	return nil
+}
+
+func printText(unifiedFindings []UnifiedFinding) {
+	for i, unifiedFinding := range unifiedFindings {
+		fmt.Printf("Finding %d:\n", i)
+		fmt.Printf("  file: %v\n", unifiedFinding.File)
+		fmt.Printf("  line: %d\n", unifiedFinding.Line)
+		fmt.Printf("\n")
+	}
 }
 
 type GitleaksFinding struct {
@@ -116,14 +137,16 @@ type GitleaksFinding struct {
 	StartLine int
 }
 
+// The attributes need to start with capital letter because
+// otherwise the JSON formatter cannot see them.
 type UnifiedFinding struct {
-	file string
-	line int
+	File string
+	Line int
 }
 
 func convertGitleaksFindingToUnifiedFinding(gitleaksFinding GitleaksFinding) UnifiedFinding {
 	return UnifiedFinding{
-		file: gitleaksFinding.File,
-		line: gitleaksFinding.StartLine,
+		File: gitleaksFinding.File,
+		Line: gitleaksFinding.StartLine,
 	}
 }
