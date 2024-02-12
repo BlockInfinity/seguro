@@ -8,10 +8,12 @@ import (
 // The attributes need to start with capital letter because
 // otherwise the JSON formatter cannot see them.
 type UnifiedFinding struct {
-	File   string
-	Line   int
-	Column int
-	Match  string
+	Detector string
+	Rule     string
+	File     string
+	Line     int
+	Column   int
+	Match    string
 }
 
 func commandScan(scanGitHistory bool, printAsJson bool) {

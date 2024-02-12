@@ -8,6 +8,7 @@ import (
 )
 
 type GitleaksFinding struct {
+	RuleID      string
 	File        string
 	StartLine   int
 	StartColumn int
@@ -16,10 +17,12 @@ type GitleaksFinding struct {
 
 func convertGitleaksFindingToUnifiedFinding(gitleaksFinding GitleaksFinding) UnifiedFinding {
 	return UnifiedFinding{
-		File:   gitleaksFinding.File,
-		Line:   gitleaksFinding.StartLine,
-		Column: gitleaksFinding.StartColumn,
-		Match:  gitleaksFinding.Match,
+		Detector: "gitleaks",
+		Rule:     gitleaksFinding.RuleID,
+		File:     gitleaksFinding.File,
+		Line:     gitleaksFinding.StartLine,
+		Column:   gitleaksFinding.StartColumn,
+		Match:    gitleaksFinding.Match,
 	}
 }
 

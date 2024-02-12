@@ -18,6 +18,8 @@ func printJson(unifiedFindings []UnifiedFinding) error {
 func printText(unifiedFindings []UnifiedFinding) {
 	for i, unifiedFinding := range unifiedFindings {
 		fmt.Printf("Finding %d:\n", i)
+		fmt.Printf("  detector: %v\n", unifiedFinding.Detector)
+		fmt.Printf("  rule: %v\n", unifiedFinding.Rule)
 		fmt.Printf("  file: %v\n", unifiedFinding.File)
 		fmt.Printf("  line: %d\n", unifiedFinding.Line)
 		fmt.Printf("  column: %d\n", unifiedFinding.Column)
