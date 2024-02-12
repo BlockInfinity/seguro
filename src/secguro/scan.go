@@ -14,6 +14,7 @@ type UnifiedFinding struct {
 	Line     int
 	Column   int
 	Match    string
+	Hint     string
 }
 
 // TODO: replace panic.
@@ -24,11 +25,25 @@ func commandScan(scanGitHistory bool, printAsJson bool) {
 		panic(err)
 	}
 
-	fmt.Println("Scanning...")
-	unifiedFindings, err := getGitleaksFindingsAsUnified()
+	err = installSemgrep()
 	if err != nil {
 		panic(err)
 	}
+
+	fmt.Println("Scanning...")
+	unifiedFindingsGitleaks, err := getGitleaksFindingsAsUnified()
+	if err != nil {
+		panic(err)
+	}
+
+	unifiedFindingsSemgrep, err := getSemgrepFindingsAsUnified()
+	if err != nil {
+		panic(err)
+	}
+
+	unifiedFindings := []UnifiedFinding{}
+	unifiedFindings = append(unifiedFindings, unifiedFindingsGitleaks...)
+	unifiedFindings = append(unifiedFindings, unifiedFindingsSemgrep...)
 
 	fmt.Println("Findings:")
 	if printAsJson {

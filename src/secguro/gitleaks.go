@@ -23,6 +23,7 @@ func convertGitleaksFindingToUnifiedFinding(gitleaksFinding GitleaksFinding) Uni
 		Line:     gitleaksFinding.StartLine,
 		Column:   gitleaksFinding.StartColumn,
 		Match:    gitleaksFinding.Match,
+		Hint:     "",
 	}
 }
 

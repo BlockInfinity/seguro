@@ -24,6 +24,9 @@ func printText(unifiedFindings []UnifiedFinding) {
 		fmt.Printf("  line: %d\n", unifiedFinding.Line)
 		fmt.Printf("  column: %d\n", unifiedFinding.Column)
 		fmt.Printf("  match: %v\n", unifiedFinding.Match)
+		if len(unifiedFinding.Hint) > 0 {
+			fmt.Printf("  hint: %v\n", unifiedFinding.Hint)
+		}
 		fmt.Printf("\n")
 	}
 }
