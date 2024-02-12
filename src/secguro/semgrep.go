@@ -25,7 +25,7 @@ type SemgrepFinding_start struct {
 
 type SemgrepFinding_extra struct {
 	Lines   string
-	Message string // TODO: display message
+	Message string
 }
 
 func convertSemgrepFindingToUnifiedFinding(semgrepFinding SemgrepFinding) UnifiedFinding {
@@ -36,6 +36,7 @@ func convertSemgrepFindingToUnifiedFinding(semgrepFinding SemgrepFinding) Unifie
 		Line:     semgrepFinding.Start.Line,
 		Column:   semgrepFinding.Start.Col,
 		Match:    semgrepFinding.Extra.Lines,
+		Hint:     semgrepFinding.Extra.Message,
 	}
 }
 

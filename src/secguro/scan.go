@@ -14,6 +14,7 @@ type UnifiedFinding struct {
 	Line     int
 	Column   int
 	Match    string
+	Hint     string
 }
 
 // TODO: replace panic.
