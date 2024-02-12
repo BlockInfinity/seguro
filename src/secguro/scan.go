@@ -26,6 +26,9 @@ func commandScan(scanGitHistory bool, printAsJson bool) {
 
 	fmt.Println("Scanning...")
 	unifiedFindings, err := getGitleaksFindingsAsUnified()
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Println("Findings:")
 	if printAsJson {
