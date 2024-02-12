@@ -15,15 +15,15 @@ func main() {
 	var flagScanGitGistory string
 	var flagFormat string
 
-	app := &cli.App{
+	app := &cli.App{ // nolint: exhaustruct
 		Flags: []cli.Flag{
-			&cli.StringFlag{
+			&cli.StringFlag{ // nolint: exhaustruct
 				Name:        "scan-git-history",
 				Value:       "true",
 				Usage:       "true or false",
 				Destination: &flagScanGitGistory,
 			},
-			&cli.StringFlag{
+			&cli.StringFlag{ // nolint: exhaustruct
 				Name:        "format",
 				Value:       "text",
 				Usage:       "text or json",
