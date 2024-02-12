@@ -24,6 +24,11 @@ func commandScan(scanGitHistory bool, printAsJson bool) {
 		panic(err)
 	}
 
+	err = installSemgrep()
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Println("Scanning...")
 	unifiedFindings, err := getGitleaksFindingsAsUnified()
 	if err != nil {
