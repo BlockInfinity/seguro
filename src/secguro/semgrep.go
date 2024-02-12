@@ -12,10 +12,10 @@ type Meta_SemgrepFinding struct {
 }
 
 type SemgrepFinding struct {
-	Checker_id string
-	Start      SemgrepFinding_start
-	Extra      SemgrepFinding_extra
-	path       string
+	Check_id string
+	Start    SemgrepFinding_start
+	Extra    SemgrepFinding_extra
+	path     string
 }
 
 type SemgrepFinding_start struct {
@@ -25,13 +25,13 @@ type SemgrepFinding_start struct {
 
 type SemgrepFinding_extra struct {
 	Lines   string
-	Message string
+	Message string // TODO: display message
 }
 
 func convertSemgrepFindingToUnifiedFinding(semgrepFinding SemgrepFinding) UnifiedFinding {
 	return UnifiedFinding{
 		Detector: "semgrep",
-		Rule:     semgrepFinding.Extra.Message,
+		Rule:     semgrepFinding.Check_id,
 		File:     semgrepFinding.path,
 		Line:     semgrepFinding.Start.Line,
 		Column:   semgrepFinding.Start.Col,
