@@ -5,7 +5,9 @@
 
 ## Use
 ### Locally
-- `secguro scan`
+```bash
+secguro scan
+```
 
 ### Github Workflow
 ```yaml
