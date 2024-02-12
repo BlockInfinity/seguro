@@ -1,0 +1,12 @@
+linters:
+  enable:
+    - exhaustive
+    - exhaustruct
+
+linters-settings:
+  exhaustive:
+    # Program elements to check for exhaustiveness.
+    # Default: [ switch ]
+    check:
+      - switch
+      - map
