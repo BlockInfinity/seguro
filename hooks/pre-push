@@ -1,0 +1,11 @@
+#!/bin/bash
+
+cd "$(dirname "$0")"/..
+
+make lint
+returnValue="$?"
+if (( "$returnValue" != 0 ))
+then
+	echo "Linting violations found!"
+	exit "$returnValue"
+fi
