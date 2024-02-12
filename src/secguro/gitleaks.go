@@ -34,7 +34,7 @@ func getGitleaksOutputJson() ([]byte, error) {
 	// Ignore error because this is expected to deliver an exit code not equal to 0 and write to stderr.
 	out, _ := cmd.Output()
 	if out == nil {
-		errors.New("did not receive output from gitleaks")
+		return nil, errors.New("did not receive output from gitleaks")
 	}
 
 	gitleaksOutputJson, err := os.ReadFile(gitleaksOutputJsonPath)
@@ -48,7 +48,11 @@ func getGitleaksFindingsAsUnified() ([]UnifiedFinding, error) {
 	}
 
 	var gitleaksFindings []GitleaksFinding
-	json.Unmarshal(gitleaksOutputJson, &gitleaksFindings)
+	err = json.Unmarshal(gitleaksOutputJson, &gitleaksFindings)
+	if err != nil {
+		return nil, err
+	}
+
 	unifiedFindings := Map(gitleaksFindings, convertGitleaksFindingToUnifiedFinding)
 	return unifiedFindings, nil
 }
