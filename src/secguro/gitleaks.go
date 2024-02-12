@@ -48,7 +48,11 @@ func getGitleaksFindingsAsUnified() ([]UnifiedFinding, error) {
 	}
 
 	var gitleaksFindings []GitleaksFinding
-	json.Unmarshal(gitleaksOutputJson, &gitleaksFindings)
+	err = json.Unmarshal(gitleaksOutputJson, &gitleaksFindings)
+	if err != nil {
+		return nil, err
+	}
+
 	unifiedFindings := Map(gitleaksFindings, convertGitleaksFindingToUnifiedFinding)
 	return unifiedFindings, nil
 }
