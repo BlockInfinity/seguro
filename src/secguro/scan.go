@@ -30,10 +30,19 @@ func commandScan(scanGitHistory bool, printAsJson bool) {
 	}
 
 	fmt.Println("Scanning...")
-	unifiedFindings, err := getGitleaksFindingsAsUnified()
+	unifiedFindingsGitleaks, err := getGitleaksFindingsAsUnified()
 	if err != nil {
 		panic(err)
 	}
+
+	unifiedFindingsSemgrep, err := getSemgrepFindingsAsUnified()
+	if err != nil {
+		panic(err)
+	}
+
+	unifiedFindings := []UnifiedFinding{}
+	unifiedFindings = append(unifiedFindings, unifiedFindingsGitleaks...)
+	unifiedFindings = append(unifiedFindings, unifiedFindingsSemgrep...)
 
 	fmt.Println("Findings:")
 	if printAsJson {
