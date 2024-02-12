@@ -12,18 +12,18 @@ import (
 
 const dependenciesDir = "/tmp/secguroDependencies"
 
-func extractDependencies() error {
-	file, _ := os.Open(dependenciesDir + "/gitleaks.tar.gz")
-	return extract.Gz(context.Background(), file, dependenciesDir+"/gitleaks", nil)
+func extractGzDependency(name string) error {
+	file, _ := os.Open(dependenciesDir + "/" + name + ".tar.gz")
+	return extract.Gz(context.Background(), file, dependenciesDir+"/"+name, nil)
 }
 
-func downloadDependencies() error {
+func downloadDependency(name string, url string) error {
 	err := os.MkdirAll(dependenciesDir, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	return downloadFile(dependenciesDir+"/gitleaks.tar.gz", "https://github.com/gitleaks/gitleaks/releases/download/v8.18.2/gitleaks_8.18.2_linux_x64.tar.gz")
+	return downloadFile(dependenciesDir+"/"+name+".tar.gz", url)
 }
 
 // https://stackoverflow.com/a/33853856

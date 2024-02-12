@@ -13,14 +13,8 @@ type UnifiedFinding struct {
 }
 
 func commandScan(scanGitHistory bool, printAsJson bool) {
-	fmt.Println("Downloading dependencies...")
-	err := downloadDependencies()
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println("Extracting dependencies...")
-	err = extractDependencies()
+	fmt.Println("Downloading and extracting dependencies...")
+	err := downloadAndExtractGitleaks()
 	if err != nil {
 		panic(err)
 	}
