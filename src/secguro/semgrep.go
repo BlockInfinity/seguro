@@ -15,7 +15,7 @@ type SemgrepFinding struct {
 	Check_id string
 	Start    SemgrepFinding_start
 	Extra    SemgrepFinding_extra
-	path     string
+	Path     string
 }
 
 type SemgrepFinding_start struct {
@@ -32,7 +32,7 @@ func convertSemgrepFindingToUnifiedFinding(semgrepFinding SemgrepFinding) Unifie
 	return UnifiedFinding{
 		Detector: "semgrep",
 		Rule:     semgrepFinding.Check_id,
-		File:     semgrepFinding.path,
+		File:     semgrepFinding.Path,
 		Line:     semgrepFinding.Start.Line,
 		Column:   semgrepFinding.Start.Col,
 		Match:    semgrepFinding.Extra.Lines,
