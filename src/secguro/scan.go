@@ -16,6 +16,7 @@ type UnifiedFinding struct {
 	Match    string
 }
 
+// TODO: replace panic
 func commandScan(scanGitHistory bool, printAsJson bool) {
 	fmt.Println("Downloading and extracting dependencies...")
 	err := downloadAndExtractGitleaks()
