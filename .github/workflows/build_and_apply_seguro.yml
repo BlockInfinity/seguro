@@ -4,8 +4,9 @@
 name: Build and Apply Secguro
 
 on:
-  pull_request:
-    branches: [ "master" ]
+  push:
+    branches-ignore:
+      - 'gh-pages'
 
 jobs:
 
