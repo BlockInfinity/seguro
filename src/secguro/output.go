@@ -16,6 +16,11 @@ func printJson(unifiedFindings []UnifiedFinding) error {
 }
 
 func printText(unifiedFindings []UnifiedFinding) {
+	if len(unifiedFindings) == 0 {
+		fmt.Println("no findings")
+		return
+	}
+
 	for i, unifiedFinding := range unifiedFindings {
 		fmt.Printf("Finding %d:\n", i)
 		fmt.Printf("  detector: %v\n", unifiedFinding.Detector)
