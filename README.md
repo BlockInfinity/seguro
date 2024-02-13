@@ -25,6 +25,13 @@ secguro scan
         failOnStderr: false # because wget writes to stderr
 ```
 
+## Exit Code
+Exit codes ranging from 0 to 250 (inclusive) indicate the number of findings. Exit code 250 indicates 250 or more findings. Ignored findings are not counted.
+
+Exit codes not equal to 0 are useful to make Github Workflows and Azure Pipelines fail.
+
+Switch `--tolerance n` may be used to make secguro yield exit code 0 if the number of findigs does not exceed `n`.
+
 ## Deveploment
 - Go version: 1.21.7
 
