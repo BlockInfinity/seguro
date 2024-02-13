@@ -31,7 +31,7 @@ func getGitleaksOutputJson() ([]byte, error) {
 	gitleaksOutputJsonPath := dependenciesDir + "/gitleaksOutput.json"
 
 	// secguro-ignore-next-line
-	cmd := exec.Command(dependenciesDir+"/gitleaks/gitleaks", "detect", "--report-format", "json", "--report-path", gitleaksOutputJsonPath)
+	cmd := exec.Command(dependenciesDir+"/gitleaks/gitleaks", "detect", "--no-git", "--report-format", "json", "--report-path", gitleaksOutputJsonPath)
 	cmd.Dir = directoryToScan
 	// Ignore error because this is expected to deliver an exit code not equal to 0 and write to stderr.
 	out, _ := cmd.Output()

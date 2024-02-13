@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/go-set/v2"
 )
 
+const maxFindingsIndicatingExitCode = 250
+
 // The attributes need to start with capital letter because
 // otherwise the JSON formatter cannot see them.
 type UnifiedFinding struct {
@@ -25,7 +27,7 @@ type FilePathWithLineNumber struct {
 }
 
 // TODO: replace panic.
-func commandScan(scanGitHistory bool, printAsJson bool) {
+func commandScan(scanGitHistory bool, printAsJson bool, tolerance int) {
 	fmt.Println("Downloading and extracting dependencies...")
 	err := downloadAndExtractGitleaks()
 	if err != nil {
@@ -59,7 +61,7 @@ func commandScan(scanGitHistory bool, printAsJson bool) {
 
 	ignoredLines := set.New[FilePathWithLineNumber](10)
 	filePathsWithResults.ForEach(func(filePath string) bool {
-		lineNumbers, err := GetNumbersOfMatchingLines(filePath, "secguro-ignore-next-line")
+		lineNumbers, err := GetNumbersOfMatchingLines(directoryToScan+"/"+filePath, "secguro-ignore-next-line")
 		if err != nil {
 			panic(err)
 		}
@@ -97,5 +99,17 @@ func commandScan(scanGitHistory bool, printAsJson bool) {
 		printText(unifiedFindingsNotIgnored)
 	}
 
-	os.Exit(0)
+	exitWithAppropriateExitCode(len(unifiedFindingsNotIgnored), tolerance)
+}
+
+func exitWithAppropriateExitCode(numberOfFindingsNotIgnored int, tolerance int) {
+	if numberOfFindingsNotIgnored <= tolerance {
+		os.Exit(0)
+	}
+
+	if numberOfFindingsNotIgnored > maxFindingsIndicatingExitCode {
+		os.Exit(maxFindingsIndicatingExitCode)
+	}
+
+	os.Exit(numberOfFindingsNotIgnored)
 }

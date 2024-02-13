@@ -8,12 +8,13 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// const directoryToScan = "/home/christoph/Development/Work/wallet/"
+// const directoryToScan = "/home/christoph/Development/Work/wallet"
 const directoryToScan = "."
 
 func main() {
 	var flagScanGitGistory string
 	var flagFormat string
+	var flagTolerance int
 
 	app := &cli.App{ // nolint: exhaustruct
 		Flags: []cli.Flag{
@@ -28,6 +29,12 @@ func main() {
 				Value:       "text",
 				Usage:       "text or json",
 				Destination: &flagFormat,
+			},
+			&cli.IntFlag{ // nolint: exhaustruct
+				Name:        "tolerance",
+				Value:       0,
+				Usage:       "number of findings to tolerate when choosing exit code",
+				Destination: &flagTolerance,
 			},
 		},
 		Action: func(cCtx *cli.Context) error {
@@ -52,7 +59,7 @@ func main() {
 				return errors.New("unsupported value for --format")
 			}
 
-			commandScan(flagScanGitGistory == "true", flagFormat == "json")
+			commandScan(flagScanGitGistory == "true", flagFormat == "json", flagTolerance)
 
 			return nil
 		},
