@@ -22,7 +22,7 @@ func printText(unifiedFindings []UnifiedFinding) {
 	}
 
 	for i, unifiedFinding := range unifiedFindings {
-		fmt.Printf("Finding %d:\n", i)
+		fmt.Printf("Finding %d:\n", i+1)
 		fmt.Printf("  detector: %v\n", unifiedFinding.Detector)
 		fmt.Printf("  rule: %v\n", unifiedFinding.Rule)
 		fmt.Printf("  file: %v\n", unifiedFinding.File)
