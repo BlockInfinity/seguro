@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/go-set/v2"
 )
 
+const maxFindingsIndicatingExitCode = 250
+
 // The attributes need to start with capital letter because
 // otherwise the JSON formatter cannot see them.
 type UnifiedFinding struct {
@@ -98,5 +100,8 @@ func commandScan(scanGitHistory bool, printAsJson bool) {
 	}
 
 	exitCode := len(unifiedFindingsNotIgnored)
+	if exitCode > maxFindingsIndicatingExitCode {
+		exitCode = maxFindingsIndicatingExitCode
+	}
 	os.Exit(exitCode)
 }
