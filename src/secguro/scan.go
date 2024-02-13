@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/hashicorp/go-set/v2"
 )
 
 // The attributes need to start with capital letter because
@@ -15,6 +17,11 @@ type UnifiedFinding struct {
 	Column   int
 	Match    string
 	Hint     string
+}
+
+type FilePathWithLineNumber struct {
+	FilePath   string
+	LineNumber int
 }
 
 // TODO: replace panic.
@@ -45,14 +52,49 @@ func commandScan(scanGitHistory bool, printAsJson bool) {
 	unifiedFindings = append(unifiedFindings, unifiedFindingsGitleaks...)
 	unifiedFindings = append(unifiedFindings, unifiedFindingsSemgrep...)
 
+	filePathsWithResults := set.New[string](10)
+	for _, unifiedFinding := range unifiedFindings {
+		filePathsWithResults.Insert(unifiedFinding.File)
+	}
+
+	ignoredLines := set.New[FilePathWithLineNumber](10)
+	filePathsWithResults.ForEach(func(filePath string) bool {
+		lineNumbers, err := GetNumbersOfMatchingLines(filePath, "secguro-ignore-next-line")
+		if err != nil {
+			panic(err)
+		}
+
+		for _, lineNumber := range lineNumbers {
+			ignoredLines.Insert(FilePathWithLineNumber{
+				FilePath:   filePath,
+				LineNumber: lineNumber + 1,
+			})
+		}
+
+		return false
+	})
+
+	unifiedFindingsNotIgnored := Filter(unifiedFindings, func(unifiedFinding UnifiedFinding) bool {
+		r := true
+		ignoredLines.ForEach(func(ignoredLine FilePathWithLineNumber) bool {
+			if ignoredLine.FilePath == unifiedFinding.File && ignoredLine.LineNumber == unifiedFinding.Line {
+				r = false
+				return true
+			}
+
+			return false
+		})
+		return r
+	})
+
 	fmt.Println("Findings:")
 	if printAsJson {
-		err = printJson(unifiedFindings)
+		err = printJson(unifiedFindingsNotIgnored)
 		if err != nil {
 			panic(err)
 		}
 	} else {
-		printText(unifiedFindings)
+		printText(unifiedFindingsNotIgnored)
 	}
 
 	os.Exit(0)
