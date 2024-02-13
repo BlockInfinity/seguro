@@ -61,7 +61,7 @@ func commandScan(scanGitHistory bool, printAsJson bool, tolerance int) {
 
 	ignoredLines := set.New[FilePathWithLineNumber](10)
 	filePathsWithResults.ForEach(func(filePath string) bool {
-		lineNumbers, err := GetNumbersOfMatchingLines(filePath, "secguro-ignore-next-line")
+		lineNumbers, err := GetNumbersOfMatchingLines(directoryToScan+"/"+filePath, "secguro-ignore-next-line")
 		if err != nil {
 			panic(err)
 		}

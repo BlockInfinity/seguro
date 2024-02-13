@@ -8,7 +8,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// const directoryToScan = "/home/christoph/Development/Work/wallet/"
+// const directoryToScan = "/home/christoph/Development/Work/wallet"
 const directoryToScan = "."
 
 func main() {
