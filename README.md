@@ -1,7 +1,7 @@
 ## Installation
 - Download: `wget 'https://secguro.github.io/secguro-cli/secguro'`
 - Make executable: `chmod +x secguro`
-- Move to directory in `$PATH`
+- Move to directory in `$PATH`; e.g. `mv secguro ~/.local/bin`
 
 ## Use
 ### Locally
