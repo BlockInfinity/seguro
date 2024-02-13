@@ -97,5 +97,6 @@ func commandScan(scanGitHistory bool, printAsJson bool) {
 		printText(unifiedFindingsNotIgnored)
 	}
 
-	os.Exit(0)
+	exitCode := len(unifiedFindingsNotIgnored)
+	os.Exit(exitCode)
 }
