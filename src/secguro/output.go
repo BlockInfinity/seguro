@@ -6,6 +6,13 @@ import (
 )
 
 func printJson(unifiedFindings []UnifiedFinding) error {
+	// Handle case of un-initialzed array (would cause
+	// conversion to "null" instead of "[]").
+	if unifiedFindings == nil {
+		fmt.Println("[]")
+		return nil
+	}
+
 	resultJson, err := json.Marshal(unifiedFindings)
 	if err != nil {
 		return err
