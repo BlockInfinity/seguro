@@ -37,6 +37,7 @@ func main() {
 					},
 					&cli.StringFlag{ // nolint: exhaustruct
 						Name:        "output",
+						Aliases:     []string{"o"},
 						Value:       "",
 						Usage:       "path to output destination",
 						Destination: &flagOutput,
