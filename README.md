@@ -39,3 +39,10 @@ Switch `--tolerance n` may be used to make secguro yield exit code 0 if the numb
 - Installation: `yay -S golangci-lint` or https://golangci-lint.run/usage/install/#local-installation
 - Manual invocation: `make lint`
 - Activation of pre-push hook: `git config core.hooksPath hooks`
+
+### Compilation
+```bash
+make
+```
+
+Location of generated binary: `build/secguro`
