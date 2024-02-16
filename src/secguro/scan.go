@@ -27,7 +27,7 @@ type FilePathWithLineNumber struct {
 }
 
 // TODO: replace panic.
-func commandScan(scanGitHistory bool, printAsJson bool, tolerance int) {
+func commandScan(scanGitHistory bool, printAsJson bool, outputDestination string, tolerance int) {
 	fmt.Println("Downloading and extracting dependencies...")
 	err := downloadAndExtractGitleaks()
 	if err != nil {
@@ -89,14 +89,28 @@ func commandScan(scanGitHistory bool, printAsJson bool, tolerance int) {
 		return r
 	})
 
-	fmt.Println("Findings:")
-	if printAsJson {
-		err = printJson(unifiedFindingsNotIgnored)
+	output := (func() string {
+		if printAsJson {
+			o, err := printJson(unifiedFindingsNotIgnored)
+			if err != nil {
+				panic(err)
+			}
+			return o
+		} else {
+			return printText(unifiedFindingsNotIgnored)
+		}
+	})()
+
+	if outputDestination == "" {
+		fmt.Println("Findings:")
+		fmt.Println(output)
+	} else {
+		err = os.WriteFile(outputDestination, []byte(output), 0644)
 		if err != nil {
 			panic(err)
 		}
-	} else {
-		printText(unifiedFindingsNotIgnored)
+
+		fmt.Println("Output written to: " + outputDestination)
 	}
 
 	exitWithAppropriateExitCode(len(unifiedFindingsNotIgnored), tolerance)

@@ -5,40 +5,41 @@ import (
 	"fmt"
 )
 
-func printJson(unifiedFindings []UnifiedFinding) error {
+func printJson(unifiedFindings []UnifiedFinding) (string, error) {
 	// Handle case of un-initialzed array (would cause
 	// conversion to "null" instead of "[]").
 	if unifiedFindings == nil {
-		fmt.Println("[]")
-		return nil
+		return "[]", nil
 	}
 
 	resultJson, err := json.Marshal(unifiedFindings)
 	if err != nil {
-		return err
+		return "error", err
 	}
 
-	fmt.Println(string(resultJson[:]))
-	return nil
+	return string(resultJson[:]), nil
 }
 
-func printText(unifiedFindings []UnifiedFinding) {
+func printText(unifiedFindings []UnifiedFinding) string {
 	if len(unifiedFindings) == 0 {
-		fmt.Println("no findings")
-		return
+		return "no findings"
 	}
 
+	r := ""
+
 	for i, unifiedFinding := range unifiedFindings {
-		fmt.Printf("Finding %d:\n", i+1)
-		fmt.Printf("  detector: %v\n", unifiedFinding.Detector)
-		fmt.Printf("  rule: %v\n", unifiedFinding.Rule)
-		fmt.Printf("  file: %v\n", unifiedFinding.File)
-		fmt.Printf("  line: %d\n", unifiedFinding.Line)
-		fmt.Printf("  column: %d\n", unifiedFinding.Column)
-		fmt.Printf("  match: %v\n", unifiedFinding.Match)
+		r += fmt.Sprintf("Finding %d:\n", i+1)
+		r += fmt.Sprintf("  detector: %v\n", unifiedFinding.Detector)
+		r += fmt.Sprintf("  rule: %v\n", unifiedFinding.Rule)
+		r += fmt.Sprintf("  file: %v\n", unifiedFinding.File)
+		r += fmt.Sprintf("  line: %d\n", unifiedFinding.Line)
+		r += fmt.Sprintf("  column: %d\n", unifiedFinding.Column)
+		r += fmt.Sprintf("  match: %v\n", unifiedFinding.Match)
 		if len(unifiedFinding.Hint) > 0 {
-			fmt.Printf("  hint: %v\n", unifiedFinding.Hint)
+			r += fmt.Sprintf("  hint: %v\n", unifiedFinding.Hint)
 		}
-		fmt.Printf("\n")
+		r += "\n"
 	}
+
+	return r
 }

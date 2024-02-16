@@ -14,6 +14,7 @@ const directoryToScan = "."
 func main() {
 	var flagScanGitGistory string
 	var flagFormat string
+	var flagOutput string
 	var flagTolerance int
 
 	app := &cli.App{ // nolint: exhaustruct
@@ -33,6 +34,12 @@ func main() {
 						Value:       "text",
 						Usage:       "text or json",
 						Destination: &flagFormat,
+					},
+					&cli.StringFlag{ // nolint: exhaustruct
+						Name:        "output",
+						Value:       "",
+						Usage:       "path to output destination",
+						Destination: &flagOutput,
 					},
 					&cli.IntFlag{ // nolint: exhaustruct
 						Name:        "tolerance",
@@ -54,7 +61,7 @@ func main() {
 						return errors.New("unsupported value for --format")
 					}
 
-					commandScan(flagScanGitGistory == "true", flagFormat == "json", flagTolerance)
+					commandScan(flagScanGitGistory == "true", flagFormat == "json", flagOutput, flagTolerance)
 					return nil
 				},
 			},
