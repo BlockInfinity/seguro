@@ -32,7 +32,7 @@ func getGitInfo(filePath string, lineNumber int, gitMode bool) (GitInfo, error) 
 		} else if strings.HasPrefix(line, "author ") {
 			r.AuthorName = strings.TrimPrefix(line, "author ")
 		} else if strings.HasPrefix(line, "author-mail ") {
-			r.AuthorEmailAddress = strings.TrimPrefix(line, "author-mail ")
+			r.AuthorEmailAddress = strings.TrimSuffix(strings.TrimPrefix(line, "author-mail <"), ">")
 		} else if strings.HasPrefix(line, "author-time ") {
 			authorTimeString := strings.TrimPrefix(line, "author-time ")
 			authorTimeInt, err := strconv.Atoi(authorTimeString)
