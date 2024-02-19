@@ -61,7 +61,7 @@ func printText(unifiedFindings []UnifiedFinding, gitMode bool) string {
 			r += fmt.Sprintf("  commit hash: %v\n", unifiedFinding.CommitHash)
 			r += fmt.Sprintf("  commit date: %v\n", unifiedFinding.CommitDate)
 			r += fmt.Sprintf("  author: %v\n", unifiedFinding.AuthorName)
-			r += fmt.Sprintf("  auther email address: %v\n", unifiedFinding.AuthorEmailAddress)
+			r += fmt.Sprintf("  author email address: %v\n", unifiedFinding.AuthorEmailAddress)
 			r += fmt.Sprintf("  commit message: %v\n", unifiedFinding.CommitMessage)
 		}
 		r += "\n"
