@@ -28,17 +28,28 @@ type SemgrepFinding_extra struct {
 	Message string
 }
 
-func convertSemgrepFindingToUnifiedFinding(semgrepFinding SemgrepFinding) UnifiedFinding {
-	// TODO: implement git mode
-	return UnifiedFinding{ // nolint: exhaustruct
-		Detector: "semgrep",
-		Rule:     semgrepFinding.Check_id,
-		File:     semgrepFinding.Path,
-		Line:     semgrepFinding.Start.Line,
-		Column:   semgrepFinding.Start.Col,
-		Match:    semgrepFinding.Extra.Lines,
-		Hint:     semgrepFinding.Extra.Message,
+func convertSemgrepFindingToUnifiedFinding(semgrepFinding SemgrepFinding, gitMode bool) (UnifiedFinding, error) {
+	gitInfo, err := getGitInfo(semgrepFinding.Path, semgrepFinding.Start.Line, gitMode)
+	if err != nil {
+		return UnifiedFinding{}, err
 	}
+
+	unifiedFinding := UnifiedFinding{
+		Detector:           "semgrep",
+		Rule:               semgrepFinding.Check_id,
+		File:               semgrepFinding.Path,
+		Line:               semgrepFinding.Start.Line,
+		Column:             semgrepFinding.Start.Col,
+		Match:              semgrepFinding.Extra.Lines,
+		Hint:               semgrepFinding.Extra.Message,
+		CommitHash:         gitInfo.CommitHash,
+		CommitDate:         gitInfo.CommitDate,
+		AuthorName:         gitInfo.AuthorName,
+		AuthorEmailAddress: gitInfo.AuthorEmailAddress,
+		CommitMessage:      gitInfo.CommitMessage,
+	}
+
+	return unifiedFinding, nil
 }
 
 func getSemgrepOutputJson() ([]byte, error) {
@@ -56,7 +67,7 @@ func getSemgrepOutputJson() ([]byte, error) {
 	return semgrepOutputJson, err
 }
 
-func getSemgrepFindingsAsUnified() ([]UnifiedFinding, error) {
+func getSemgrepFindingsAsUnified(gitMode bool) ([]UnifiedFinding, error) {
 	semgrepOutputJson, err := getSemgrepOutputJson()
 	if err != nil {
 		return nil, err
@@ -70,7 +81,14 @@ func getSemgrepFindingsAsUnified() ([]UnifiedFinding, error) {
 
 	semgrepFindings := metaSemgrepFindings.Results
 
-	unifiedFindings := Map(semgrepFindings, convertSemgrepFindingToUnifiedFinding)
+	unifiedFindings, err := MapWithError(semgrepFindings,
+		func(semgrepFinding SemgrepFinding) (UnifiedFinding, error) {
+			return convertSemgrepFindingToUnifiedFinding(semgrepFinding, gitMode)
+		})
+	if err != nil {
+		return make([]UnifiedFinding, 0), err
+	}
+
 	return unifiedFindings, nil
 }
 

@@ -9,6 +9,18 @@ func Map[T, U any](ts []T, f func(T) U) []U {
 	return us
 }
 
+func MapWithError[T, U any](ts []T, f func(T) (U, error)) ([]U, error) {
+	us := make([]U, len(ts))
+	for i := range ts {
+		var err error
+		us[i], err = f(ts[i])
+		if err != nil {
+			return make([]U, 0), err
+		}
+	}
+	return us, nil
+}
+
 // https://stackoverflow.com/a/37563128
 func Filter[T any](ss []T, test func(T) bool) (ret []T) {
 	for _, s := range ss {

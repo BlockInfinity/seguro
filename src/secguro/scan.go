@@ -19,6 +19,14 @@ type UnifiedFindingSansGitInfo struct {
 	Hint     string
 }
 
+type GitInfo struct {
+	CommitHash         string
+	CommitDate         string
+	AuthorName         string
+	AuthorEmailAddress string
+	CommitMessage      string
+}
+
 // The attributes need to start with capital letter because
 // otherwise the JSON formatter cannot see them.
 type UnifiedFinding struct {
@@ -60,8 +68,7 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 		panic(err)
 	}
 
-	// TODO: git mode
-	unifiedFindingsSemgrep, err := getSemgrepFindingsAsUnified()
+	unifiedFindingsSemgrep, err := getSemgrepFindingsAsUnified(gitMode)
 	if err != nil {
 		panic(err)
 	}
