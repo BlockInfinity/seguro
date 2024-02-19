@@ -9,6 +9,16 @@ import (
 
 const maxFindingsIndicatingExitCode = 250
 
+type UnifiedFindingSansGitInfo struct {
+	Detector string
+	Rule     string
+	File     string
+	Line     int
+	Column   int
+	Match    string
+	Hint     string
+}
+
 // The attributes need to start with capital letter because
 // otherwise the JSON formatter cannot see them.
 type UnifiedFinding struct {
@@ -102,7 +112,7 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 	output := (func() string {
 		if printAsJson {
 			// TODO implement git mode
-			o, err := printJson(unifiedFindingsNotIgnored)
+			o, err := printJson(unifiedFindingsNotIgnored, gitMode)
 			if err != nil {
 				panic(err)
 			}

@@ -5,7 +5,26 @@ import (
 	"fmt"
 )
 
-func printJson(unifiedFindings []UnifiedFinding) (string, error) {
+func printJson(unifiedFindings []UnifiedFinding, gitMode bool) (string, error) {
+	if gitMode {
+		return printJsonInternal(unifiedFindings)
+	} else {
+		unifiedFindingsSansGitInfo := Map(unifiedFindings, func(unifiedFinding UnifiedFinding) UnifiedFindingSansGitInfo {
+			return UnifiedFindingSansGitInfo{
+				unifiedFinding.Detector,
+				unifiedFinding.Rule,
+				unifiedFinding.File,
+				unifiedFinding.Line,
+				unifiedFinding.Column,
+				unifiedFinding.Match,
+				unifiedFinding.Hint,
+			}
+		})
+		return printJsonInternal(unifiedFindingsSansGitInfo)
+	}
+}
+
+func printJsonInternal[T UnifiedFinding | UnifiedFindingSansGitInfo](unifiedFindings []T) (string, error) {
 	// Handle case of un-initialzed array (would cause
 	// conversion to "null" instead of "[]").
 	if unifiedFindings == nil {
