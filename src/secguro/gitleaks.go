@@ -13,25 +13,42 @@ type GitleaksFinding struct {
 	StartLine   int
 	StartColumn int
 	Match       string
+	Commit      string
+	Date        string
+	Author      string
+	Email       string
+	Message     string
 }
 
 func convertGitleaksFindingToUnifiedFinding(gitleaksFinding GitleaksFinding) UnifiedFinding {
 	return UnifiedFinding{
-		Detector: "gitleaks",
-		Rule:     gitleaksFinding.RuleID,
-		File:     gitleaksFinding.File,
-		Line:     gitleaksFinding.StartLine,
-		Column:   gitleaksFinding.StartColumn,
-		Match:    gitleaksFinding.Match,
-		Hint:     "",
+		Detector:           "gitleaks",
+		Rule:               gitleaksFinding.RuleID,
+		File:               gitleaksFinding.File,
+		Line:               gitleaksFinding.StartLine,
+		Column:             gitleaksFinding.StartColumn,
+		Match:              gitleaksFinding.Match,
+		Hint:               "",
+		CommitHash:         gitleaksFinding.Commit,
+		CommitDate:         gitleaksFinding.Date,
+		AuthorName:         gitleaksFinding.Author,
+		AuthorEmailAddress: gitleaksFinding.Email,
+		CommitMessage:      gitleaksFinding.Message,
 	}
 }
 
-func getGitleaksOutputJson() ([]byte, error) {
+func getGitleaksOutputJson(gitMode bool) ([]byte, error) {
 	gitleaksOutputJsonPath := dependenciesDir + "/gitleaksOutput.json"
 
-	// secguro-ignore-next-line
-	cmd := exec.Command(dependenciesDir+"/gitleaks/gitleaks", "detect", "--no-git", "--report-format", "json", "--report-path", gitleaksOutputJsonPath)
+	cmd := (func() *exec.Cmd {
+		if gitMode {
+			// secguro-ignore-next-line
+			return exec.Command(dependenciesDir+"/gitleaks/gitleaks", "detect", "--report-format", "json", "--report-path", gitleaksOutputJsonPath)
+		} else {
+			// secguro-ignore-next-line
+			return exec.Command(dependenciesDir+"/gitleaks/gitleaks", "detect", "--no-git", "--report-format", "json", "--report-path", gitleaksOutputJsonPath)
+		}
+	})()
 	cmd.Dir = directoryToScan
 	// Ignore error because this is expected to deliver an exit code not equal to 0 and write to stderr.
 	out, _ := cmd.Output()
@@ -43,8 +60,8 @@ func getGitleaksOutputJson() ([]byte, error) {
 	return gitleaksOutputJson, err
 }
 
-func getGitleaksFindingsAsUnified() ([]UnifiedFinding, error) {
-	gitleaksOutputJson, err := getGitleaksOutputJson()
+func getGitleaksFindingsAsUnified(gitMode bool) ([]UnifiedFinding, error) {
+	gitleaksOutputJson, err := getGitleaksOutputJson(gitMode)
 	if err != nil {
 		return nil, err
 	}

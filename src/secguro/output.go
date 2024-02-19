@@ -5,7 +5,26 @@ import (
 	"fmt"
 )
 
-func printJson(unifiedFindings []UnifiedFinding) (string, error) {
+func printJson(unifiedFindings []UnifiedFinding, gitMode bool) (string, error) {
+	if gitMode {
+		return printJsonInternal(unifiedFindings)
+	} else {
+		unifiedFindingsSansGitInfo := Map(unifiedFindings, func(unifiedFinding UnifiedFinding) UnifiedFindingSansGitInfo {
+			return UnifiedFindingSansGitInfo{
+				unifiedFinding.Detector,
+				unifiedFinding.Rule,
+				unifiedFinding.File,
+				unifiedFinding.Line,
+				unifiedFinding.Column,
+				unifiedFinding.Match,
+				unifiedFinding.Hint,
+			}
+		})
+		return printJsonInternal(unifiedFindingsSansGitInfo)
+	}
+}
+
+func printJsonInternal[T UnifiedFinding | UnifiedFindingSansGitInfo](unifiedFindings []T) (string, error) {
 	// Handle case of un-initialzed array (would cause
 	// conversion to "null" instead of "[]").
 	if unifiedFindings == nil {
@@ -20,7 +39,7 @@ func printJson(unifiedFindings []UnifiedFinding) (string, error) {
 	return string(resultJson[:]), nil
 }
 
-func printText(unifiedFindings []UnifiedFinding) string {
+func printText(unifiedFindings []UnifiedFinding, gitMode bool) string {
 	if len(unifiedFindings) == 0 {
 		return "no findings"
 	}
@@ -37,6 +56,13 @@ func printText(unifiedFindings []UnifiedFinding) string {
 		r += fmt.Sprintf("  match: %v\n", unifiedFinding.Match)
 		if len(unifiedFinding.Hint) > 0 {
 			r += fmt.Sprintf("  hint: %v\n", unifiedFinding.Hint)
+		}
+		if gitMode {
+			r += fmt.Sprintf("  commit hash: %v\n", unifiedFinding.CommitHash)
+			r += fmt.Sprintf("  commit date: %v\n", unifiedFinding.CommitDate)
+			r += fmt.Sprintf("  author: %v\n", unifiedFinding.AuthorName)
+			r += fmt.Sprintf("  author email address: %v\n", unifiedFinding.AuthorEmailAddress)
+			r += fmt.Sprintf("  commit message: %v\n", unifiedFinding.CommitMessage)
 		}
 		r += "\n"
 	}

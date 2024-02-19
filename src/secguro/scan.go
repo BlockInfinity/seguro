@@ -9,9 +9,7 @@ import (
 
 const maxFindingsIndicatingExitCode = 250
 
-// The attributes need to start with capital letter because
-// otherwise the JSON formatter cannot see them.
-type UnifiedFinding struct {
+type UnifiedFindingSansGitInfo struct {
 	Detector string
 	Rule     string
 	File     string
@@ -21,13 +19,38 @@ type UnifiedFinding struct {
 	Hint     string
 }
 
+type GitInfo struct {
+	CommitHash         string
+	CommitDate         string
+	AuthorName         string
+	AuthorEmailAddress string
+	CommitMessage      string
+}
+
+// The attributes need to start with capital letter because
+// otherwise the JSON formatter cannot see them.
+type UnifiedFinding struct {
+	Detector           string
+	Rule               string
+	File               string
+	Line               int
+	Column             int
+	Match              string
+	Hint               string
+	CommitHash         string
+	CommitDate         string
+	AuthorName         string
+	AuthorEmailAddress string
+	CommitMessage      string
+}
+
 type FilePathWithLineNumber struct {
 	FilePath   string
 	LineNumber int
 }
 
 // TODO: replace panic.
-func commandScan(scanGitHistory bool, printAsJson bool, outputDestination string, tolerance int) {
+func commandScan(gitMode bool, printAsJson bool, outputDestination string, tolerance int) {
 	fmt.Println("Downloading and extracting dependencies...")
 	err := downloadAndExtractGitleaks()
 	if err != nil {
@@ -40,12 +63,12 @@ func commandScan(scanGitHistory bool, printAsJson bool, outputDestination string
 	}
 
 	fmt.Println("Scanning...")
-	unifiedFindingsGitleaks, err := getGitleaksFindingsAsUnified()
+	unifiedFindingsGitleaks, err := getGitleaksFindingsAsUnified(gitMode)
 	if err != nil {
 		panic(err)
 	}
 
-	unifiedFindingsSemgrep, err := getSemgrepFindingsAsUnified()
+	unifiedFindingsSemgrep, err := getSemgrepFindingsAsUnified(gitMode)
 	if err != nil {
 		panic(err)
 	}
@@ -63,7 +86,8 @@ func commandScan(scanGitHistory bool, printAsJson bool, outputDestination string
 	filePathsWithResults.ForEach(func(filePath string) bool {
 		lineNumbers, err := GetNumbersOfMatchingLines(directoryToScan+"/"+filePath, "secguro-ignore-next-line")
 		if err != nil {
-			panic(err)
+			// Ignore failing file reads because this happens in git mode if the file has been deleted.
+			return false
 		}
 
 		for _, lineNumber := range lineNumbers {
@@ -94,13 +118,14 @@ func commandScan(scanGitHistory bool, printAsJson bool, outputDestination string
 
 	output := (func() string {
 		if printAsJson {
-			o, err := printJson(unifiedFindingsNotIgnored)
+			// TODO implement git mode
+			o, err := printJson(unifiedFindingsNotIgnored, gitMode)
 			if err != nil {
 				panic(err)
 			}
 			return o
 		} else {
-			return printText(unifiedFindingsNotIgnored)
+			return printText(unifiedFindingsNotIgnored, gitMode)
 		}
 	})()
 
