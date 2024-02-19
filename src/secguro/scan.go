@@ -81,10 +81,13 @@ func commandScan(scanGitHistory bool, printAsJson bool, outputDestination string
 		ignoredLines.ForEach(func(ignoredLine FilePathWithLineNumber) bool {
 			if ignoredLine.FilePath == unifiedFinding.File && ignoredLine.LineNumber == unifiedFinding.Line {
 				r = false
-				return true
 			}
 
-			return false
+			// It should be possible to end the forEach early as soon as r
+			// is set to false. However, this causes undeterministically
+			// occurring behavior that causes subsequent matches of ignored
+			// lines to be missed.
+			return true
 		})
 		return r
 	})
