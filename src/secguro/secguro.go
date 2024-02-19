@@ -12,7 +12,7 @@ import (
 const directoryToScan = "."
 
 func main() {
-	var flagScanGitGistory string
+	var flagGitMode bool
 	var flagFormat string
 	var flagOutput string
 	var flagTolerance int
@@ -23,11 +23,10 @@ func main() {
 				Name:  "scan",
 				Usage: "scan for problems",
 				Flags: []cli.Flag{
-					&cli.StringFlag{ // nolint: exhaustruct
-						Name:        "scan-git-history",
-						Value:       "true",
-						Usage:       "true or false",
-						Destination: &flagScanGitGistory,
+					&cli.BoolFlag{ // nolint: exhaustruct
+						Name:        "git",
+						Usage:       "set to scan git history and print commit information",
+						Destination: &flagGitMode,
 					},
 					&cli.StringFlag{ // nolint: exhaustruct
 						Name:        "format",
@@ -54,15 +53,11 @@ func main() {
 						return errors.New("too many arguments")
 					}
 
-					if flagScanGitGistory != "true" && flagScanGitGistory != "false" {
-						return errors.New("unsupported value for --scan-git-history")
-					}
-
 					if flagFormat != "text" && flagFormat != "json" {
 						return errors.New("unsupported value for --format")
 					}
 
-					commandScan(flagScanGitGistory == "true", flagFormat == "json", flagOutput, flagTolerance)
+					commandScan(flagGitMode, flagFormat == "json", flagOutput, flagTolerance)
 					return nil
 				},
 			},

@@ -12,13 +12,18 @@ const maxFindingsIndicatingExitCode = 250
 // The attributes need to start with capital letter because
 // otherwise the JSON formatter cannot see them.
 type UnifiedFinding struct {
-	Detector string
-	Rule     string
-	File     string
-	Line     int
-	Column   int
-	Match    string
-	Hint     string
+	Detector           string
+	Rule               string
+	File               string
+	Line               int
+	Column             int
+	Match              string
+	Hint               string
+	CommitHash         string
+	CommitDate         string
+	AuthorName         string
+	AuthorEmailAddress string
+	CommitMessage      string
 }
 
 type FilePathWithLineNumber struct {
@@ -27,7 +32,7 @@ type FilePathWithLineNumber struct {
 }
 
 // TODO: replace panic.
-func commandScan(scanGitHistory bool, printAsJson bool, outputDestination string, tolerance int) {
+func commandScan(gitMode bool, printAsJson bool, outputDestination string, tolerance int) {
 	fmt.Println("Downloading and extracting dependencies...")
 	err := downloadAndExtractGitleaks()
 	if err != nil {
@@ -40,11 +45,12 @@ func commandScan(scanGitHistory bool, printAsJson bool, outputDestination string
 	}
 
 	fmt.Println("Scanning...")
-	unifiedFindingsGitleaks, err := getGitleaksFindingsAsUnified()
+	unifiedFindingsGitleaks, err := getGitleaksFindingsAsUnified(gitMode)
 	if err != nil {
 		panic(err)
 	}
 
+	// TODO: git mode
 	unifiedFindingsSemgrep, err := getSemgrepFindingsAsUnified()
 	if err != nil {
 		panic(err)
@@ -95,13 +101,14 @@ func commandScan(scanGitHistory bool, printAsJson bool, outputDestination string
 
 	output := (func() string {
 		if printAsJson {
+			// TODO implement git mode
 			o, err := printJson(unifiedFindingsNotIgnored)
 			if err != nil {
 				panic(err)
 			}
 			return o
 		} else {
-			return printText(unifiedFindingsNotIgnored)
+			return printText(unifiedFindingsNotIgnored, gitMode)
 		}
 	})()
 

@@ -29,7 +29,8 @@ type SemgrepFinding_extra struct {
 }
 
 func convertSemgrepFindingToUnifiedFinding(semgrepFinding SemgrepFinding) UnifiedFinding {
-	return UnifiedFinding{
+	// TODO: implement git mode
+	return UnifiedFinding{ // nolint: exhaustruct
 		Detector: "semgrep",
 		Rule:     semgrepFinding.Check_id,
 		File:     semgrepFinding.Path,

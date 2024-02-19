@@ -20,7 +20,7 @@ func printJson(unifiedFindings []UnifiedFinding) (string, error) {
 	return string(resultJson[:]), nil
 }
 
-func printText(unifiedFindings []UnifiedFinding) string {
+func printText(unifiedFindings []UnifiedFinding, gitMode bool) string {
 	if len(unifiedFindings) == 0 {
 		return "no findings"
 	}
@@ -37,6 +37,13 @@ func printText(unifiedFindings []UnifiedFinding) string {
 		r += fmt.Sprintf("  match: %v\n", unifiedFinding.Match)
 		if len(unifiedFinding.Hint) > 0 {
 			r += fmt.Sprintf("  hint: %v\n", unifiedFinding.Hint)
+		}
+		if gitMode {
+			r += fmt.Sprintf("  commit hash: %v\n", unifiedFinding.CommitHash)
+			r += fmt.Sprintf("  commit date: %v\n", unifiedFinding.CommitDate)
+			r += fmt.Sprintf("  author: %v\n", unifiedFinding.AuthorName)
+			r += fmt.Sprintf("  auther email address: %v\n", unifiedFinding.AuthorEmailAddress)
+			r += fmt.Sprintf("  commit message: %v\n", unifiedFinding.CommitMessage)
 		}
 		r += "\n"
 	}
