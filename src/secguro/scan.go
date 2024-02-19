@@ -63,7 +63,8 @@ func commandScan(scanGitHistory bool, printAsJson bool, outputDestination string
 	filePathsWithResults.ForEach(func(filePath string) bool {
 		lineNumbers, err := GetNumbersOfMatchingLines(directoryToScan+"/"+filePath, "secguro-ignore-next-line")
 		if err != nil {
-			panic(err)
+			// Ignore failing file reads because this happens in git mode if the file has been deleted.
+			return false
 		}
 
 		for _, lineNumber := range lineNumbers {
