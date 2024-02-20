@@ -107,7 +107,8 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 	unifiedFindingsNotIgnored := Filter(unifiedFindings, func(unifiedFinding UnifiedFinding) bool {
 		r := true
 		ignoredLines.ForEach(func(ignoredLine FilePathWithLineNumber) bool {
-			if ignoredLine.FilePath == unifiedFinding.File && ignoredLine.LineNumber == unifiedFinding.LineStart {
+			if ignoredLine.FilePath == unifiedFinding.File &&
+				ignoredLine.LineNumber == unifiedFinding.LineStart {
 				r = false
 			}
 
