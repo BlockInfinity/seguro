@@ -24,10 +24,14 @@ func getGitInfo(filePath string, lineNumber int, gitMode bool) (GitInfo, error) 
 
 	scanner := bufio.NewScanner(strings.NewReader(string(out)))
 	r := GitInfo{} // nolint: exhaustruct
+	isFirstLine := true
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		if strings.HasPrefix(line, "summary ") {
+		if isFirstLine {
+			r.CommitHash = strings.Fields(line)[0]
+			isFirstLine = false
+		} else if strings.HasPrefix(line, "summary ") {
 			r.CommitMessage = strings.TrimPrefix(line, "summary ")
 		} else if strings.HasPrefix(line, "author ") {
 			r.AuthorName = strings.TrimPrefix(line, "author ")
@@ -42,8 +46,6 @@ func getGitInfo(filePath string, lineNumber int, gitMode bool) (GitInfo, error) 
 			authorTime := time.Unix(int64(authorTimeInt), 0)
 			authorTimeFormatted := authorTime.UTC().Format(time.RFC3339)
 			r.CommitDate = authorTimeFormatted
-		} else if strings.HasPrefix(line, "previous ") {
-			r.CommitHash = strings.Fields(line)[1]
 		}
 	}
 
