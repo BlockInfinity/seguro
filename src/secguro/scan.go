@@ -10,13 +10,15 @@ import (
 const maxFindingsIndicatingExitCode = 250
 
 type UnifiedFindingSansGitInfo struct {
-	Detector string
-	Rule     string
-	File     string
-	Line     int
-	Column   int
-	Match    string
-	Hint     string
+	Detector    string
+	Rule        string
+	File        string
+	LineStart   int
+	LineEnd     int
+	ColumnStart int
+	ColumnEnd   int
+	Match       string
+	Hint        string
 }
 
 type GitInfo struct {
@@ -33,8 +35,10 @@ type UnifiedFinding struct {
 	Detector           string
 	Rule               string
 	File               string
-	Line               int
-	Column             int
+	LineStart          int
+	LineEnd            int
+	ColumnStart        int
+	ColumnEnd          int
 	Match              string
 	Hint               string
 	CommitHash         string
@@ -103,7 +107,7 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 	unifiedFindingsNotIgnored := Filter(unifiedFindings, func(unifiedFinding UnifiedFinding) bool {
 		r := true
 		ignoredLines.ForEach(func(ignoredLine FilePathWithLineNumber) bool {
-			if ignoredLine.FilePath == unifiedFinding.File && ignoredLine.LineNumber == unifiedFinding.Line {
+			if ignoredLine.FilePath == unifiedFinding.File && ignoredLine.LineNumber == unifiedFinding.LineStart {
 				r = false
 			}
 

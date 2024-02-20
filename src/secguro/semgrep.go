@@ -13,12 +13,13 @@ type Meta_SemgrepFinding struct {
 
 type SemgrepFinding struct {
 	Check_id string
-	Start    SemgrepFinding_start
+	Start    SemgrepFinding_startAndEnd
+	End      SemgrepFinding_startAndEnd
 	Extra    SemgrepFinding_extra
 	Path     string
 }
 
-type SemgrepFinding_start struct {
+type SemgrepFinding_startAndEnd struct {
 	Col  int
 	Line int
 }
@@ -38,8 +39,10 @@ func convertSemgrepFindingToUnifiedFinding(semgrepFinding SemgrepFinding, gitMod
 		Detector:           "semgrep",
 		Rule:               semgrepFinding.Check_id,
 		File:               semgrepFinding.Path,
-		Line:               semgrepFinding.Start.Line,
-		Column:             semgrepFinding.Start.Col,
+		LineStart:          semgrepFinding.Start.Line,
+		LineEnd:            semgrepFinding.End.Line,
+		ColumnStart:        semgrepFinding.Start.Col,
+		ColumnEnd:          semgrepFinding.End.Col,
 		Match:              semgrepFinding.Extra.Lines,
 		Hint:               semgrepFinding.Extra.Message,
 		CommitHash:         gitInfo.CommitHash,
