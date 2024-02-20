@@ -118,7 +118,6 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 
 	output := (func() string {
 		if printAsJson {
-			// TODO implement git mode.
 			o, err := printJson(unifiedFindingsNotIgnored, gitMode)
 			if err != nil {
 				panic(err)
