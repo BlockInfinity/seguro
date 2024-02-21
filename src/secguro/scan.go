@@ -26,7 +26,7 @@ type GitInfo struct {
 	CommitDate         string
 	AuthorName         string
 	AuthorEmailAddress string
-	CommitMessage      string
+	CommitSummary      string
 }
 
 // The attributes need to start with capital letter because
@@ -45,7 +45,7 @@ type UnifiedFinding struct {
 	CommitDate         string
 	AuthorName         string
 	AuthorEmailAddress string
-	CommitMessage      string
+	CommitSummary      string
 }
 
 type FilePathWithLineNumber struct {

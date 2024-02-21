@@ -32,7 +32,7 @@ func getGitInfo(filePath string, lineNumber int, gitMode bool) (GitInfo, error) 
 			r.CommitHash = strings.Fields(line)[0]
 			isFirstLine = false
 		} else if strings.HasPrefix(line, "summary ") {
-			r.CommitMessage = strings.TrimPrefix(line, "summary ")
+			r.CommitSummary = strings.TrimPrefix(line, "summary ")
 		} else if strings.HasPrefix(line, "author ") {
 			r.AuthorName = strings.TrimPrefix(line, "author ")
 		} else if strings.HasPrefix(line, "author-mail ") {

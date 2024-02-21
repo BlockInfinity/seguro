@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 type GitleaksFinding struct {
@@ -23,6 +24,8 @@ type GitleaksFinding struct {
 }
 
 func convertGitleaksFindingToUnifiedFinding(gitleaksFinding GitleaksFinding) UnifiedFinding {
+	commitSummary, _, _ := strings.Cut(gitleaksFinding.Message, "\n")
+
 	return UnifiedFinding{
 		Detector:           "gitleaks",
 		Rule:               gitleaksFinding.RuleID,
@@ -37,7 +40,7 @@ func convertGitleaksFindingToUnifiedFinding(gitleaksFinding GitleaksFinding) Uni
 		CommitDate:         gitleaksFinding.Date,
 		AuthorName:         gitleaksFinding.Author,
 		AuthorEmailAddress: gitleaksFinding.Email,
-		CommitMessage:      gitleaksFinding.Message,
+		CommitSummary:      commitSummary,
 	}
 }
 

@@ -49,7 +49,7 @@ func convertSemgrepFindingToUnifiedFinding(semgrepFinding SemgrepFinding, gitMod
 		CommitDate:         gitInfo.CommitDate,
 		AuthorName:         gitInfo.AuthorName,
 		AuthorEmailAddress: gitInfo.AuthorEmailAddress,
-		CommitMessage:      gitInfo.CommitMessage,
+		CommitSummary:      gitInfo.CommitSummary,
 	}
 
 	return unifiedFinding, nil
