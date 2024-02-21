@@ -14,8 +14,10 @@ func printJson(unifiedFindings []UnifiedFinding, gitMode bool) (string, error) {
 				unifiedFinding.Detector,
 				unifiedFinding.Rule,
 				unifiedFinding.File,
-				unifiedFinding.Line,
-				unifiedFinding.Column,
+				unifiedFinding.LineStart,
+				unifiedFinding.LineEnd,
+				unifiedFinding.ColumnStart,
+				unifiedFinding.ColumnEnd,
 				unifiedFinding.Match,
 				unifiedFinding.Hint,
 			}
@@ -51,8 +53,8 @@ func printText(unifiedFindings []UnifiedFinding, gitMode bool) string {
 		r += fmt.Sprintf("  detector: %v\n", unifiedFinding.Detector)
 		r += fmt.Sprintf("  rule: %v\n", unifiedFinding.Rule)
 		r += fmt.Sprintf("  file: %v\n", unifiedFinding.File)
-		r += fmt.Sprintf("  line: %d\n", unifiedFinding.Line)
-		r += fmt.Sprintf("  column: %d\n", unifiedFinding.Column)
+		r += fmt.Sprintf("  line: %d\n", unifiedFinding.LineStart)
+		r += fmt.Sprintf("  column: %d\n", unifiedFinding.ColumnStart)
 		r += fmt.Sprintf("  match: %v\n", unifiedFinding.Match)
 		if len(unifiedFinding.Hint) > 0 {
 			r += fmt.Sprintf("  hint: %v\n", unifiedFinding.Hint)

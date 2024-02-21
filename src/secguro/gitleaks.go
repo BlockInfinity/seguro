@@ -11,7 +11,9 @@ type GitleaksFinding struct {
 	RuleID      string
 	File        string
 	StartLine   int
+	EndLine     int
 	StartColumn int
+	EndColumn   int
 	Match       string
 	Commit      string
 	Date        string
@@ -25,8 +27,10 @@ func convertGitleaksFindingToUnifiedFinding(gitleaksFinding GitleaksFinding) Uni
 		Detector:           "gitleaks",
 		Rule:               gitleaksFinding.RuleID,
 		File:               gitleaksFinding.File,
-		Line:               gitleaksFinding.StartLine,
-		Column:             gitleaksFinding.StartColumn,
+		LineStart:          gitleaksFinding.StartLine,
+		LineEnd:            gitleaksFinding.EndLine,
+		ColumnStart:        gitleaksFinding.StartColumn,
+		ColumnEnd:          gitleaksFinding.EndColumn,
 		Match:              gitleaksFinding.Match,
 		Hint:               "",
 		CommitHash:         gitleaksFinding.Commit,
