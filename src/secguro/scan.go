@@ -53,28 +53,27 @@ type FilePathWithLineNumber struct {
 	LineNumber int
 }
 
-// TODO: replace panic
-func commandScan(gitMode bool, printAsJson bool, outputDestination string, tolerance int) {
+func commandScan(gitMode bool, printAsJson bool, outputDestination string, tolerance int) error {
 	fmt.Println("Downloading and extracting dependencies...")
 	err := downloadAndExtractGitleaks()
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	err = installSemgrep()
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	fmt.Println("Scanning...")
 	unifiedFindingsGitleaks, err := getGitleaksFindingsAsUnified(gitMode)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	unifiedFindingsSemgrep, err := getSemgrepFindingsAsUnified(gitMode)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	unifiedFindings := []UnifiedFinding{}
@@ -121,17 +120,15 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 		return r
 	})
 
-	output := (func() string {
-		if printAsJson {
-			o, err := printJson(unifiedFindingsNotIgnored, gitMode)
-			if err != nil {
-				panic(err)
-			}
-			return o
-		} else {
-			return printText(unifiedFindingsNotIgnored, gitMode)
+	var output string
+	if printAsJson {
+		output, err = printJson(unifiedFindingsNotIgnored, gitMode)
+		if err != nil {
+			return err
 		}
-	})()
+	} else {
+		output = printText(unifiedFindingsNotIgnored, gitMode)
+	}
 
 	if outputDestination == "" {
 		fmt.Println("Findings:")
@@ -139,13 +136,14 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 	} else {
 		err = os.WriteFile(outputDestination, []byte(output), 0644)
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		fmt.Println("Output written to: " + outputDestination)
 	}
 
 	exitWithAppropriateExitCode(len(unifiedFindingsNotIgnored), tolerance)
+	return nil
 }
 
 func exitWithAppropriateExitCode(numberOfFindingsNotIgnored int, tolerance int) {

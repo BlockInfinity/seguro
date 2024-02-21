@@ -57,8 +57,8 @@ func main() {
 						return errors.New("unsupported value for --format")
 					}
 
-					commandScan(flagGitMode, flagFormat == "json", flagOutput, flagTolerance)
-					return nil
+					err := commandScan(flagGitMode, flagFormat == "json", flagOutput, flagTolerance)
+					return err
 				},
 			},
 		},
