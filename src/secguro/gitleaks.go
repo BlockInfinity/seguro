@@ -40,7 +40,7 @@ func convertGitleaksFindingToUnifiedFinding(gitleaksFinding GitleaksFinding) Uni
 		CommitDate:         gitleaksFinding.Date,
 		AuthorName:         gitleaksFinding.Author,
 		AuthorEmailAddress: gitleaksFinding.Email,
-		CommitMessage:      commitSummary,
+		CommitSummary:      commitSummary,
 	}
 }
 
