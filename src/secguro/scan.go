@@ -48,9 +48,10 @@ type UnifiedFinding struct {
 	CommitSummary      string
 }
 
-type FilePathWithLineNumber struct {
+type IgnoreInstruction struct {
 	FilePath   string
-	LineNumber int
+	LineNumber int      // -1 signifies ignoring all lines
+	Rules      []string // empty array signifies ignoring all rules
 }
 
 func commandScan(gitMode bool, printAsJson bool, outputDestination string, tolerance int) error {
@@ -85,7 +86,7 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 		filePathsWithResults.Insert(unifiedFinding.File)
 	}
 
-	ignoredLines := make([]FilePathWithLineNumber, 10)
+	ignoredLines := make([]IgnoreInstruction, 10)
 	filePathsWithResults.ForEach(func(filePath string) bool {
 		lineNumbers, err := GetNumbersOfMatchingLines(directoryToScan+"/"+filePath, "secguro-ignore-next-line")
 		if err != nil {
@@ -94,9 +95,10 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 		}
 
 		for _, lineNumber := range lineNumbers {
-			ignoredLines = append(ignoredLines, FilePathWithLineNumber{
+			ignoredLines = append(ignoredLines, IgnoreInstruction{
 				FilePath:   filePath,
 				LineNumber: lineNumber + 1,
+				Rules:      make([]string, 0),
 			})
 		}
 
@@ -106,7 +108,8 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 	unifiedFindingsNotIgnored := Filter(unifiedFindings, func(unifiedFinding UnifiedFinding) bool {
 		for _, ignoredLine := range ignoredLines {
 			if ignoredLine.FilePath == unifiedFinding.File &&
-				ignoredLine.LineNumber == unifiedFinding.LineStart {
+				(ignoredLine.LineNumber == unifiedFinding.LineStart || unifiedFinding.LineStart == -1) &&
+				(len(ignoredLine.Rules) == 0 || arrayIncludes(ignoredLine.Rules, unifiedFinding.Rule)) {
 				return false
 			}
 		}
