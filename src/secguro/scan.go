@@ -84,11 +84,10 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 	ignoreInstructions = append(ignoreInstructions, fileBasedIgnoreInstructions...)
 
 	unifiedFindingsNotIgnored := Filter(unifiedFindings, func(unifiedFinding UnifiedFinding) bool {
-		for _, ignoreInstruction := range ignoreInstructions {
-			if ignoreInstruction.FilePath == unifiedFinding.File &&
-				(ignoreInstruction.LineNumber == unifiedFinding.LineStart || ignoreInstruction.LineNumber == -1) &&
-				(len(ignoreInstruction.Rules) == 0 ||
-					arrayIncludes(ignoreInstruction.Rules, unifiedFinding.Rule)) {
+		for _, ii := range ignoreInstructions {
+			if ii.FilePath == unifiedFinding.File &&
+				(ii.LineNumber == unifiedFinding.LineStart || ii.LineNumber == -1) &&
+				(len(ii.Rules) == 0 || arrayIncludes(ii.Rules, unifiedFinding.Rule)) {
 				return false
 			}
 		}
