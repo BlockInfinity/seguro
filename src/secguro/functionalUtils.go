@@ -30,3 +30,12 @@ func Filter[T any](ss []T, test func(T) bool) (ret []T) {
 	}
 	return
 }
+
+func arrayIncludes[T comparable](s []T, e T) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}

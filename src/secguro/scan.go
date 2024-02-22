@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-
-	"github.com/hashicorp/go-set/v2"
 )
 
 const maxFindingsIndicatingExitCode = 250
@@ -48,11 +46,6 @@ type UnifiedFinding struct {
 	CommitSummary      string
 }
 
-type FilePathWithLineNumber struct {
-	FilePath   string
-	LineNumber int
-}
-
 func commandScan(gitMode bool, printAsJson bool, outputDestination string, tolerance int) error {
 	fmt.Println("Downloading and extracting dependencies...")
 	err := downloadAndExtractGitleaks()
@@ -80,44 +73,25 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 	unifiedFindings = append(unifiedFindings, unifiedFindingsGitleaks...)
 	unifiedFindings = append(unifiedFindings, unifiedFindingsSemgrep...)
 
-	filePathsWithResults := set.New[string](10)
-	for _, unifiedFinding := range unifiedFindings {
-		filePathsWithResults.Insert(unifiedFinding.File)
+	lineBasedIgnoreInstructions := getLineBasedIgnoreInstructions(unifiedFindings)
+	fileBasedIgnoreInstructions, err := getFileBasedIgnoreInstructions()
+	if err != nil {
+		return err
 	}
 
-	ignoredLines := set.New[FilePathWithLineNumber](10)
-	filePathsWithResults.ForEach(func(filePath string) bool {
-		lineNumbers, err := GetNumbersOfMatchingLines(directoryToScan+"/"+filePath, "secguro-ignore-next-line")
-		if err != nil {
-			// Ignore failing file reads because this happens in git mode if the file has been deleted.
-			return false
-		}
-
-		for _, lineNumber := range lineNumbers {
-			ignoredLines.Insert(FilePathWithLineNumber{
-				FilePath:   filePath,
-				LineNumber: lineNumber + 1,
-			})
-		}
-
-		return false
-	})
+	ignoreInstructions := []IgnoreInstruction{}
+	ignoreInstructions = append(ignoreInstructions, lineBasedIgnoreInstructions...)
+	ignoreInstructions = append(ignoreInstructions, fileBasedIgnoreInstructions...)
 
 	unifiedFindingsNotIgnored := Filter(unifiedFindings, func(unifiedFinding UnifiedFinding) bool {
-		r := true
-		ignoredLines.ForEach(func(ignoredLine FilePathWithLineNumber) bool {
-			if ignoredLine.FilePath == unifiedFinding.File &&
-				ignoredLine.LineNumber == unifiedFinding.LineStart {
-				r = false
+		for _, ii := range ignoreInstructions {
+			if ii.FilePath == unifiedFinding.File &&
+				(ii.LineNumber == unifiedFinding.LineStart || ii.LineNumber == -1) &&
+				(len(ii.Rules) == 0 || arrayIncludes(ii.Rules, unifiedFinding.Rule)) {
+				return false
 			}
-
-			// It should be possible to end the forEach early as soon as r
-			// is set to false. However, this causes undeterministically
-			// occurring behavior that causes subsequent matches of ignored
-			// lines to be missed.
-			return true
-		})
-		return r
+		}
+		return true
 	})
 
 	var output string
