@@ -50,7 +50,7 @@ func getNumbersOfMatchingLines(filePath string, pattern string) ([]int, error) {
 	}
 	defer file.Close()
 
-	var matchingLines []int
+	matchingLines := make([]int, 0)
 	scanner := bufio.NewScanner(file)
 	lineNumber := 1
 
