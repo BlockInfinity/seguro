@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-
-	"github.com/hashicorp/go-set/v2"
 )
 
 const maxFindingsIndicatingExitCode = 250
@@ -46,12 +44,6 @@ type UnifiedFinding struct {
 	AuthorName         string
 	AuthorEmailAddress string
 	CommitSummary      string
-}
-
-type IgnoreInstruction struct {
-	FilePath   string
-	LineNumber int      // -1 signifies ignoring all lines
-	Rules      []string // empty array signifies ignoring all rules
 }
 
 func commandScan(gitMode bool, printAsJson bool, outputDestination string, tolerance int) error {
@@ -134,32 +126,4 @@ func exitWithAppropriateExitCode(numberOfFindingsNotIgnored int, tolerance int) 
 	}
 
 	os.Exit(numberOfFindingsNotIgnored)
-}
-
-func getLineBasedIgnoreInstructions(unifiedFindings []UnifiedFinding) []IgnoreInstruction {
-	filePathsWithResults := set.New[string](10)
-	for _, unifiedFinding := range unifiedFindings {
-		filePathsWithResults.Insert(unifiedFinding.File)
-	}
-
-	ignoreInstructions := make([]IgnoreInstruction, 10)
-	filePathsWithResults.ForEach(func(filePath string) bool {
-		lineNumbers, err := GetNumbersOfMatchingLines(directoryToScan+"/"+filePath, "secguro-ignore-next-line")
-		if err != nil {
-			// Ignore failing file reads because this happens in git mode if the file has been deleted.
-			return false
-		}
-
-		for _, lineNumber := range lineNumbers {
-			ignoreInstructions = append(ignoreInstructions, IgnoreInstruction{
-				FilePath:   filePath,
-				LineNumber: lineNumber + 1,
-				Rules:      make([]string, 0),
-			})
-		}
-
-		return false
-	})
-
-	return ignoreInstructions
 }
