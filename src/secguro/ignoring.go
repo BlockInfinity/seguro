@@ -5,8 +5,6 @@ import (
 	"os"
 	"regexp"
 	"strings"
-
-	"github.com/hashicorp/go-set/v2"
 )
 
 type IgnoreInstruction struct {
@@ -16,17 +14,21 @@ type IgnoreInstruction struct {
 }
 
 func getLineBasedIgnoreInstructions(unifiedFindings []UnifiedFinding) []IgnoreInstruction {
-	filePathsWithResults := set.New[string](10)
+	filePathsWithResults := make([]string, 0)
 	for _, unifiedFinding := range unifiedFindings {
-		filePathsWithResults.Insert(unifiedFinding.File)
+		if arrayIncludes(filePathsWithResults, unifiedFinding.File) {
+			continue
+		}
+
+		filePathsWithResults = append(filePathsWithResults, unifiedFinding.File)
 	}
 
 	ignoreInstructions := make([]IgnoreInstruction, 0)
-	filePathsWithResults.ForEach(func(filePath string) bool {
+	for _, filePath := range filePathsWithResults {
 		lineNumbers, err := getNumbersOfMatchingLines(directoryToScan+"/"+filePath, "secguro-ignore-next-line")
 		if err != nil {
 			// Ignore failing file reads because this happens in git mode if the file has been deleted.
-			return false
+			continue
 		}
 
 		for _, lineNumber := range lineNumbers {
@@ -36,9 +38,7 @@ func getLineBasedIgnoreInstructions(unifiedFindings []UnifiedFinding) []IgnoreIn
 				Rules:      make([]string, 0),
 			})
 		}
-
-		return false
-	})
+	}
 
 	return ignoreInstructions
 }
