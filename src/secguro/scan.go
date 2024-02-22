@@ -74,9 +74,14 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 	unifiedFindings = append(unifiedFindings, unifiedFindingsSemgrep...)
 
 	lineBasedIgnoreInstructions := getLineBasedIgnoreInstructions(unifiedFindings)
+	fileBasedIgnoreInstructions, err := getFileBasedIgnoreInstructions()
+	if err != nil {
+		return err
+	}
 
 	ignoreInstructions := []IgnoreInstruction{}
 	ignoreInstructions = append(ignoreInstructions, lineBasedIgnoreInstructions...)
+	ignoreInstructions = append(ignoreInstructions, fileBasedIgnoreInstructions...)
 
 	unifiedFindingsNotIgnored := Filter(unifiedFindings, func(unifiedFinding UnifiedFinding) bool {
 		for _, ignoreInstruction := range ignoreInstructions {

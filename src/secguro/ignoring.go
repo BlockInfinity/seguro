@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"os"
 	"regexp"
+	"strings"
 
 	"github.com/hashicorp/go-set/v2"
 )
@@ -72,4 +73,45 @@ func getNumbersOfMatchingLines(filePath string, pattern string) ([]int, error) {
 	}
 
 	return matchingLines, nil
+}
+
+func getFileBasedIgnoreInstructions() ([]IgnoreInstruction, error) {
+	// TODO: handle case of file not existing
+	file, err := os.Open(".secguroignore")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var ignoreInstructions []IgnoreInstruction
+	scanner := bufio.NewScanner(file)
+	inNewParagraph := true
+
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+
+		if line == "" {
+			inNewParagraph = true
+			continue
+		}
+
+		if inNewParagraph {
+			ignoreInstructions = append(ignoreInstructions, IgnoreInstruction{
+				FilePath:   line,
+				LineNumber: -1,
+				Rules:      make([]string, 0),
+			})
+
+			inNewParagraph = false
+		} else {
+			ignoreInstruction := ignoreInstructions[len(ignoreInstructions)-1]
+			ignoreInstruction.Rules = append(ignoreInstruction.Rules, line)
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return ignoreInstructions, nil
 }
