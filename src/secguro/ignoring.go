@@ -76,14 +76,18 @@ func getNumbersOfMatchingLines(filePath string, pattern string) ([]int, error) {
 }
 
 func getFileBasedIgnoreInstructions() ([]IgnoreInstruction, error) {
-	// TODO: handle case of file not existing
+	ignoreInstructions := make([]IgnoreInstruction, 0)
+
 	file, err := os.Open(".secguroignore")
 	if err != nil {
+		if os.IsNotExist(err) {
+			return ignoreInstructions, nil
+		}
+
 		return nil, err
 	}
 	defer file.Close()
 
-	var ignoreInstructions []IgnoreInstruction
 	scanner := bufio.NewScanner(file)
 	inNewParagraph := true
 
