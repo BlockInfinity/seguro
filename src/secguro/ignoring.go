@@ -20,7 +20,7 @@ func getLineBasedIgnoreInstructions(unifiedFindings []UnifiedFinding) []IgnoreIn
 		filePathsWithResults.Insert(unifiedFinding.File)
 	}
 
-	ignoreInstructions := make([]IgnoreInstruction, 10)
+	ignoreInstructions := make([]IgnoreInstruction, 0)
 	filePathsWithResults.ForEach(func(filePath string) bool {
 		lineNumbers, err := getNumbersOfMatchingLines(directoryToScan+"/"+filePath, "secguro-ignore-next-line")
 		if err != nil {
