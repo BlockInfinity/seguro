@@ -81,29 +81,10 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 	unifiedFindings = append(unifiedFindings, unifiedFindingsGitleaks...)
 	unifiedFindings = append(unifiedFindings, unifiedFindingsSemgrep...)
 
-	filePathsWithResults := set.New[string](10)
-	for _, unifiedFinding := range unifiedFindings {
-		filePathsWithResults.Insert(unifiedFinding.File)
-	}
+	lineBasedIgnoreInstructions := getLineBasedIgnoreInstructions(unifiedFindings)
 
-	ignoreInstructions := make([]IgnoreInstruction, 10)
-	filePathsWithResults.ForEach(func(filePath string) bool {
-		lineNumbers, err := GetNumbersOfMatchingLines(directoryToScan+"/"+filePath, "secguro-ignore-next-line")
-		if err != nil {
-			// Ignore failing file reads because this happens in git mode if the file has been deleted.
-			return false
-		}
-
-		for _, lineNumber := range lineNumbers {
-			ignoreInstructions = append(ignoreInstructions, IgnoreInstruction{
-				FilePath:   filePath,
-				LineNumber: lineNumber + 1,
-				Rules:      make([]string, 0),
-			})
-		}
-
-		return false
-	})
+	ignoreInstructions := []IgnoreInstruction{}
+	ignoreInstructions = append(ignoreInstructions, lineBasedIgnoreInstructions...)
 
 	unifiedFindingsNotIgnored := Filter(unifiedFindings, func(unifiedFinding UnifiedFinding) bool {
 		for _, ignoreInstruction := range ignoreInstructions {
@@ -153,4 +134,32 @@ func exitWithAppropriateExitCode(numberOfFindingsNotIgnored int, tolerance int) 
 	}
 
 	os.Exit(numberOfFindingsNotIgnored)
+}
+
+func getLineBasedIgnoreInstructions(unifiedFindings []UnifiedFinding) []IgnoreInstruction {
+	filePathsWithResults := set.New[string](10)
+	for _, unifiedFinding := range unifiedFindings {
+		filePathsWithResults.Insert(unifiedFinding.File)
+	}
+
+	ignoreInstructions := make([]IgnoreInstruction, 10)
+	filePathsWithResults.ForEach(func(filePath string) bool {
+		lineNumbers, err := GetNumbersOfMatchingLines(directoryToScan+"/"+filePath, "secguro-ignore-next-line")
+		if err != nil {
+			// Ignore failing file reads because this happens in git mode if the file has been deleted.
+			return false
+		}
+
+		for _, lineNumber := range lineNumbers {
+			ignoreInstructions = append(ignoreInstructions, IgnoreInstruction{
+				FilePath:   filePath,
+				LineNumber: lineNumber + 1,
+				Rules:      make([]string, 0),
+			})
+		}
+
+		return false
+	})
+
+	return ignoreInstructions
 }
