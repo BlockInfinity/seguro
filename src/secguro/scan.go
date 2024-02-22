@@ -85,7 +85,7 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 		filePathsWithResults.Insert(unifiedFinding.File)
 	}
 
-	ignoredLines := set.New[FilePathWithLineNumber](10)
+	ignoredLines := make([]FilePathWithLineNumber, 10)
 	filePathsWithResults.ForEach(func(filePath string) bool {
 		lineNumbers, err := GetNumbersOfMatchingLines(directoryToScan+"/"+filePath, "secguro-ignore-next-line")
 		if err != nil {
@@ -94,7 +94,7 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 		}
 
 		for _, lineNumber := range lineNumbers {
-			ignoredLines.Insert(FilePathWithLineNumber{
+			ignoredLines = append(ignoredLines, FilePathWithLineNumber{
 				FilePath:   filePath,
 				LineNumber: lineNumber + 1,
 			})
@@ -104,20 +104,13 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 	})
 
 	unifiedFindingsNotIgnored := Filter(unifiedFindings, func(unifiedFinding UnifiedFinding) bool {
-		r := true
-		ignoredLines.ForEach(func(ignoredLine FilePathWithLineNumber) bool {
+		for _, ignoredLine := range ignoredLines {
 			if ignoredLine.FilePath == unifiedFinding.File &&
 				ignoredLine.LineNumber == unifiedFinding.LineStart {
-				r = false
+				return false
 			}
-
-			// It should be possible to end the forEach early as soon as r
-			// is set to false. However, this causes undeterministically
-			// occurring behavior that causes subsequent matches of ignored
-			// lines to be missed.
-			return true
-		})
-		return r
+		}
+		return true
 	})
 
 	var output string
