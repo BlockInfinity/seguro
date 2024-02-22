@@ -108,7 +108,7 @@ func getFileBasedIgnoreInstructions() ([]IgnoreInstruction, error) {
 
 			inNewParagraph = false
 		} else {
-			ignoreInstruction := ignoreInstructions[len(ignoreInstructions)-1]
+			ignoreInstruction := &ignoreInstructions[len(ignoreInstructions)-1]
 			ignoreInstruction.Rules = append(ignoreInstruction.Rules, line)
 		}
 	}
