@@ -94,6 +94,10 @@ func getFileBasedIgnoreInstructions() ([]IgnoreInstruction, error) {
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 
+		if strings.HasPrefix(line, "#") {
+			continue
+		}
+
 		if line == "" {
 			inNewParagraph = true
 			continue

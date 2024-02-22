@@ -1,9 +1,11 @@
+# local files
 untracked/oSemgrep
 generic-api-key
 jwt
 
 untracked/semgrepOutput
 
+# for pipeline tests
 test_data/apiKey
 generic-api-key
 generic.secrets.security.detected-generic-api-key.detected-generic-api-key
