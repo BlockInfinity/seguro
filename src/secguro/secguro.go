@@ -58,6 +58,7 @@ func main() {
 					}
 
 					err := commandScan(flagGitMode, flagFormat == "json", flagOutput, flagTolerance)
+
 					return err
 				},
 			},

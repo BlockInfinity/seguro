@@ -6,6 +6,7 @@ func Map[T, U any](ts []T, f func(T) U) []U {
 	for i := range ts {
 		us[i] = f(ts[i])
 	}
+
 	return us
 }
 
@@ -18,6 +19,7 @@ func MapWithError[T, U any](ts []T, f func(T) (U, error)) ([]U, error) {
 			return make([]U, 0), err
 		}
 	}
+
 	return us, nil
 }
 
@@ -39,5 +41,6 @@ func arrayIncludes[T comparable](s []T, e T) bool {
 			return true
 		}
 	}
+
 	return false
 }

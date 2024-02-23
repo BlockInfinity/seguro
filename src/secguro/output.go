@@ -22,6 +22,7 @@ func printJson(unifiedFindings []UnifiedFinding, gitMode bool) (string, error) {
 				unifiedFinding.Hint,
 			}
 		})
+
 		return printJsonInternal(unifiedFindingsSansGitInfo)
 	}
 }
