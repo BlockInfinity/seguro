@@ -30,7 +30,7 @@ Exit codes ranging from 0 to 250 (inclusive) indicate the number of findings. Ex
 
 Exit codes not equal to 0 are useful to make Github Workflows and Azure Pipelines fail.
 
-Switch `--tolerance n` may be used to make secguro yield exit code 0 if the number of findigs does not exceed `n`.
+Switch `--tolerance n` (or `--tolerance=n`) may be used to make secguro yield exit code 0 if the number of findigs does not exceed `n`.
 
 ## Deveploment
 - Go version: 1.21.7
