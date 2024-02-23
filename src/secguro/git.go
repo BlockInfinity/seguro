@@ -40,6 +40,7 @@ func parseGitBlameOutput(gitBlameOutput []byte) (GitInfo, error) {
 	for scanner.Scan() {
 		line := scanner.Text()
 
+		//nolint: gocritic
 		if isFirstLine {
 			gitInfo.CommitHash = strings.Fields(line)[0]
 			isFirstLine = false
