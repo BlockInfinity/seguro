@@ -47,28 +47,28 @@ func printText(unifiedFindings []UnifiedFinding, gitMode bool) string {
 		return "no findings"
 	}
 
-	r := ""
+	result := ""
 
 	for i, unifiedFinding := range unifiedFindings {
-		r += fmt.Sprintf("Finding %d:\n", i+1)
-		r += fmt.Sprintf("  detector: %v\n", unifiedFinding.Detector)
-		r += fmt.Sprintf("  rule: %v\n", unifiedFinding.Rule)
-		r += fmt.Sprintf("  file: %v\n", unifiedFinding.File)
-		r += fmt.Sprintf("  line: %d\n", unifiedFinding.LineStart)
-		r += fmt.Sprintf("  column: %d\n", unifiedFinding.ColumnStart)
-		r += fmt.Sprintf("  match: %v\n", unifiedFinding.Match)
+		result += fmt.Sprintf("Finding %d:\n", i+1)
+		result += fmt.Sprintf("  detector: %v\n", unifiedFinding.Detector)
+		result += fmt.Sprintf("  rule: %v\n", unifiedFinding.Rule)
+		result += fmt.Sprintf("  file: %v\n", unifiedFinding.File)
+		result += fmt.Sprintf("  line: %d\n", unifiedFinding.LineStart)
+		result += fmt.Sprintf("  column: %d\n", unifiedFinding.ColumnStart)
+		result += fmt.Sprintf("  match: %v\n", unifiedFinding.Match)
 		if len(unifiedFinding.Hint) > 0 {
-			r += fmt.Sprintf("  hint: %v\n", unifiedFinding.Hint)
+			result += fmt.Sprintf("  hint: %v\n", unifiedFinding.Hint)
 		}
 		if gitMode {
-			r += fmt.Sprintf("  commit hash: %v\n", unifiedFinding.CommitHash)
-			r += fmt.Sprintf("  commit date: %v\n", unifiedFinding.CommitDate)
-			r += fmt.Sprintf("  author: %v\n", unifiedFinding.AuthorName)
-			r += fmt.Sprintf("  author email address: %v\n", unifiedFinding.AuthorEmailAddress)
-			r += fmt.Sprintf("  commit summary: %v\n", unifiedFinding.CommitSummary)
+			result += fmt.Sprintf("  commit hash: %v\n", unifiedFinding.CommitHash)
+			result += fmt.Sprintf("  commit date: %v\n", unifiedFinding.CommitDate)
+			result += fmt.Sprintf("  author: %v\n", unifiedFinding.AuthorName)
+			result += fmt.Sprintf("  author email address: %v\n", unifiedFinding.AuthorEmailAddress)
+			result += fmt.Sprintf("  commit summary: %v\n", unifiedFinding.CommitSummary)
 		}
-		r += "\n"
+		result += "\n"
 	}
 
-	return r
+	return result
 }

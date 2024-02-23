@@ -55,13 +55,13 @@ func getNumbersOfMatchingLines(filePath string, pattern string) ([]int, error) {
 	lineNumber := 1
 
 	// Compile the regular expression pattern
-	re := regexp.MustCompile(pattern)
+	regex := regexp.MustCompile(pattern)
 
 	for scanner.Scan() {
 		line := scanner.Text()
 
 		// Check for matches in the line
-		if re.MatchString(line) {
+		if regex.MatchString(line) {
 			matchingLines = append(matchingLines, lineNumber)
 		}
 
