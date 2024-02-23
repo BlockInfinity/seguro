@@ -38,7 +38,7 @@ func printJsonInternal[T UnifiedFinding | UnifiedFindingSansGitInfo](unifiedFind
 		return "error", err
 	}
 
-	return string(resultJson[:]), nil
+	return string(resultJson), nil
 }
 
 func printText(unifiedFindings []UnifiedFinding, gitMode bool) string {
