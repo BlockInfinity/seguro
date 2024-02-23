@@ -50,6 +50,44 @@ type UnifiedFinding struct {
 
 func commandScan(gitMode bool, printAsJson bool, outputDestination string, tolerance int) error {
 	fmt.Println("Downloading and extracting dependencies...")
+	err := installDependencies()
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Scanning...")
+	unifiedFindings, err := getUnifiedFindings(gitMode)
+	if err != nil {
+		return err
+	}
+
+	unifiedFindingsNotIgnored, err := getFindingsNotIgnored(unifiedFindings)
+	if err != nil {
+		return err
+	}
+
+	err = writeOutput(gitMode, printAsJson, outputDestination, unifiedFindingsNotIgnored)
+	if err != nil {
+		return err
+	}
+
+	exitWithAppropriateExitCode(len(unifiedFindingsNotIgnored), tolerance)
+	return nil
+}
+
+func exitWithAppropriateExitCode(numberOfFindingsNotIgnored int, tolerance int) {
+	if numberOfFindingsNotIgnored <= tolerance {
+		os.Exit(0)
+	}
+
+	if numberOfFindingsNotIgnored > maxFindingsIndicatingExitCode {
+		os.Exit(maxFindingsIndicatingExitCode)
+	}
+
+	os.Exit(numberOfFindingsNotIgnored)
+}
+
+func installDependencies() error {
 	err := downloadAndExtractGitleaks()
 	if err != nil {
 		return err
@@ -60,25 +98,32 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 		return err
 	}
 
-	fmt.Println("Scanning...")
+	return nil
+}
+
+func getUnifiedFindings(gitMode bool) ([]UnifiedFinding, error) {
+	unifiedFindings := make([]UnifiedFinding, 0)
 	unifiedFindingsGitleaks, err := getGitleaksFindingsAsUnified(gitMode)
 	if err != nil {
-		return err
+		return unifiedFindings, err
 	}
 
 	unifiedFindingsSemgrep, err := getSemgrepFindingsAsUnified(gitMode)
 	if err != nil {
-		return err
+		return unifiedFindings, err
 	}
 
-	unifiedFindings := []UnifiedFinding{}
 	unifiedFindings = append(unifiedFindings, unifiedFindingsGitleaks...)
 	unifiedFindings = append(unifiedFindings, unifiedFindingsSemgrep...)
 
+	return unifiedFindings, nil
+}
+
+func getFindingsNotIgnored(unifiedFindings []UnifiedFinding) ([]UnifiedFinding, error) {
 	lineBasedIgnoreInstructions := getLineBasedIgnoreInstructions(unifiedFindings)
 	fileBasedIgnoreInstructions, err := getFileBasedIgnoreInstructions()
 	if err != nil {
-		return err
+		return make([]UnifiedFinding, 0), err
 	}
 
 	ignoreInstructions := []IgnoreInstruction{}
@@ -97,8 +142,14 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 		return true
 	})
 
+	return unifiedFindingsNotIgnored, nil
+}
+
+func writeOutput(gitMode bool, printAsJson bool,
+	outputDestination string, unifiedFindingsNotIgnored []UnifiedFinding) error {
 	var output string
 	if printAsJson {
+		var err error
 		output, err = printJson(unifiedFindingsNotIgnored, gitMode)
 		if err != nil {
 			return err
@@ -111,7 +162,8 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 		fmt.Println("Findings:")
 		fmt.Println(output)
 	} else {
-		err = os.WriteFile(outputDestination, []byte(output), 0644)
+		const filePermissions = 0644
+		err := os.WriteFile(outputDestination, []byte(output), filePermissions)
 		if err != nil {
 			return err
 		}
@@ -119,18 +171,5 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 		fmt.Println("Output written to: " + outputDestination)
 	}
 
-	exitWithAppropriateExitCode(len(unifiedFindingsNotIgnored), tolerance)
 	return nil
-}
-
-func exitWithAppropriateExitCode(numberOfFindingsNotIgnored int, tolerance int) {
-	if numberOfFindingsNotIgnored <= tolerance {
-		os.Exit(0)
-	}
-
-	if numberOfFindingsNotIgnored > maxFindingsIndicatingExitCode {
-		os.Exit(maxFindingsIndicatingExitCode)
-	}
-
-	os.Exit(numberOfFindingsNotIgnored)
 }

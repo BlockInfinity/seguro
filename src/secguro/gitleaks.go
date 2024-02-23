@@ -50,10 +50,12 @@ func getGitleaksOutputJson(gitMode bool) ([]byte, error) {
 	cmd := (func() *exec.Cmd {
 		if gitMode {
 			// secguro-ignore-next-line
-			return exec.Command(dependenciesDir+"/gitleaks/gitleaks", "detect", "--report-format", "json", "--report-path", gitleaksOutputJsonPath)
+			return exec.Command(dependenciesDir+"/gitleaks/gitleaks",
+				"detect", "--report-format", "json", "--report-path", gitleaksOutputJsonPath)
 		} else {
 			// secguro-ignore-next-line
-			return exec.Command(dependenciesDir+"/gitleaks/gitleaks", "detect", "--no-git", "--report-format", "json", "--report-path", gitleaksOutputJsonPath)
+			return exec.Command(dependenciesDir+"/gitleaks/gitleaks",
+				"detect", "--no-git", "--report-format", "json", "--report-path", gitleaksOutputJsonPath)
 		}
 	})()
 	cmd.Dir = directoryToScan
