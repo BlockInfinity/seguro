@@ -33,7 +33,7 @@ Exit codes not equal to 0 are useful to make Github Workflows and Azure Pipeline
 Switch `--tolerance n` (or `--tolerance=n`) may be used to make secguro yield exit code 0 if the number of findigs does not exceed `n`.
 
 ## Options
-```bash
+```
 $ secguro scan --help
 NAME:
    secguro scan - scan for problems
