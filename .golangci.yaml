@@ -2,6 +2,87 @@ linters:
   enable:
     - exhaustive
     - exhaustruct
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - containedctx
+    - contextcheck
+    - cyclop
+    - decorder
+    - dogsled
+    - dupl
+    - dupword
+    - durationcheck
+    - errchkjson
+    - errname
+    - errorlint
+    - execinquery
+    - exportloopref
+    - forcetypeassert
+    - funlen
+    - gci
+    - ginkgolinter
+    - gocheckcompilerdirectives
+    - gochecknoinits
+    - gochecksumtype
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+#    - goerr113
+    - goheader
+    - goimports
+    - gomnd
+    - gomoddirectives
+#    - gosec
+    - gosmopolitan
+    - grouper
+    - importas
+    - inamedparam
+    - interfacebloat
+    - ireturn
+    - lll
+    - maintidx
+    - makezero
+    - mirror
+    - misspell
+#    - musttag
+    - nakedret
+    - nestif
+    - nilerr
+    - nilnil
+    - nlreturn
+    - noctx
+    - nolintlint
+    - nonamedreturns
+    - nosprintfhostport
+    - paralleltest
+    - prealloc
+    - predeclared
+    - promlinter
+    - protogetter
+    - reassign
+#    - revive
+    - rowserrcheck
+    - sloglint
+    - spancheck
+    - sqlclosecheck
+    - stylecheck
+    - tagalign
+    - tagliatelle
+    - tenv
+    - testableexamples
+    - testifylint
+    - testpackage
+    - thelper
+    - tparallel
+    - unconvert
+    - unparam
+    - usestdlibvars
+    - varnamelen
+    - wastedassign
+    - whitespace
+    - zerologlint
 
 linters-settings:
   exhaustive:
@@ -10,3 +91,8 @@ linters-settings:
     check:
       - switch
       - map
+  nlreturn:
+    block-size: 3
+  stylecheck:
+    checks: ["all", "-ST1003", "-ST1005"]
+    initialisms: [""]
