@@ -17,31 +17,31 @@ func main() {
 	var flagOutput string
 	var flagTolerance int
 
-	app := &cli.App{ // nolint: exhaustruct
+	app := &cli.App{ //nolint: exhaustruct
 		Commands: []*cli.Command{
 			{
 				Name:  "scan",
 				Usage: "scan for problems",
 				Flags: []cli.Flag{
-					&cli.BoolFlag{ // nolint: exhaustruct
+					&cli.BoolFlag{ //nolint: exhaustruct
 						Name:        "git",
 						Usage:       "set to scan git history and print commit information",
 						Destination: &flagGitMode,
 					},
-					&cli.StringFlag{ // nolint: exhaustruct
+					&cli.StringFlag{ //nolint: exhaustruct
 						Name:        "format",
 						Value:       "text",
 						Usage:       "text or json",
 						Destination: &flagFormat,
 					},
-					&cli.StringFlag{ // nolint: exhaustruct
+					&cli.StringFlag{ //nolint: exhaustruct
 						Name:        "output",
 						Aliases:     []string{"o"},
 						Value:       "",
 						Usage:       "path to output destination",
 						Destination: &flagOutput,
 					},
-					&cli.IntFlag{ // nolint: exhaustruct
+					&cli.IntFlag{ //nolint: exhaustruct
 						Name:        "tolerance",
 						Value:       0,
 						Usage:       "number of findings to tolerate when choosing exit code",
@@ -58,6 +58,7 @@ func main() {
 					}
 
 					err := commandScan(flagGitMode, flagFormat == "json", flagOutput, flagTolerance)
+
 					return err
 				},
 			},

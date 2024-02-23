@@ -11,12 +11,12 @@ import (
 
 func getGitInfo(filePath string, lineNumber int, gitMode bool) (GitInfo, error) {
 	if !gitMode {
-		return GitInfo{}, nil // nolint: exhaustruct
+		return GitInfo{}, nil //nolint: exhaustruct
 	}
 
 	gitBlameOutput, err := getGitBlameOutput(filePath, lineNumber)
 	if err != nil {
-		return GitInfo{}, err // nolint: exhaustruct
+		return GitInfo{}, err
 	}
 
 	gitInfo, err := parseGitBlameOutput(gitBlameOutput)
@@ -35,7 +35,7 @@ func getGitBlameOutput(filePath string, lineNumber int) ([]byte, error) {
 
 func parseGitBlameOutput(gitBlameOutput []byte) (GitInfo, error) {
 	scanner := bufio.NewScanner(strings.NewReader(string(gitBlameOutput)))
-	gitInfo := GitInfo{} // nolint: exhaustruct
+	gitInfo := GitInfo{} //nolint: exhaustruct
 	isFirstLine := true
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -43,7 +43,11 @@ func parseGitBlameOutput(gitBlameOutput []byte) (GitInfo, error) {
 		if isFirstLine {
 			gitInfo.CommitHash = strings.Fields(line)[0]
 			isFirstLine = false
-		} else if strings.HasPrefix(line, "summary ") {
+			continue
+		}
+
+		//nolint: gocritic
+		if strings.HasPrefix(line, "summary ") {
 			gitInfo.CommitSummary = strings.TrimPrefix(line, "summary ")
 		} else if strings.HasPrefix(line, "author ") {
 			gitInfo.AuthorName = strings.TrimPrefix(line, "author ")
@@ -53,7 +57,7 @@ func parseGitBlameOutput(gitBlameOutput []byte) (GitInfo, error) {
 			authorTimeString := strings.TrimPrefix(line, "author-time ")
 			authorTimeInt, err := strconv.Atoi(authorTimeString)
 			if err != nil {
-				return GitInfo{}, err // nolint: exhaustruct
+				return GitInfo{}, err
 			}
 			authorTime := time.Unix(int64(authorTimeInt), 0)
 			authorTimeFormatted := authorTime.UTC().Format(time.RFC3339)
@@ -62,7 +66,7 @@ func parseGitBlameOutput(gitBlameOutput []byte) (GitInfo, error) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		return GitInfo{}, err // nolint: exhaustruct
+		return GitInfo{}, err
 	}
 
 	return gitInfo, nil

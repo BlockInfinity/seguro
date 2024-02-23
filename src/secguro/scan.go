@@ -72,6 +72,7 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 	}
 
 	exitWithAppropriateExitCode(len(unifiedFindingsNotIgnored), tolerance)
+
 	return nil
 }
 
@@ -139,6 +140,7 @@ func getFindingsNotIgnored(unifiedFindings []UnifiedFinding) ([]UnifiedFinding, 
 				return false
 			}
 		}
+
 		return true
 	})
 

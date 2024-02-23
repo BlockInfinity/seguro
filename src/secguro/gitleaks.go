@@ -66,6 +66,7 @@ func getGitleaksOutputJson(gitMode bool) ([]byte, error) {
 	}
 
 	gitleaksOutputJson, err := os.ReadFile(gitleaksOutputJsonPath)
+
 	return gitleaksOutputJson, err
 }
 
@@ -82,6 +83,7 @@ func getGitleaksFindingsAsUnified(gitMode bool) ([]UnifiedFinding, error) {
 	}
 
 	unifiedFindings := Map(gitleaksFindings, convertGitleaksFindingToUnifiedFinding)
+
 	return unifiedFindings, nil
 }
 
@@ -93,5 +95,6 @@ func downloadAndExtractGitleaks() error {
 	}
 
 	err = extractGzDependency("gitleaks")
+
 	return err
 }

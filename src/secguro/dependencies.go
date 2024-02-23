@@ -27,7 +27,7 @@ func downloadDependency(name string, url string) error {
 }
 
 // https://stackoverflow.com/a/33853856
-func downloadFile(filepath string, url string) (err error) {
+func downloadFile(filepath string, url string) error {
 	// Create the file
 	out, err := os.Create(filepath)
 	if err != nil {
@@ -36,7 +36,7 @@ func downloadFile(filepath string, url string) (err error) {
 	defer out.Close()
 
 	// Get the data
-	resp, err := http.Get(url)
+	resp, err := http.Get(url) //nolint: noctx
 	if err != nil {
 		return err
 	}

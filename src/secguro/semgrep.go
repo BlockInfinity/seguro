@@ -67,6 +67,7 @@ func getSemgrepOutputJson() ([]byte, error) {
 	}
 
 	semgrepOutputJson, err := os.ReadFile(semgrepOutputJsonPath)
+
 	return semgrepOutputJson, err
 }
 
