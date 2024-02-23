@@ -36,7 +36,7 @@ func downloadFile(filepath string, url string) error {
 	defer out.Close()
 
 	// Get the data
-	resp, err := http.Get(url)
+	resp, err := http.Get(url) //nolint: noctx
 	if err != nil {
 		return err
 	}
