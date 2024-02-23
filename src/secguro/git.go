@@ -40,11 +40,14 @@ func parseGitBlameOutput(gitBlameOutput []byte) (GitInfo, error) {
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		//nolint: gocritic
 		if isFirstLine {
 			gitInfo.CommitHash = strings.Fields(line)[0]
 			isFirstLine = false
-		} else if strings.HasPrefix(line, "summary ") {
+			continue
+		}
+
+		//nolint: gocritic
+		if strings.HasPrefix(line, "summary ") {
 			gitInfo.CommitSummary = strings.TrimPrefix(line, "summary ")
 		} else if strings.HasPrefix(line, "author ") {
 			gitInfo.AuthorName = strings.TrimPrefix(line, "author ")
