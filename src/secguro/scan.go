@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+
+	ignore "github.com/sabhiram/go-gitignore"
 )
 
 const maxFindingsIndicatingExitCode = 250
@@ -85,7 +87,8 @@ func commandScan(gitMode bool, printAsJson bool, outputDestination string, toler
 
 	unifiedFindingsNotIgnored := Filter(unifiedFindings, func(unifiedFinding UnifiedFinding) bool {
 		for _, ii := range ignoreInstructions {
-			if ii.FilePath == unifiedFinding.File &&
+			gitIgnoreMatcher := ignore.CompileIgnoreLines(ii.FilePath)
+			if gitIgnoreMatcher.MatchesPath(unifiedFinding.File) &&
 				(ii.LineNumber == unifiedFinding.LineStart || ii.LineNumber == -1) &&
 				(len(ii.Rules) == 0 || arrayIncludes(ii.Rules, unifiedFinding.Rule)) {
 				return false

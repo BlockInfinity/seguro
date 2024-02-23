@@ -4,6 +4,7 @@ go 1.21.7
 
 require (
 	github.com/codeclysm/extract/v3 v3.1.1
+	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/urfave/cli/v2 v2.27.1
 )
 
