@@ -162,7 +162,8 @@ func writeOutput(gitMode bool, printAsJson bool,
 		fmt.Println("Findings:")
 		fmt.Println(output)
 	} else {
-		err := os.WriteFile(outputDestination, []byte(output), 0644)
+		const filePermissions = 0644
+		err := os.WriteFile(outputDestination, []byte(output), filePermissions)
 		if err != nil {
 			return err
 		}
