@@ -1,9 +1,7 @@
 # local files
-untracked/oSemgrep
+/untracked
 generic-api-key
 jwt
-
-untracked/semgrepOutput
 
 # for pipeline tests
 test_data/apiKey
