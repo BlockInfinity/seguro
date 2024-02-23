@@ -22,13 +22,15 @@ func MapWithError[T, U any](ts []T, f func(T) (U, error)) ([]U, error) {
 }
 
 // https://stackoverflow.com/a/37563128
-func Filter[T any](ss []T, test func(T) bool) (ret []T) {
+func Filter[T any](ss []T, test func(T) bool) []T {
+	ret := make([]T, 0)
 	for _, s := range ss {
 		if test(s) {
 			ret = append(ret, s)
 		}
 	}
-	return
+
+	return ret
 }
 
 func arrayIncludes[T comparable](s []T, e T) bool {
