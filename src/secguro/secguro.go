@@ -11,11 +11,12 @@ import (
 // const directoryToScan = "/home/christoph/Development/Work/wallet"
 const directoryToScan = "."
 
-func main() {
+func main() { //nolint: funlen
 	var flagGitMode bool
 	var flagFormat string
 	var flagOutput string
 	var flagTolerance int
+	var flagDisabledDetectors []string
 
 	app := &cli.App{ //nolint: exhaustruct
 		Commands: []*cli.Command{
@@ -47,6 +48,14 @@ func main() {
 						Usage:       "number of findings to tolerate when choosing exit code",
 						Destination: &flagTolerance,
 					},
+					&cli.MultiStringFlag{
+						Target: &cli.StringSliceFlag{ //nolint: exhaustruct
+							Name:  "disabled-detectors",
+							Usage: "list of disabled detectors",
+						},
+						Value:       []string{},
+						Destination: &flagDisabledDetectors,
+					},
 				},
 				Action: func(cCtx *cli.Context) error {
 					if cCtx.NArg() > 0 {
@@ -57,7 +66,8 @@ func main() {
 						return errors.New("unsupported value for --format")
 					}
 
-					err := commandScan(flagGitMode, flagFormat == "json", flagOutput, flagTolerance)
+					err := commandScan(flagGitMode, flagDisabledDetectors,
+						flagFormat == "json", flagOutput, flagTolerance)
 
 					return err
 				},

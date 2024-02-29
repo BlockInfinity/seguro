@@ -48,15 +48,16 @@ type UnifiedFinding struct {
 	CommitSummary      string
 }
 
-func commandScan(gitMode bool, printAsJson bool, outputDestination string, tolerance int) error {
+func commandScan(gitMode bool, disabledDetectors []string,
+	printAsJson bool, outputDestination string, tolerance int) error {
 	fmt.Println("Downloading and extracting dependencies...")
-	err := installDependencies()
+	err := installDependencies(disabledDetectors)
 	if err != nil {
 		return err
 	}
 
 	fmt.Println("Scanning...")
-	unifiedFindings, err := getUnifiedFindings(gitMode)
+	unifiedFindings, err := getUnifiedFindings(gitMode, disabledDetectors)
 	if err != nil {
 		return err
 	}
@@ -88,34 +89,42 @@ func exitWithAppropriateExitCode(numberOfFindingsNotIgnored int, tolerance int) 
 	os.Exit(numberOfFindingsNotIgnored)
 }
 
-func installDependencies() error {
-	err := downloadAndExtractGitleaks()
-	if err != nil {
-		return err
+func installDependencies(disabledDetectors []string) error {
+	if !arrayIncludes(disabledDetectors, "gitleaks") {
+		err := downloadAndExtractGitleaks()
+		if err != nil {
+			return err
+		}
 	}
 
-	err = installSemgrep()
-	if err != nil {
-		return err
+	if !arrayIncludes(disabledDetectors, "semgrep") {
+		err := installSemgrep()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func getUnifiedFindings(gitMode bool) ([]UnifiedFinding, error) {
+func getUnifiedFindings(gitMode bool, disabledDetectors []string) ([]UnifiedFinding, error) {
 	unifiedFindings := make([]UnifiedFinding, 0)
-	unifiedFindingsGitleaks, err := getGitleaksFindingsAsUnified(gitMode)
-	if err != nil {
-		return unifiedFindings, err
+
+	if !arrayIncludes(disabledDetectors, "gitleaks") {
+		unifiedFindingsGitleaks, err := getGitleaksFindingsAsUnified(gitMode)
+		if err != nil {
+			return unifiedFindings, err
+		}
+		unifiedFindings = append(unifiedFindings, unifiedFindingsGitleaks...)
 	}
 
-	unifiedFindingsSemgrep, err := getSemgrepFindingsAsUnified(gitMode)
-	if err != nil {
-		return unifiedFindings, err
+	if !arrayIncludes(disabledDetectors, "semgrep") {
+		unifiedFindingsSemgrep, err := getSemgrepFindingsAsUnified(gitMode)
+		if err != nil {
+			return unifiedFindings, err
+		}
+		unifiedFindings = append(unifiedFindings, unifiedFindingsSemgrep...)
 	}
-
-	unifiedFindings = append(unifiedFindings, unifiedFindingsGitleaks...)
-	unifiedFindings = append(unifiedFindings, unifiedFindingsSemgrep...)
 
 	return unifiedFindings, nil
 }
