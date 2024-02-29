@@ -74,12 +74,16 @@ func getDependencycheckOutputJson(_gitMode bool) ([]byte, error) {
 		"--nvdApiKey", os.Getenv("NVD_API_KEY"))
 	out, err := cmd.Output()
 	if err != nil {
-		fmt.Println("Received output from dependencycheck:")
-		fmt.Println(out)
-		fmt.Println("Received error from dependencycheck:")
-		fmt.Println(err)
+		if !config.tolerateDependecycheckErrorExitCodes {
+			fmt.Println("Received output from dependencycheck:")
+			fmt.Println(out)
+			fmt.Println("Received error from dependencycheck:")
+			fmt.Println(err)
 
-		return nil, errors.New("dependencycheck failed")
+			return nil, errors.New("dependencycheck failed")
+		}
+
+		fmt.Println("Received error from dependencycheck but continuing anyway...")
 	}
 
 	if out == nil {
