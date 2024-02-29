@@ -24,8 +24,19 @@ type DependencycheckFinding_Vulnerabilities struct {
 
 func convertDependencycheckFindingToUnifiedFinding(dependencycheckFinding DependencycheckFinding,
 	vulnerabilityIndex int) UnifiedFinding {
-	const separator = "?"
+	// dependencycheck uses "?" for npm dependencies but ":" or none at att for go dependencies.
+	separator := "?"
 	separatorIndex := strings.LastIndex(dependencycheckFinding.FilePath, separator)
+	if separatorIndex == -1 {
+		separator = ":"
+		separatorIndex = strings.LastIndex(dependencycheckFinding.FilePath, separator)
+	}
+
+	// Prevent crashing in the case where there is no separator. Only seems to happen
+	// in experimental mode. Problem not handled better because it might go away.
+	if separatorIndex == -1 {
+		separatorIndex = len(dependencycheckFinding.FilePath) - 1
+	}
 
 	file := dependencycheckFinding.FilePath[:separatorIndex]
 	packageAndVersionPossiblePrefixed := dependencycheckFinding.FilePath[separatorIndex+len(separator):]
@@ -55,8 +66,10 @@ func getDependencycheckOutputJson(_gitMode bool) ([]byte, error) {
 
 	// secguro-ignore-next-line
 	cmd := exec.Command(dependenciesDir+"/dependencycheck/dependency-check/bin/dependency-check.sh",
+		"--enableExperimental", // necessary for support of go dependencies
 		"--scan", directoryToScan+"/**/package.json",
 		"--scan", directoryToScan+"/**/package-lock.json",
+		"--scan", directoryToScan+"/**/go.mod", // .sum files are not considered by dependencycheck
 		"--format", "JSON", "--out", dependencycheckOutputDirPath,
 		"--nvdApiKey", os.Getenv("NVD_API_KEY"))
 	out, err := cmd.Output()
