@@ -54,8 +54,12 @@ func printText(unifiedFindings []UnifiedFinding, gitMode bool) string {
 		result += fmt.Sprintf("  detector: %v\n", unifiedFinding.Detector)
 		result += fmt.Sprintf("  rule: %v\n", unifiedFinding.Rule)
 		result += fmt.Sprintf("  file: %v\n", unifiedFinding.File)
-		result += fmt.Sprintf("  line: %d\n", unifiedFinding.LineStart)
-		result += fmt.Sprintf("  column: %d\n", unifiedFinding.ColumnStart)
+		if unifiedFinding.LineStart != -1 {
+			result += fmt.Sprintf("  line: %d\n", unifiedFinding.LineStart)
+		}
+		if unifiedFinding.ColumnStart != -1 {
+			result += fmt.Sprintf("  column: %d\n", unifiedFinding.ColumnStart)
+		}
 		result += fmt.Sprintf("  match: %v\n", unifiedFinding.Match)
 		if len(unifiedFinding.Hint) > 0 {
 			result += fmt.Sprintf("  hint: %v\n", unifiedFinding.Hint)
