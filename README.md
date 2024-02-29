@@ -42,11 +42,12 @@ USAGE:
    secguro scan [command options] [arguments...]
 
 OPTIONS:
-   --git                     set to scan git history and print commit information (default: false)
-   --format value            text or json (default: "text")
-   --output value, -o value  path to output destination
-   --tolerance value         number of findings to tolerate when choosing exit code (default: 0)
-   --help, -h                show help
+   --git                                                      set to scan git history and print commit information (default: false)
+   --format value                                             text or json (default: "text")
+   --output value, -o value                                   path to output destination
+   --tolerance value                                          number of findings to tolerate when choosing exit code (default: 0)
+   --disabled-detectors value [ --disabled-detectors value ]  list of disabled detectors
+   --help, -h                                                 show help
 ```
 
 ## Deveploment
