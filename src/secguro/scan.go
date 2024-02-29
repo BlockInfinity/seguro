@@ -104,6 +104,13 @@ func installDependencies(disabledDetectors []string) error {
 		}
 	}
 
+	if !arrayIncludes(disabledDetectors, "dependencycheck") {
+		err := downloadAndExtractDependencycheck()
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -124,6 +131,14 @@ func getUnifiedFindings(gitMode bool, disabledDetectors []string) ([]UnifiedFind
 			return unifiedFindings, err
 		}
 		unifiedFindings = append(unifiedFindings, unifiedFindingsSemgrep...)
+	}
+
+	if !arrayIncludes(disabledDetectors, "dependencycheck") {
+		unifiedFindingsDependencycheck, err := getDependencycheckFindingsAsUnified(gitMode)
+		if err != nil {
+			return unifiedFindings, err
+		}
+		unifiedFindings = append(unifiedFindings, unifiedFindingsDependencycheck...)
 	}
 
 	return unifiedFindings, nil

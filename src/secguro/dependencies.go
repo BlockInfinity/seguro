@@ -17,13 +17,18 @@ func extractGzDependency(name string) error {
 	return extract.Gz(context.Background(), file, dependenciesDir+"/"+name, nil)
 }
 
-func downloadDependency(name string, url string) error {
+func extractZipDependency(name string) error {
+	file, _ := os.Open(dependenciesDir + "/" + name + ".zip")
+	return extract.Zip(context.Background(), file, dependenciesDir+"/"+name, nil)
+}
+
+func downloadDependency(name string, fileNameExtension string, url string) error {
 	err := os.MkdirAll(dependenciesDir, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	return downloadFile(dependenciesDir+"/"+name+".tar.gz", url)
+	return downloadFile(dependenciesDir+"/"+name+"."+fileNameExtension, url)
 }
 
 // https://stackoverflow.com/a/33853856
