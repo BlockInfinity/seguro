@@ -15,6 +15,7 @@ jobs:
   build:
     name: Build and Upload Release Artifact Job
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
     - uses: actions/checkout@v3
 
