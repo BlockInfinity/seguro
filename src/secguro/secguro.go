@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 
@@ -67,6 +68,17 @@ func main() { //nolint: funlen
 
 					if flagFormat != "text" && flagFormat != "json" {
 						return errors.New("unsupported value for --format")
+					}
+
+					if !arrayIncludes(flagDisabledDetectors, "dependencycheck") {
+						if os.Getenv(nvdApiKeyEnvVarName) == "" {
+							fmt.Printf("Disabling detector dependencycheck because "+
+								"environment variable %s is not set or is empty. "+
+								"You may apply for an API key at: "+
+								"https://nvd.nist.gov/developers/request-an-api-key\n", nvdApiKeyEnvVarName)
+
+							flagDisabledDetectors = append(flagDisabledDetectors, "dependencycheck")
+						}
 					}
 
 					err := commandScan(flagGitMode, flagDisabledDetectors,
