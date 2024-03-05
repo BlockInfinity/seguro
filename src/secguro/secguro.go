@@ -50,7 +50,7 @@ func main() { //nolint: funlen
 					&cli.MultiStringFlag{
 						Target: &cli.StringSliceFlag{ //nolint: exhaustruct
 							Name:  "disabled-detectors",
-							Usage: "list of disabled detectors",
+							Usage: "list of detectors to disable (semgrep,gitleaks,dependencycheck)",
 						},
 						Value:       []string{},
 						Destination: &flagDisabledDetectors,
