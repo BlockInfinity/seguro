@@ -8,8 +8,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// const directoryToScan = "/home/christoph/Development/Work/wallet"
-const directoryToScan = "."
+var directoryToScan = "."
 
 func main() { //nolint: funlen
 	var flagGitMode bool
@@ -59,6 +58,10 @@ func main() { //nolint: funlen
 				},
 				Action: func(cCtx *cli.Context) error {
 					if cCtx.NArg() > 0 {
+						directoryToScan = cCtx.Args().Get(0)
+					}
+
+					if cCtx.NArg() > 1 {
 						return errors.New("too many arguments")
 					}
 
