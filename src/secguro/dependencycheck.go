@@ -45,20 +45,16 @@ func convertDependencycheckFindingToUnifiedFinding(dependencycheckFinding Depend
 	packageAndVersion := strings.TrimPrefix(packageAndVersionPossiblePrefixed, "/")
 
 	return UnifiedFinding{
-		Detector:           "dependencycheck",
-		Rule:               dependencycheckFinding.Vulnerabilities[vulnerabilityIndex].Name,
-		File:               file,
-		LineStart:          -1,
-		LineEnd:            -1,
-		ColumnStart:        -1,
-		ColumnEnd:          -1,
-		Match:              packageAndVersion,
-		Hint:               "",
-		CommitHash:         "",
-		CommitDate:         "",
-		AuthorName:         "",
-		AuthorEmailAddress: "",
-		CommitSummary:      "",
+		Detector:    "dependencycheck",
+		Rule:        dependencycheckFinding.Vulnerabilities[vulnerabilityIndex].Name,
+		File:        file,
+		LineStart:   -1,
+		LineEnd:     -1,
+		ColumnStart: -1,
+		ColumnEnd:   -1,
+		Match:       packageAndVersion,
+		Hint:        "",
+		GitInfo:     nil,
 	}
 }
 

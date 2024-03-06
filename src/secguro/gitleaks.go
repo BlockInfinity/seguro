@@ -27,20 +27,22 @@ func convertGitleaksFindingToUnifiedFinding(gitleaksFinding GitleaksFinding) Uni
 	commitSummary, _, _ := strings.Cut(gitleaksFinding.Message, "\n")
 
 	return UnifiedFinding{
-		Detector:           "gitleaks",
-		Rule:               gitleaksFinding.RuleID,
-		File:               gitleaksFinding.File,
-		LineStart:          gitleaksFinding.StartLine,
-		LineEnd:            gitleaksFinding.EndLine,
-		ColumnStart:        gitleaksFinding.StartColumn,
-		ColumnEnd:          gitleaksFinding.EndColumn,
-		Match:              gitleaksFinding.Match,
-		Hint:               "",
-		CommitHash:         gitleaksFinding.Commit,
-		CommitDate:         gitleaksFinding.Date,
-		AuthorName:         gitleaksFinding.Author,
-		AuthorEmailAddress: gitleaksFinding.Email,
-		CommitSummary:      commitSummary,
+		Detector:    "gitleaks",
+		Rule:        gitleaksFinding.RuleID,
+		File:        gitleaksFinding.File,
+		LineStart:   gitleaksFinding.StartLine,
+		LineEnd:     gitleaksFinding.EndLine,
+		ColumnStart: gitleaksFinding.StartColumn,
+		ColumnEnd:   gitleaksFinding.EndColumn,
+		Match:       gitleaksFinding.Match,
+		Hint:        "",
+		GitInfo: &GitInfo{
+			CommitHash:         gitleaksFinding.Commit,
+			CommitDate:         gitleaksFinding.Date,
+			AuthorName:         gitleaksFinding.Author,
+			AuthorEmailAddress: gitleaksFinding.Email,
+			CommitSummary:      commitSummary,
+		},
 	}
 }
 
