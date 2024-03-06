@@ -65,12 +65,8 @@ func printText(unifiedFindings []UnifiedFinding, gitMode bool) string {
 		result += fmt.Sprintf("Finding %d:\n", i+1)
 		result += fmt.Sprintf("  detector: %v\n", unifiedFinding.Detector)
 		result += fmt.Sprintf("  rule: %v\n", unifiedFinding.Rule)
-		if unifiedFinding.LineStart != -1 && unifiedFinding.ColumnStart != -1 {
-			result += fmt.Sprintf("  location: %v:%v:%v\n",
-				unifiedFinding.File, unifiedFinding.LineStart, unifiedFinding.ColumnStart)
-		} else {
-			result += fmt.Sprintf("  location: %v\n", unifiedFinding.File)
-		}
+		result += "  location: " +
+			getLocation(unifiedFinding.File, unifiedFinding.LineStart, unifiedFinding.ColumnStart)
 		result += fmt.Sprintf("  match: %v\n", unifiedFinding.Match)
 		if len(unifiedFinding.Hint) > 0 {
 			result += fmt.Sprintf("  hint: %v\n", unifiedFinding.Hint)
@@ -86,4 +82,12 @@ func printText(unifiedFindings []UnifiedFinding, gitMode bool) string {
 	}
 
 	return result
+}
+
+func getLocation(path string, line int, column int) string {
+	if line != -1 && column != -1 {
+		return fmt.Sprintf("%v:%v:%v\n", path, line, column)
+	} else {
+		return fmt.Sprintf("%v\n", path)
+	}
 }
