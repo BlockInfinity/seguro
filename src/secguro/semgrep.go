@@ -36,20 +36,16 @@ func convertSemgrepFindingToUnifiedFinding(semgrepFinding SemgrepFinding, gitMod
 	}
 
 	unifiedFinding := UnifiedFinding{
-		Detector:           "semgrep",
-		Rule:               semgrepFinding.Check_id,
-		File:               semgrepFinding.Path,
-		LineStart:          semgrepFinding.Start.Line,
-		LineEnd:            semgrepFinding.End.Line,
-		ColumnStart:        semgrepFinding.Start.Col,
-		ColumnEnd:          semgrepFinding.End.Col,
-		Match:              semgrepFinding.Extra.Lines,
-		Hint:               semgrepFinding.Extra.Message,
-		CommitHash:         gitInfo.CommitHash,
-		CommitDate:         gitInfo.CommitDate,
-		AuthorName:         gitInfo.AuthorName,
-		AuthorEmailAddress: gitInfo.AuthorEmailAddress,
-		CommitSummary:      gitInfo.CommitSummary,
+		Detector:    "semgrep",
+		Rule:        semgrepFinding.Check_id,
+		File:        semgrepFinding.Path,
+		LineStart:   semgrepFinding.Start.Line,
+		LineEnd:     semgrepFinding.End.Line,
+		ColumnStart: semgrepFinding.Start.Col,
+		ColumnEnd:   semgrepFinding.End.Col,
+		Match:       semgrepFinding.Extra.Lines,
+		Hint:        semgrepFinding.Extra.Message,
+		GitInfo:     gitInfo,
 	}
 
 	return unifiedFinding, nil

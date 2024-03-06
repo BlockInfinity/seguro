@@ -5,6 +5,18 @@ import (
 	"fmt"
 )
 
+type UnifiedFindingSansGitInfo struct {
+	Detector    string
+	Rule        string
+	File        string
+	LineStart   int
+	LineEnd     int
+	ColumnStart int
+	ColumnEnd   int
+	Match       string
+	Hint        string
+}
+
 func printJson(unifiedFindings []UnifiedFinding, gitMode bool) (string, error) {
 	if gitMode {
 		return printJsonInternal(unifiedFindings)
@@ -63,12 +75,12 @@ func printText(unifiedFindings []UnifiedFinding, gitMode bool) string {
 		if len(unifiedFinding.Hint) > 0 {
 			result += fmt.Sprintf("  hint: %v\n", unifiedFinding.Hint)
 		}
-		if gitMode {
-			result += fmt.Sprintf("  commit hash: %v\n", unifiedFinding.CommitHash)
-			result += fmt.Sprintf("  commit date: %v\n", unifiedFinding.CommitDate)
-			result += fmt.Sprintf("  author: %v\n", unifiedFinding.AuthorName)
-			result += fmt.Sprintf("  author email address: %v\n", unifiedFinding.AuthorEmailAddress)
-			result += fmt.Sprintf("  commit summary: %v\n", unifiedFinding.CommitSummary)
+		if gitMode && unifiedFinding.GitInfo != nil {
+			result += fmt.Sprintf("  commit hash: %v\n", unifiedFinding.GitInfo.CommitHash)
+			result += fmt.Sprintf("  commit date: %v\n", unifiedFinding.GitInfo.CommitDate)
+			result += fmt.Sprintf("  author: %v\n", unifiedFinding.GitInfo.AuthorName)
+			result += fmt.Sprintf("  author email address: %v\n", unifiedFinding.GitInfo.AuthorEmailAddress)
+			result += fmt.Sprintf("  commit summary: %v\n", unifiedFinding.GitInfo.CommitSummary)
 		}
 		result += "\n"
 	}

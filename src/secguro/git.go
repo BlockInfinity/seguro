@@ -9,19 +9,22 @@ import (
 	"time"
 )
 
-func getGitInfo(filePath string, lineNumber int, gitMode bool) (GitInfo, error) {
+/**
+ * Returns git info if in git mode; otherwise returns nil.
+ */
+func getGitInfo(filePath string, lineNumber int, gitMode bool) (*GitInfo, error) {
 	if !gitMode {
-		return GitInfo{}, nil //nolint: exhaustruct
+		return nil, nil //nolint: nilnil
 	}
 
 	gitBlameOutput, err := getGitBlameOutput(filePath, lineNumber)
 	if err != nil {
-		return GitInfo{}, err
+		return nil, err
 	}
 
 	gitInfo, err := parseGitBlameOutput(gitBlameOutput)
 
-	return gitInfo, err
+	return &gitInfo, err
 }
 
 func getGitBlameOutput(filePath string, lineNumber int) ([]byte, error) {
