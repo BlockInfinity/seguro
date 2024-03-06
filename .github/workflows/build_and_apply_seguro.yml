@@ -9,6 +9,9 @@ on:
       - 'master'
       - 'gh-pages'
 
+concurrency:
+  group: ${{ github.workflow }}
+
 jobs:
 
   build:
