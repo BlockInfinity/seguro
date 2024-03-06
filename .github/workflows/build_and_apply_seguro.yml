@@ -6,7 +6,11 @@ name: Build and Apply Secguro
 on:
   push:
     branches-ignore:
+      - 'master'
       - 'gh-pages'
+
+concurrency:
+  group: ${{ github.workflow }}
 
 jobs:
 
