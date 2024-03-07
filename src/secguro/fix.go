@@ -39,15 +39,10 @@ type listKeyMap struct {
 	toggleStatusBar  key.Binding
 	togglePagination key.Binding
 	toggleHelpMenu   key.Binding
-	insertItem       key.Binding
 }
 
 func newListKeyMap() *listKeyMap {
 	return &listKeyMap{
-		insertItem: key.NewBinding(
-			key.WithKeys("a"),
-			key.WithHelp("a", "add item"),
-		),
 		toggleSpinner: key.NewBinding(
 			key.WithKeys("s"),
 			key.WithHelp("s", "toggle spinner"),
@@ -72,17 +67,15 @@ func newListKeyMap() *listKeyMap {
 }
 
 type model struct {
-	list          list.Model
-	itemGenerator *randomItemGenerator
-	keys          *listKeyMap
-	delegateKeys  *delegateKeyMap
+	list         list.Model
+	keys         *listKeyMap
+	delegateKeys *delegateKeyMap
 }
 
 func newModel(unifiedFindingsNotIgnored []UnifiedFinding) model {
 	var (
-		itemGenerator randomItemGenerator
-		delegateKeys  = newDelegateKeyMap()
-		listKeys      = newListKeyMap()
+		delegateKeys = newDelegateKeyMap()
+		listKeys     = newListKeyMap()
 	)
 
 	// Make initial list of items
@@ -106,7 +99,6 @@ func newModel(unifiedFindingsNotIgnored []UnifiedFinding) model {
 	groceryList.AdditionalFullHelpKeys = func() []key.Binding {
 		return []key.Binding{
 			listKeys.toggleSpinner,
-			listKeys.insertItem,
 			listKeys.toggleTitleBar,
 			listKeys.toggleStatusBar,
 			listKeys.togglePagination,
@@ -115,10 +107,9 @@ func newModel(unifiedFindingsNotIgnored []UnifiedFinding) model {
 	}
 
 	return model{
-		list:          groceryList,
-		keys:          listKeys,
-		delegateKeys:  delegateKeys,
-		itemGenerator: &itemGenerator,
+		list:         groceryList,
+		keys:         listKeys,
+		delegateKeys: delegateKeys,
 	}
 }
 
@@ -164,14 +155,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) { //nolint: ireturn
 		case key.Matches(msg, m.keys.toggleHelpMenu):
 			m.list.SetShowHelp(!m.list.ShowHelp())
 			return m, nil
-
-		case key.Matches(msg, m.keys.insertItem):
-			m.delegateKeys.remove.SetEnabled(true)
-			newItem := m.itemGenerator.next()
-			insCmd := m.list.InsertItem(0, newItem)
-			statusCmd := m.list.NewStatusMessage(statusMessageStyle("Added " + newItem.Title()))
-
-			return m, tea.Batch(insCmd, statusCmd)
 		}
 	}
 
