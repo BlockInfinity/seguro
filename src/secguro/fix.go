@@ -24,8 +24,9 @@ var (
 )
 
 type item struct {
-	title       string
-	description string
+	title          string
+	description    string
+	unifiedFinding UnifiedFinding
 }
 
 func (i item) Title() string       { return i.title }
@@ -93,6 +94,7 @@ func newModel(unifiedFindingsNotIgnored []UnifiedFinding) model {
 			title: unifiedFinding.Rule, // getFindingTitle(i),
 			description: getLocation(unifiedFinding.File, unifiedFinding.LineStart,
 				unifiedFinding.ColumnStart), // getFindingBody(gitMode, unifiedFinding),
+			unifiedFinding: unifiedFinding,
 		}
 	})
 
@@ -185,6 +187,8 @@ func (m model) View() string {
 	return appStyle.Render(m.list.View())
 }
 
+var actionPastFixSelection func() error = nil
+
 func commandFix(gitMode bool, disabledDetectors []string,
 	printAsJson bool, outputDestination string) error {
 	unifiedFindingsNotIgnored, err := performScan(gitMode, disabledDetectors,
@@ -196,6 +200,10 @@ func commandFix(gitMode bool, disabledDetectors []string,
 	if _, err := tea.NewProgram(newModel(unifiedFindingsNotIgnored), tea.WithAltScreen()).Run(); err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
+	}
+
+	if actionPastFixSelection != nil {
+		return actionPastFixSelection()
 	}
 
 	return nil

@@ -137,6 +137,7 @@ func (r *randomItemGenerator) reset() { //nolint: funlen
 	})
 }
 
+// TODO: remove
 func (r *randomItemGenerator) next() item {
 	if r.mtx == nil {
 		r.reset()
@@ -145,7 +146,7 @@ func (r *randomItemGenerator) next() item {
 	r.mtx.Lock()
 	defer r.mtx.Unlock()
 
-	//nolint: varnamelen
+	//nolint: varnamelen, exhaustruct
 	i := item{
 		title:       r.titles[r.titleIndex],
 		description: r.descs[r.descIndex],

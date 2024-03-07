@@ -12,9 +12,11 @@ func newItemDelegate(keys *delegateKeyMap) list.DefaultDelegate {
 	//nolint: varnamelen
 	d.UpdateFunc = func(msg tea.Msg, m *list.Model) tea.Cmd {
 		var title string
+		var unifiedFinding UnifiedFinding
 
 		if i, ok := m.SelectedItem().(item); ok {
 			title = i.Title()
+			unifiedFinding = i.unifiedFinding
 		} else {
 			return nil
 		}
@@ -23,7 +25,14 @@ func newItemDelegate(keys *delegateKeyMap) list.DefaultDelegate {
 		case tea.KeyMsg:
 			switch {
 			case key.Matches(msg, keys.choose):
-				return m.NewStatusMessage(statusMessageStyle("You chose " + title))
+				{
+					actionPastFixSelection = func() error {
+						return fixSecret(unifiedFinding)
+					}
+
+					return tea.Quit
+					// return m.NewStatusMessage(statusMessageStyle("You chose " + title))
+				}
 
 			case key.Matches(msg, keys.remove):
 				index := m.Index()
