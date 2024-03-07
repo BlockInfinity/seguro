@@ -62,23 +62,33 @@ func printText(unifiedFindings []UnifiedFinding, gitMode bool) string {
 	result := ""
 
 	for i, unifiedFinding := range unifiedFindings {
-		result += fmt.Sprintf("Finding %d:\n", i+1)
-		result += fmt.Sprintf("  detector: %v\n", unifiedFinding.Detector)
-		result += fmt.Sprintf("  rule: %v\n", unifiedFinding.Rule)
-		result += "  location: " +
-			getLocation(unifiedFinding.File, unifiedFinding.LineStart, unifiedFinding.ColumnStart)
-		result += fmt.Sprintf("  match: %v\n", unifiedFinding.Match)
-		if len(unifiedFinding.Hint) > 0 {
-			result += fmt.Sprintf("  hint: %v\n", unifiedFinding.Hint)
-		}
-		if gitMode && unifiedFinding.GitInfo != nil {
-			result += fmt.Sprintf("  commit hash: %v\n", unifiedFinding.GitInfo.CommitHash)
-			result += fmt.Sprintf("  commit date: %v\n", unifiedFinding.GitInfo.CommitDate)
-			result += fmt.Sprintf("  author: %v\n", unifiedFinding.GitInfo.AuthorName)
-			result += fmt.Sprintf("  author email address: %v\n", unifiedFinding.GitInfo.AuthorEmailAddress)
-			result += fmt.Sprintf("  commit summary: %v\n", unifiedFinding.GitInfo.CommitSummary)
-		}
-		result += "\n"
+		result += getFindingTitle(i) + "\n"
+		result += getFindingBody(gitMode, unifiedFinding) + "\n"
+	}
+
+	return result
+}
+
+func getFindingTitle(index int) string {
+	return fmt.Sprintf("Finding %d:", index+1)
+}
+
+func getFindingBody(gitMode bool, unifiedFinding UnifiedFinding) string {
+	result := ""
+	result += fmt.Sprintf("  detector: %v\n", unifiedFinding.Detector)
+	result += fmt.Sprintf("  rule: %v\n", unifiedFinding.Rule)
+	result += "  location: " +
+		getLocation(unifiedFinding.File, unifiedFinding.LineStart, unifiedFinding.ColumnStart)
+	result += fmt.Sprintf("  match: %v\n", unifiedFinding.Match)
+	if len(unifiedFinding.Hint) > 0 {
+		result += fmt.Sprintf("  hint: %v\n", unifiedFinding.Hint)
+	}
+	if gitMode && unifiedFinding.GitInfo != nil {
+		result += fmt.Sprintf("  commit hash: %v\n", unifiedFinding.GitInfo.CommitHash)
+		result += fmt.Sprintf("  commit date: %v\n", unifiedFinding.GitInfo.CommitDate)
+		result += fmt.Sprintf("  author: %v\n", unifiedFinding.GitInfo.AuthorName)
+		result += fmt.Sprintf("  author email address: %v\n", unifiedFinding.GitInfo.AuthorEmailAddress)
+		result += fmt.Sprintf("  commit summary: %v\n", unifiedFinding.GitInfo.CommitSummary)
 	}
 
 	return result
