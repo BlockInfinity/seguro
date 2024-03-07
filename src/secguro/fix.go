@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -190,4 +191,13 @@ func commandFix(gitMode bool, disabledDetectors []string,
 	}
 
 	return nil
+}
+
+func fixUnifiedFinding(unifiedFinding UnifiedFinding) error {
+	switch unifiedFinding.Rule {
+	case "generic-api-key":
+		return fixSecret(unifiedFinding)
+	default:
+		return errors.New("Fixing of selected finding not yet supported.")
+	}
 }

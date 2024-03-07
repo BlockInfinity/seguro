@@ -27,7 +27,7 @@ func newItemDelegate(keys *delegateKeyMap) list.DefaultDelegate {
 			case key.Matches(msg, keys.choose):
 				{
 					actionPastFixSelection = func() error {
-						return fixSecret(unifiedFinding)
+						return fixUnifiedFinding(unifiedFinding)
 					}
 
 					return tea.Quit
