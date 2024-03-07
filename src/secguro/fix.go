@@ -85,10 +85,14 @@ func newModel(unifiedFindingsNotIgnored []UnifiedFinding) model {
 	)
 
 	// Make initial list of items
-	items := Map(unifiedFindingsNotIgnored, func(unifiedFinding UnifiedFinding) list.Item {
+	items := MapWithIndex(unifiedFindingsNotIgnored, func(unifiedFinding UnifiedFinding, i int) list.Item {
+		// TODO: should be the things in the comments so the list items are
+		// identical to the output of `secguro scan` but i can't get list
+		// items with multi-line descriptions to work.
 		return item{
-			title:       getLocation(unifiedFinding.File, unifiedFinding.LineStart, unifiedFinding.ColumnStart),
-			description: unifiedFinding.Rule,
+			title: unifiedFinding.Rule, // getFindingTitle(i),
+			description: getLocation(unifiedFinding.File, unifiedFinding.LineStart,
+				unifiedFinding.ColumnStart), // getFindingBody(gitMode, unifiedFinding),
 		}
 	})
 
