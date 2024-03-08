@@ -10,6 +10,15 @@ func Map[T, U any](ts []T, f func(T) U) []U {
 	return result
 }
 
+func MapWithIndex[T, U any](ts []T, f func(T, int) U) []U {
+	result := make([]U, len(ts))
+	for i := range ts {
+		result[i] = f(ts[i], i)
+	}
+
+	return result
+}
+
 func MapWithError[T, U any](ts []T, f func(T) (U, error)) ([]U, error) {
 	result := make([]U, len(ts))
 	for i := range ts {

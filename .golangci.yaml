@@ -96,3 +96,5 @@ linters-settings:
   stylecheck:
     checks: ["all", "-ST1003", "-ST1005"]
     initialisms: [""]
+  varnamelen:
+    max-distance: 16
