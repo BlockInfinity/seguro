@@ -7,10 +7,11 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// TODO: get answer in cleaner way; like in fix_choose_option
 var providedAnswer string
 
 func getTextInput(prompt string, defaultAnswer string) (string, error) {
-	p := tea.NewProgram(initialModel(prompt, defaultAnswer))
+	p := tea.NewProgram(initialModelTextInput(prompt, defaultAnswer))
 	if _, err := p.Run(); err != nil {
 		return "", err
 	}
@@ -28,7 +29,7 @@ type modelTextInput struct {
 	err       error
 }
 
-func initialModel(prompt string, defaultAnswer string) modelTextInput {
+func initialModelTextInput(prompt string, defaultAnswer string) modelTextInput {
 	ti := textinput.New()
 	ti.Placeholder = ""
 	ti.Focus()

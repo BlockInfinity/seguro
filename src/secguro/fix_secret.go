@@ -6,9 +6,6 @@ import (
 )
 
 func fixSecret(unifiedFinding UnifiedFinding) error {
-	fmt.Println("would fix:")
-	fmt.Println(unifiedFinding)
-
 	// TODO: make line breaks dependent on the terminal's width
 	prompt := "Please specify the secret to remove from all git history. \n" +
 		"Note that we are not always able to determine the exact bounds of \n" +
@@ -23,8 +20,49 @@ func fixSecret(unifiedFinding UnifiedFinding) error {
 		}
 	}
 
-	fmt.Println("got:")
-	fmt.Println(secret)
+	secretIsInIndex := true
+	for secretIsInIndex {
+		var err error
+		secretIsInIndex, err = isSecretInIndex(secret)
+		if err != nil {
+			return err
+		}
+
+		if secretIsInIndex {
+			prompt = "The specified secret is in the git index. Please replace the \n" +
+				"secret, commit your changes, and try again. We only delete \n" +
+				"secrets that are not in the git index to make sure that your \n" +
+				"code keeps working. The file system state of your latest commit \n" +
+				"will never be modified by secguro when deleting secrets.\n" +
+				"\n" +
+				"You may use environmnt variables to insert secrets into your \n" +
+				"program. Make sure that your secrets are also available in any \n" +
+				"CI tools you are using, as well as your production and CD environments.\n" +
+				"Check out: https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions\n"
+			choices := []string{"back", "I have removed the secret from the latest commit."}
+			choiceIndex, _, err := getOptionChoice(prompt, choices)
+			if err != nil {
+				return err
+			}
+			if choiceIndex == 0 {
+				return nil
+			}
+		}
+	}
+
+	fmt.Println("would fix:")
+	fmt.Println(unifiedFinding)
 
 	return nil
+}
+
+func isSecretInIndex(secret string) (bool, error) {
+	cmd := exec.Command("git", "grep", secret, "HEAD", "--", ".")
+	cmd.Dir = directoryToScan
+	out, err := cmd.Output()
+	if err != nil {
+		return false, err
+	}
+
+	return len(out) > 0, nil
 }
