@@ -22,11 +22,11 @@ func fixSecret(unifiedFinding UnifiedFinding) error {
 
 	secretIsInIndex := true
 	for secretIsInIndex {
-		var err error
-		secretIsInIndex, err = isSecretInIndex(secret)
+		searchResult, err := findStringInGitIndex(secret)
 		if err != nil {
 			return err
 		}
+		secretIsInIndex = len(searchResult) > 0
 
 		if secretIsInIndex {
 			prompt = "The specified secret is in the git index. Please replace the \n" +
@@ -38,7 +38,10 @@ func fixSecret(unifiedFinding UnifiedFinding) error {
 				"You may use environmnt variables to insert secrets into your \n" +
 				"program. Make sure that your secrets are also available in any \n" +
 				"CI tools you are using, as well as your production and CD environments.\n" +
-				"Check out: https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions\n"
+				"Check out: https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions\n" +
+				"\n" +
+				"We found the secret in:\n" +
+				searchResult
 			choices := []string{"back", "I have removed the secret from the latest commit."}
 			choiceIndex, _, err := getOptionChoice(prompt, choices)
 			if err != nil {
@@ -56,13 +59,13 @@ func fixSecret(unifiedFinding UnifiedFinding) error {
 	return nil
 }
 
-func isSecretInIndex(secret string) (bool, error) {
+func findStringInGitIndex(secret string) (string, error) {
 	cmd := exec.Command("git", "grep", secret, "HEAD", "--", ".")
 	cmd.Dir = directoryToScan
 	out, err := cmd.Output()
 	if err != nil {
-		return false, err
+		return "", err
 	}
 
-	return len(out) > 0, nil
+	return string(out), nil
 }
