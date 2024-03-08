@@ -7,6 +7,7 @@ require (
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/charmbracelet/lipgloss v0.10.0
 	github.com/codeclysm/extract/v3 v3.1.1
+	github.com/inancgumus/screen v0.0.0-20190314163918-06e984b86ed3
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/urfave/cli/v2 v2.27.1
 )
@@ -33,8 +34,9 @@ require (
 	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
+	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.12.0 // indirect
-	golang.org/x/term v0.6.0 // indirect
-	golang.org/x/text v0.3.8 // indirect
+	golang.org/x/sys v0.18.0 // indirect
+	golang.org/x/term v0.18.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 )

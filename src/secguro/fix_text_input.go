@@ -11,6 +11,8 @@ import (
 var providedAnswer string
 
 func getTextInput(prompt string, defaultAnswer string) (string, error) {
+	clearScreen()
+
 	p := tea.NewProgram(initialModelTextInput(prompt, defaultAnswer))
 	if _, err := p.Run(); err != nil {
 		return "", err

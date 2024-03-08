@@ -6,7 +6,6 @@ import (
 )
 
 func fixSecret(unifiedFinding UnifiedFinding) error {
-	// TODO: make line breaks dependent on the terminal's width
 	prompt := "Please specify the secret to remove from all git history. \n" +
 		"Note that we are not always able to determine the exact bounds of \n" +
 		"the secret, so it's important you specify the secret exactly."
