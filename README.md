@@ -3,10 +3,10 @@
 - Make executable: `chmod +x secguro`
 - Move to directory in `$PATH`; e.g. `mv secguro ~/.local/bin`
 
-## Use
+## Scanning for Problems
 ### Locally
 ```bash
-secguro scan
+secguro scan [path]
 ```
 
 ### Github Workflow
@@ -23,6 +23,11 @@ secguro scan
         script: wget 'https://secguro.github.io/secguro-cli/secguro' && chmod +x secguro &&  ./secguro scan
         workingDirectory: .
         failOnStderr: false # because wget writes to stderr
+```
+
+## Fixing Problems
+```bash
+secguro fix [path]
 ```
 
 ## Exit Code
