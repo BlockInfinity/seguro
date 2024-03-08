@@ -60,7 +60,7 @@ func fixSecret(unifiedFinding UnifiedFinding) error {
 }
 
 func findStringInGitIndex(secret string) (string, error) {
-	cmd := exec.Command("git", "grep", secret, "HEAD", "--", ".")
+	cmd := exec.Command("git", "grep", "--color", secret, "HEAD", "--", ".")
 	cmd.Dir = directoryToScan
 	out, err := cmd.Output()
 	if err != nil {
