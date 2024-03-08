@@ -79,7 +79,7 @@ func getOptionChoice(prompt string, choices []string) (int, string, error) {
 		return 0, "", errors.New("empty array given for choices")
 	}
 
-	p := tea.NewProgram(initialModelChooseOption(prompt, choices))
+	p := tea.NewProgram(initialModelChooseOption(prompt, choices), tea.WithAltScreen())
 
 	// Run returns the model as a tea.Model.
 	m, err := p.Run()
