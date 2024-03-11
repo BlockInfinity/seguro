@@ -21,12 +21,13 @@ func getOptionChoice(prompt string, choices []string) (int, string, error) {
 		return 0, "", err
 	}
 
-	// Assert the final tea.Model to our local model and print the choice.
+	// Assert the final tea.Model to the local model and return the final state.
 	if m, ok := m.(modelChooseOption); ok && m.choice != "" {
 		return m.cursor, m.choice, nil
 	}
 
-	return 0, "", errors.New("option chooser terminated unexpectedly")
+	return 0, "", errors.New("option chooser terminated with error due to failed " +
+		"type assertion or choice being the empty string")
 }
 
 type modelChooseOption struct {
