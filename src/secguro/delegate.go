@@ -6,8 +6,12 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// Display 5 lines per item description; i.e. 6 lines per item.
+const numberOfLinesOfItemDescription = 5
+
 func newItemDelegate(keys *delegateKeyMap) list.DefaultDelegate {
 	d := list.NewDefaultDelegate() //nolint: varnamelen
+	d.SetHeight(numberOfLinesOfItemDescription + 1)
 
 	//nolint: varnamelen
 	d.UpdateFunc = func(msg tea.Msg, m *list.Model) tea.Cmd {
