@@ -5,13 +5,15 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/muesli/reflow/wordwrap"
 )
 
 type modelChooseOption struct {
-	prompt  string
-	choices []string
-	cursor  int
-	choice  string
+	windowWidth int
+	prompt      string
+	choices     []string
+	cursor      int
+	choice      string
 }
 
 func (m modelChooseOption) Init() tea.Cmd {
@@ -19,7 +21,9 @@ func (m modelChooseOption) Init() tea.Cmd {
 }
 
 func (m modelChooseOption) Update(msg tea.Msg) (tea.Model, tea.Cmd) { //nolint: ireturn // must be like this
-	switch msg := msg.(type) { //nolint: gocritic
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.windowWidth = msg.Width
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q", "esc":
@@ -62,15 +66,16 @@ func (m modelChooseOption) View() string {
 	}
 	s.WriteString("\n(press q to quit)\n")
 
-	return s.String()
+	return wordwrap.String(s.String(), m.windowWidth)
 }
 
 func initialModelChooseOption(prompt string, choices []string) modelChooseOption {
 	return modelChooseOption{
-		prompt:  prompt,
-		choices: choices,
-		cursor:  0,
-		choice:  choices[0],
+		windowWidth: 0,
+		prompt:      prompt,
+		choices:     choices,
+		cursor:      0,
+		choice:      choices[0],
 	}
 }
 

@@ -7,8 +7,8 @@ import (
 
 func fixSecret(unifiedFinding UnifiedFinding) error {
 	// TODO: make line breaks dependent on the terminal's width
-	prompt := "Please specify the secret to remove from all git history. \n" +
-		"Note that we are not always able to determine the exact bounds of \n" +
+	prompt := "Please specify the secret to remove from all git history. " +
+		"Note that we are not always able to determine the exact bounds of " +
 		"the secret, so it's important you specify the secret exactly."
 
 	secret := ""
@@ -31,17 +31,17 @@ func fixSecret(unifiedFinding UnifiedFinding) error {
 			break
 		}
 
-		prompt = "The specified secret is in the git index. Please replace the \n" +
-			"secret, commit your changes, and try again. We only delete \n" +
-			"secrets that are not in the git index to make sure that your \n" +
-			"code keeps working. The file system state of your latest commit \n" +
-			"will never be modified by secguro when deleting secrets.\n" +
-			"\n" +
-			"You may use environmnt variables to insert secrets into your \n" +
-			"program. Make sure that your secrets are also available in any \n" +
-			"CI tools you are using, as well as your production and CD environments.\n" +
-			"Check out: https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions\n" +
-			"\n" +
+		prompt = "The specified secret is in the git index. Please replace the " +
+			"secret, commit your changes, and try again. We only delete " +
+			"secrets that are not in the git index to make sure that your " +
+			"code keeps working. The file system state of your latest commit " +
+			"will never be modified by secguro when deleting secrets." +
+			"\n\n" +
+			"You may use environmnt variables to insert secrets into your " +
+			"program. Make sure that your secrets are also available in any " +
+			"CI tools you are using, as well as your production and CD environments." +
+			"Check out: https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions" +
+			"\n\n" +
 			"We found the secret in:\n" +
 			searchResult
 		choices := []string{"back", "I have removed the secret from the latest commit."}

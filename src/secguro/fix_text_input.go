@@ -5,6 +5,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/muesli/reflow/wordwrap"
 )
 
 // TODO: get answer in cleaner way; like in fix_choose_option
@@ -24,9 +25,10 @@ type (
 )
 
 type modelTextInput struct {
-	prompt    string
-	textInput textinput.Model
-	err       error
+	windowWidth int
+	prompt      string
+	textInput   textinput.Model
+	err         error
 }
 
 func initialModelTextInput(prompt string, defaultAnswer string) modelTextInput {
@@ -38,9 +40,10 @@ func initialModelTextInput(prompt string, defaultAnswer string) modelTextInput {
 	ti.SetValue(defaultAnswer)
 
 	return modelTextInput{
-		prompt:    prompt,
-		textInput: ti,
-		err:       nil,
+		windowWidth: 0,
+		prompt:      prompt,
+		textInput:   ti,
+		err:         nil,
 	}
 }
 
@@ -52,6 +55,8 @@ func (m modelTextInput) Update(msg tea.Msg) (tea.Model, tea.Cmd) { //nolint: ire
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.windowWidth = msg.Width
 	case tea.KeyMsg: //nolint: exhaustive
 		switch msg.Type {
 		case tea.KeyEnter, tea.KeyCtrlC, tea.KeyEsc:
@@ -71,9 +76,9 @@ func (m modelTextInput) Update(msg tea.Msg) (tea.Model, tea.Cmd) { //nolint: ire
 }
 
 func (m modelTextInput) View() string {
-	return fmt.Sprintf(
+	return wordwrap.String(fmt.Sprintf(
 		m.prompt+"\n\n%s\n\n%s",
 		m.textInput.View(),
 		"(esc to quit)",
-	) + "\n"
+	)+"\n", m.windowWidth)
 }
