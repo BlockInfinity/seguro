@@ -94,10 +94,10 @@ func newModel(unifiedFindingsNotIgnored []UnifiedFinding) model {
 
 	// Setup list
 	delegate := newItemDelegate(delegateKeys)
-	groceryList := list.New(items, delegate, 0, 0)
-	groceryList.Title = "Findings"
-	groceryList.Styles.Title = titleStyle
-	groceryList.AdditionalFullHelpKeys = func() []key.Binding {
+	findingsList := list.New(items, delegate, 0, 0)
+	findingsList.Title = "Findings"
+	findingsList.Styles.Title = titleStyle
+	findingsList.AdditionalFullHelpKeys = func() []key.Binding {
 		return []key.Binding{
 			listKeys.toggleSpinner,
 			listKeys.toggleTitleBar,
@@ -108,7 +108,7 @@ func newModel(unifiedFindingsNotIgnored []UnifiedFinding) model {
 	}
 
 	return model{
-		list:         groceryList,
+		list:         findingsList,
 		keys:         listKeys,
 		delegateKeys: delegateKeys,
 	}
