@@ -81,23 +81,23 @@ func newModel(unifiedFindingsNotIgnored []UnifiedFinding) model {
 
 	// Make initial list of items
 	items := MapWithIndex(unifiedFindingsNotIgnored, func(unifiedFinding UnifiedFinding, i int) list.Item {
-		// TODO: should be the things in the comments so the list items are
-		// identical to the output of `secguro scan` but i can't get list
-		// items with multi-line descriptions to work.
+		// TODO: decide whether to support git mode (currently hard-coded to false in call to getFindingBody()).
+		// advantage: additional info possible
+		// disadvantage: need to handle highly dynamic list item height (currently, there only are list item
+		// descriptions of heights 4 and 5).
 		return item{
-			title: unifiedFinding.Rule, // getFindingTitle(i),
-			description: getLocation(unifiedFinding.File, unifiedFinding.LineStart,
-				unifiedFinding.ColumnStart), // getFindingBody(gitMode, unifiedFinding),
+			title:          getFindingTitle(i),
+			description:    getFindingBody(false, unifiedFinding),
 			unifiedFinding: unifiedFinding,
 		}
 	})
 
 	// Setup list
 	delegate := newItemDelegate(delegateKeys)
-	groceryList := list.New(items, delegate, 0, 0)
-	groceryList.Title = "Groceries"
-	groceryList.Styles.Title = titleStyle
-	groceryList.AdditionalFullHelpKeys = func() []key.Binding {
+	findingsList := list.New(items, delegate, 0, 0)
+	findingsList.Title = "Findings"
+	findingsList.Styles.Title = titleStyle
+	findingsList.AdditionalFullHelpKeys = func() []key.Binding {
 		return []key.Binding{
 			listKeys.toggleSpinner,
 			listKeys.toggleTitleBar,
@@ -108,7 +108,7 @@ func newModel(unifiedFindingsNotIgnored []UnifiedFinding) model {
 	}
 
 	return model{
-		list:         groceryList,
+		list:         findingsList,
 		keys:         listKeys,
 		delegateKeys: delegateKeys,
 	}
