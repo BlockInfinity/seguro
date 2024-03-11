@@ -95,7 +95,7 @@ func newModel(unifiedFindingsNotIgnored []UnifiedFinding) model {
 	// Setup list
 	delegate := newItemDelegate(delegateKeys)
 	groceryList := list.New(items, delegate, 0, 0)
-	groceryList.Title = "Groceries"
+	groceryList.Title = "Findings"
 	groceryList.Styles.Title = titleStyle
 	groceryList.AdditionalFullHelpKeys = func() []key.Binding {
 		return []key.Binding{
