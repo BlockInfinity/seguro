@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -8,16 +9,21 @@ import (
 	"github.com/muesli/reflow/wordwrap"
 )
 
-// TODO: get answer in cleaner way; like in fix_choose_option
-var providedAnswer string
-
 func getTextInput(prompt string, defaultAnswer string) (string, error) {
 	p := tea.NewProgram(initialModelTextInput(prompt, defaultAnswer), tea.WithAltScreen())
-	if _, err := p.Run(); err != nil {
+
+	// Run returns the model as a tea.Model.
+	m, err := p.Run()
+	if err != nil {
 		return "", err
 	}
 
-	return providedAnswer, nil
+	// Assert the final tea.Model to the local model and return the final state.
+	if m, ok := m.(modelTextInput); ok {
+		return m.textInput.Value(), nil
+	}
+
+	return "", errors.New("text input terminated with error due to failed type assertion")
 }
 
 type (
@@ -70,7 +76,6 @@ func (m modelTextInput) Update(msg tea.Msg) (tea.Model, tea.Cmd) { //nolint: ire
 	}
 
 	m.textInput, cmd = m.textInput.Update(msg)
-	providedAnswer = m.textInput.Value()
 
 	return m, cmd
 }

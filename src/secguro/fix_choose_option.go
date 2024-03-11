@@ -8,6 +8,28 @@ import (
 	"github.com/muesli/reflow/wordwrap"
 )
 
+func getOptionChoice(prompt string, choices []string) (int, string, error) {
+	if len(choices) == 0 {
+		return 0, "", errors.New("empty array given for choices")
+	}
+
+	p := tea.NewProgram(initialModelChooseOption(prompt, choices), tea.WithAltScreen())
+
+	// Run returns the model as a tea.Model.
+	m, err := p.Run()
+	if err != nil {
+		return 0, "", err
+	}
+
+	// Assert the final tea.Model to the local model and return the final state.
+	if m, ok := m.(modelChooseOption); ok && m.choice != "" {
+		return m.cursor, m.choice, nil
+	}
+
+	return 0, "", errors.New("option chooser terminated with error due to failed " +
+		"type assertion or choice being the empty string")
+}
+
 type modelChooseOption struct {
 	windowWidth int
 	prompt      string
@@ -77,25 +99,4 @@ func initialModelChooseOption(prompt string, choices []string) modelChooseOption
 		cursor:      0,
 		choice:      choices[0],
 	}
-}
-
-func getOptionChoice(prompt string, choices []string) (int, string, error) {
-	if len(choices) == 0 {
-		return 0, "", errors.New("empty array given for choices")
-	}
-
-	p := tea.NewProgram(initialModelChooseOption(prompt, choices), tea.WithAltScreen())
-
-	// Run returns the model as a tea.Model.
-	m, err := p.Run()
-	if err != nil {
-		return 0, "", err
-	}
-
-	// Assert the final tea.Model to our local model and print the choice.
-	if m, ok := m.(modelChooseOption); ok && m.choice != "" {
-		return m.cursor, m.choice, nil
-	}
-
-	return 0, "", errors.New("option chooser terminated unexpectedly")
 }
