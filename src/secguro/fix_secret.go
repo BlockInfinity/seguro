@@ -5,7 +5,7 @@ import (
 	"os/exec"
 )
 
-func fixSecret(unifiedFinding UnifiedFinding) error {
+func fixSecret(previousStep func() error, unifiedFinding UnifiedFinding) error {
 	prompt := "Please specify the secret in question. " +
 		"Note that we are not always able to determine the exact bounds of " +
 		"the secret, so it's important you specify the secret exactly."
@@ -49,7 +49,7 @@ func fixSecret(unifiedFinding UnifiedFinding) error {
 			return err
 		}
 		if choiceIndex == 0 {
-			return nil
+			return previousStep()
 		}
 	}
 
