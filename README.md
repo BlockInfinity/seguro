@@ -48,9 +48,23 @@ USAGE:
 
 OPTIONS:
    --git                                                      set to scan git history and print commit information (default: false)
+   --disabled-detectors value [ --disabled-detectors value ]  list of detectors to disable (semgrep,gitleaks,dependencycheck)
    --format value                                             text or json (default: "text")
    --output value, -o value                                   path to output destination
    --tolerance value                                          number of findings to tolerate when choosing exit code (default: 0)
+   --help, -h                                                 show help
+```
+
+```
+$ secguro fix --help
+NAME:
+   secguro fix - scan for problems and then switch to an interactive mode to fix them
+
+USAGE:
+   secguro fix [command options] [arguments...]
+
+OPTIONS:
+   --git                                                      set to scan git history and print commit information (default: false)
    --disabled-detectors value [ --disabled-detectors value ]  list of detectors to disable (semgrep,gitleaks,dependencycheck)
    --help, -h                                                 show help
 ```
