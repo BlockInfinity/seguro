@@ -50,6 +50,7 @@ func initialModelTextInput(prompt string, defaultAnswer string) modelTextInput {
 		windowWidth: 0,
 		prompt:      prompt,
 		textInput:   ti,
+		goBack:      false,
 		err:         nil,
 	}
 }
