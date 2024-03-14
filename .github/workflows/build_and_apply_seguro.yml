@@ -9,9 +9,6 @@ on:
       - 'master'
       - 'gh-pages'
 
-concurrency:
-  group: ${{ github.workflow }}
-
 jobs:
 
   build:
@@ -39,4 +36,5 @@ jobs:
     - name: Test
       env:
         NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-      run: build/secguro scan
+      # Disable dependencycheck to prevent excessive load on NVD.
+      run: build/secguro scan --disabled-detectors dependencycheck
