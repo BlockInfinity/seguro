@@ -188,9 +188,8 @@ func commandFix(gitMode bool, disabledDetectors []string) error {
 
 		return nil
 	}
-	showProblemsList()
 
-	return nil
+	return showProblemsList()
 }
 
 func fixUnifiedFinding(previousStep func() error, unifiedFinding UnifiedFinding) error {
