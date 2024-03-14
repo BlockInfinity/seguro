@@ -35,7 +35,6 @@ func newItemDelegate(keys *delegateKeyMap) list.DefaultDelegate {
 					}
 
 					return tea.Quit
-					// return m.NewStatusMessage(statusMessageStyle("You chose " + title))
 				}
 
 			case key.Matches(msg, keys.remove):

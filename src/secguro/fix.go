@@ -181,7 +181,9 @@ func commandFix(gitMode bool, disabledDetectors []string) error {
 		}
 
 		if actionPastFixSelection != nil {
-			return actionPastFixSelection()
+			actionToExecute := actionPastFixSelection
+			actionPastFixSelection = nil
+			return actionToExecute()
 		}
 
 		return nil

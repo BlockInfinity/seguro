@@ -6,19 +6,31 @@ import (
 )
 
 func fixSecret(previousStep func() error, unifiedFinding UnifiedFinding) error {
+	return fixSecretStep1(previousStep, unifiedFinding)
+}
+
+func fixSecretStep1(previousStep func() error, unifiedFinding UnifiedFinding) error {
 	prompt := "Please specify the secret in question. " +
 		"Note that we are not always able to determine the exact bounds of " +
 		"the secret, so it's important you specify the secret exactly."
 
 	secret := ""
 	for secret == "" {
+		var goBack bool
 		var err error
-		secret, err = getTextInput(prompt, unifiedFinding.Match)
+		secret, goBack, err = getTextInput(prompt, unifiedFinding.Match)
 		if err != nil {
 			return err
 		}
+		if goBack {
+			previousStep()
+		}
 	}
 
+	return fixSecretStep2(func() error { return fixSecretStep1(previousStep, unifiedFinding) }, secret)
+}
+
+func fixSecretStep2(previousStep func() error, secret string) error {
 	for {
 		searchResult, err := findStringInGitIndex(secret)
 		if err != nil {
@@ -30,7 +42,7 @@ func fixSecret(previousStep func() error, unifiedFinding UnifiedFinding) error {
 			break
 		}
 
-		prompt = "The specified secret is in the git index. Please replace the " +
+		prompt := "The specified secret is in the git index. Please replace the " +
 			"secret, commit your changes, and try again. We only delete " +
 			"secrets that are not in the git index to make sure that your " +
 			"code keeps working. The file system state of your latest commit " +
@@ -48,7 +60,7 @@ func fixSecret(previousStep func() error, unifiedFinding UnifiedFinding) error {
 		if err != nil {
 			return err
 		}
-		if choiceIndex == 0 {
+		if choiceIndex == -1 || choiceIndex == 0 {
 			return previousStep()
 		}
 	}

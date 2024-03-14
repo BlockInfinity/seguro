@@ -9,21 +9,21 @@ import (
 	"github.com/muesli/reflow/wordwrap"
 )
 
-func getTextInput(prompt string, defaultAnswer string) (string, error) {
+func getTextInput(prompt string, defaultAnswer string) (string, bool, error) {
 	p := tea.NewProgram(initialModelTextInput(prompt, defaultAnswer), tea.WithAltScreen())
 
 	// Run returns the model as a tea.Model.
 	m, err := p.Run()
 	if err != nil {
-		return "", err
+		return "", false, err
 	}
 
 	// Assert the final tea.Model to the local model and return the final state.
 	if m, ok := m.(modelTextInput); ok {
-		return m.textInput.Value(), nil
+		return m.textInput.Value(), m.goBack, nil
 	}
 
-	return "", errors.New("text input terminated with error due to failed type assertion")
+	return "", false, errors.New("text input terminated with error due to failed type assertion")
 }
 
 type (
@@ -34,6 +34,7 @@ type modelTextInput struct {
 	windowWidth int
 	prompt      string
 	textInput   textinput.Model
+	goBack      bool
 	err         error
 }
 
@@ -65,7 +66,11 @@ func (m modelTextInput) Update(msg tea.Msg) (tea.Model, tea.Cmd) { //nolint: ire
 		m.windowWidth = msg.Width
 	case tea.KeyMsg: //nolint: exhaustive
 		switch msg.Type {
-		case tea.KeyEnter, tea.KeyCtrlC, tea.KeyEsc:
+		case tea.KeyEnter:
+			return m, tea.Quit
+		case tea.KeyCtrlC, tea.KeyEsc:
+			m.textInput.SetValue("")
+			m.goBack = true
 			return m, tea.Quit
 		}
 
@@ -82,8 +87,9 @@ func (m modelTextInput) Update(msg tea.Msg) (tea.Model, tea.Cmd) { //nolint: ire
 
 func (m modelTextInput) View() string {
 	return wordwrap.String(fmt.Sprintf(
-		m.prompt+"\n\n%s\n\n%s",
-		m.textInput.View(),
-		"(esc to quit)",
-	)+"\n", m.windowWidth)
+		m.prompt+"\n\n%s\n\n",
+		m.textInput.View())+
+		"(submit empty string to restored suggested secret)\n"+
+		"(esc to go back)\n",
+		m.windowWidth)
 }

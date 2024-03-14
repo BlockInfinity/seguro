@@ -48,7 +48,9 @@ func (m modelChooseOption) Update(msg tea.Msg) (tea.Model, tea.Cmd) { //nolint: 
 		m.windowWidth = msg.Width
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "ctrl+c", "q", "esc":
+		case "ctrl+c", "esc":
+			m.cursor = -1
+			m.choice = ""
 			return m, tea.Quit
 
 		case "enter":
@@ -86,7 +88,7 @@ func (m modelChooseOption) View() string {
 		s.WriteString(m.choices[i])
 		s.WriteString("\n")
 	}
-	s.WriteString("\n(press q to quit)\n")
+	s.WriteString("\n(esc to go back)\n")
 
 	return wordwrap.String(s.String(), m.windowWidth)
 }
