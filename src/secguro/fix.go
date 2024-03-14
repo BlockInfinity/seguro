@@ -2,8 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
-	"os"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
@@ -169,28 +167,35 @@ func (m model) View() string {
 
 var actionPastFixSelection func() error = nil
 
+var showProblemsList func() error = nil
+
 func commandFix(gitMode bool, disabledDetectors []string) error {
 	unifiedFindingsNotIgnored, err := performScan(gitMode, disabledDetectors)
 	if err != nil {
 		return err
 	}
 
-	if _, err := tea.NewProgram(newModel(unifiedFindingsNotIgnored), tea.WithAltScreen()).Run(); err != nil {
-		fmt.Println("Error running program:", err)
-		os.Exit(1)
+	showProblemsList = func() error {
+		if _, err := tea.NewProgram(newModel(unifiedFindingsNotIgnored), tea.WithAltScreen()).Run(); err != nil {
+			return err
+		}
+
+		if actionPastFixSelection != nil {
+			actionToExecute := actionPastFixSelection
+			actionPastFixSelection = nil
+			return actionToExecute()
+		}
+
+		return nil
 	}
 
-	if actionPastFixSelection != nil {
-		return actionPastFixSelection()
-	}
-
-	return nil
+	return showProblemsList()
 }
 
-func fixUnifiedFinding(unifiedFinding UnifiedFinding) error {
+func fixUnifiedFinding(previousStep func() error, unifiedFinding UnifiedFinding) error {
 	switch unifiedFinding.Rule {
 	case "generic-api-key":
-		return fixSecret(unifiedFinding)
+		return fixSecret(previousStep, unifiedFinding)
 	default:
 		return errors.New("Fixing of selected finding not yet supported.")
 	}
