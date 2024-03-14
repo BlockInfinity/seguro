@@ -61,6 +61,7 @@ func performScan(gitMode bool, disabledDetectors []string) ([]UnifiedFinding, er
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("Scanning done")
 
 	unifiedFindingsNotIgnored, err := getFindingsNotIgnored(unifiedFindings)
 	if err != nil {
