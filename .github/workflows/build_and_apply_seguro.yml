@@ -17,7 +17,7 @@ jobs:
   build:
     name: Build and Apply Secguro Job
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40
     environment: default_environment
     steps:
     - uses: actions/checkout@v3
