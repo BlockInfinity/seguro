@@ -65,10 +65,6 @@ func main() { //nolint: funlen, cyclop
 			return errors.New("too many arguments")
 		}
 
-		if flagFormat != "text" && flagFormat != "json" {
-			return errors.New("unsupported value for --format")
-		}
-
 		if !arrayIncludes(flagDisabledDetectors, "dependencycheck") {
 			if os.Getenv(nvdApiKeyEnvVarName) == "" {
 				fmt.Printf("Disabling detector dependencycheck because "+
@@ -80,11 +76,14 @@ func main() { //nolint: funlen, cyclop
 			}
 		}
 
-		printAsJson := flagFormat == "json"
-
 		switch cCtx.Command.Name {
 		case "scan":
 			{
+				if flagFormat != "text" && flagFormat != "json" {
+					return errors.New("unsupported value for --format")
+				}
+				printAsJson := flagFormat == "json"
+
 				err := commandScan(flagGitMode, flagDisabledDetectors,
 					printAsJson, flagOutput, flagTolerance)
 				if err != nil {
