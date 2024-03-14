@@ -81,10 +81,6 @@ func newModel(unifiedFindingsNotIgnored []UnifiedFinding) model {
 
 	// Make initial list of items
 	items := MapWithIndex(unifiedFindingsNotIgnored, func(unifiedFinding UnifiedFinding, i int) list.Item {
-		// TODO: decide whether to support git mode (currently hard-coded to false in call to getFindingBody()).
-		// advantage: additional info possible
-		// disadvantage: need to handle highly dynamic list item height (currently, there only are list item
-		// descriptions of heights 4 and 5).
 		return item{
 			title:          getFindingTitle(i),
 			description:    getFindingBody(false, unifiedFinding),
