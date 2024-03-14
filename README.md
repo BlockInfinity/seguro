@@ -48,10 +48,10 @@ USAGE:
 
 OPTIONS:
    --git                                                      set to scan git history and print commit information (default: false)
+   --disabled-detectors value [ --disabled-detectors value ]  list of detectors to disable (semgrep,gitleaks,dependencycheck)
    --format value                                             text or json (default: "text")
    --output value, -o value                                   path to output destination
    --tolerance value                                          number of findings to tolerate when choosing exit code (default: 0)
-   --disabled-detectors value [ --disabled-detectors value ]  list of detectors to disable (semgrep,gitleaks,dependencycheck)
    --help, -h                                                 show help
 ```
 

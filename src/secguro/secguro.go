@@ -18,14 +18,23 @@ func main() { //nolint: funlen, cyclop
 	var flagTolerance int
 	var flagDisabledDetectors []string
 
-	// TODO: decide whether to support the same flags for "scan"
-	// and "fix" (e.g. "tolerance" might not be useful for "fix").
-	flags := []cli.Flag{
+	flagsAllModes := []cli.Flag{
 		&cli.BoolFlag{ //nolint: exhaustruct
 			Name:        "git",
 			Usage:       "set to scan git history and print commit information",
 			Destination: &flagGitMode,
 		},
+		&cli.MultiStringFlag{
+			Target: &cli.StringSliceFlag{ //nolint: exhaustruct
+				Name:  "disabled-detectors",
+				Usage: "list of detectors to disable (semgrep,gitleaks,dependencycheck)",
+			},
+			Value:       []string{},
+			Destination: &flagDisabledDetectors,
+		},
+	}
+
+	flagsOnlyScanMode := []cli.Flag{
 		&cli.StringFlag{ //nolint: exhaustruct
 			Name:        "format",
 			Value:       "text",
@@ -44,14 +53,6 @@ func main() { //nolint: funlen, cyclop
 			Value:       0,
 			Usage:       "number of findings to tolerate when choosing exit code",
 			Destination: &flagTolerance,
-		},
-		&cli.MultiStringFlag{
-			Target: &cli.StringSliceFlag{ //nolint: exhaustruct
-				Name:  "disabled-detectors",
-				Usage: "list of detectors to disable (semgrep,gitleaks,dependencycheck)",
-			},
-			Value:       []string{},
-			Destination: &flagDisabledDetectors,
 		},
 	}
 
@@ -111,13 +112,13 @@ func main() { //nolint: funlen, cyclop
 			{
 				Name:   "scan",
 				Usage:  "scan for problems",
-				Flags:  flags,
+				Flags:  append(append([]cli.Flag{}, flagsAllModes...), flagsOnlyScanMode...),
 				Action: action,
 			},
 			{
 				Name:   "fix",
 				Usage:  "scan for problems and then switch to an interactive mode to fix them",
-				Flags:  flags,
+				Flags:  flagsAllModes,
 				Action: action,
 			},
 		},
