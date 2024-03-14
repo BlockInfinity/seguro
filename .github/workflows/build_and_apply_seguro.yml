@@ -9,15 +9,12 @@ on:
       - 'master'
       - 'gh-pages'
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-
 jobs:
 
   build:
     name: Build and Apply Secguro Job
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 20
     environment: default_environment
     steps:
     - uses: actions/checkout@v3
@@ -39,4 +36,5 @@ jobs:
     - name: Test
       env:
         NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-      run: build/secguro scan
+      # Disable dependencycheck to prevent excessive load on NVD.
+      run: build/secguro scan --disabled-detectors dependencycheck
