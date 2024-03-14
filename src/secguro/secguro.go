@@ -92,8 +92,7 @@ func main() { //nolint: funlen, cyclop
 			}
 		case "fix":
 			{
-				err := commandFix(flagGitMode, flagDisabledDetectors,
-					printAsJson, flagOutput)
+				err := commandFix(flagGitMode, flagDisabledDetectors)
 				if err != nil {
 					return err
 				}
