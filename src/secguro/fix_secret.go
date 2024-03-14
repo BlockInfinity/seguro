@@ -23,7 +23,7 @@ func fixSecretStep1(previousStep func() error, unifiedFinding UnifiedFinding) er
 			return err
 		}
 		if goBack {
-			previousStep()
+			return previousStep()
 		}
 	}
 
