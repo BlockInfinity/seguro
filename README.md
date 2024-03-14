@@ -55,6 +55,20 @@ OPTIONS:
    --help, -h                                                 show help
 ```
 
+```
+$ secguro fix --help
+NAME:
+   secguro fix - scan for problems and then switch to an interactive mode to fix them
+
+USAGE:
+   secguro fix [command options] [arguments...]
+
+OPTIONS:
+   --git                                                      set to scan git history and print commit information (default: false)
+   --disabled-detectors value [ --disabled-detectors value ]  list of detectors to disable (semgrep,gitleaks,dependencycheck)
+   --help, -h                                                 show help
+```
+
 ## Deveploment
 - Go version: 1.21.7
 
