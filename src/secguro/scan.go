@@ -34,8 +34,12 @@ type UnifiedFinding struct {
 
 func commandScan(gitMode bool, disabledDetectors []string,
 	printAsJson bool, outputDestination string, tolerance int) error {
-	unifiedFindingsNotIgnored, err := performScan(gitMode, disabledDetectors,
-		printAsJson, outputDestination)
+	unifiedFindingsNotIgnored, err := performScan(gitMode, disabledDetectors)
+	if err != nil {
+		return err
+	}
+
+	err = writeOutput(gitMode, printAsJson, outputDestination, unifiedFindingsNotIgnored)
 	if err != nil {
 		return err
 	}
@@ -45,8 +49,7 @@ func commandScan(gitMode bool, disabledDetectors []string,
 	return nil
 }
 
-func performScan(gitMode bool, disabledDetectors []string,
-	printAsJson bool, outputDestination string) ([]UnifiedFinding, error) {
+func performScan(gitMode bool, disabledDetectors []string) ([]UnifiedFinding, error) {
 	fmt.Println("Downloading and extracting dependencies...")
 	err := installDependencies(disabledDetectors)
 	if err != nil {
@@ -60,11 +63,6 @@ func performScan(gitMode bool, disabledDetectors []string,
 	}
 
 	unifiedFindingsNotIgnored, err := getFindingsNotIgnored(unifiedFindings)
-	if err != nil {
-		return nil, err
-	}
-
-	err = writeOutput(gitMode, printAsJson, outputDestination, unifiedFindingsNotIgnored)
 	if err != nil {
 		return nil, err
 	}

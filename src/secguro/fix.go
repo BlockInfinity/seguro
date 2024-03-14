@@ -169,10 +169,8 @@ func (m model) View() string {
 
 var actionPastFixSelection func() error = nil
 
-func commandFix(gitMode bool, disabledDetectors []string,
-	printAsJson bool, outputDestination string) error {
-	unifiedFindingsNotIgnored, err := performScan(gitMode, disabledDetectors,
-		printAsJson, outputDestination)
+func commandFix(gitMode bool, disabledDetectors []string) error {
+	unifiedFindingsNotIgnored, err := performScan(gitMode, disabledDetectors)
 	if err != nil {
 		return err
 	}
