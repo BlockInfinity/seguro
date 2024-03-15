@@ -7,6 +7,9 @@ import (
 	"strings"
 )
 
+const ignoreFileName = ".secguroignore"
+const secretsIgnoreFileName = ignoreFileName + "-secrets"
+
 type IgnoreInstruction struct {
 	FilePath   string
 	LineNumber int      // -1 signifies ignoring all lines
@@ -78,7 +81,7 @@ func getNumbersOfMatchingLines(filePath string, pattern string) ([]int, error) {
 func getFileBasedIgnoreInstructions() ([]IgnoreInstruction, error) {
 	ignoreInstructions := make([]IgnoreInstruction, 0)
 
-	file, err := os.Open(directoryToScan + "/.secguroignore")
+	file, err := os.Open(directoryToScan + "/" + ignoreFileName)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return ignoreInstructions, nil
@@ -127,7 +130,7 @@ func getFileBasedIgnoreInstructions() ([]IgnoreInstruction, error) {
 func getIgnoredSecrets() ([]string, error) {
 	ignoredSecrets := make([]string, 0)
 
-	file, err := os.Open(directoryToScan + "/.secguroignore-secrets")
+	file, err := os.Open(directoryToScan + "/" + secretsIgnoreFileName)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return ignoredSecrets, nil

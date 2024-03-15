@@ -151,12 +151,12 @@ func getFindingsNotIgnored(unifiedFindings []UnifiedFinding) ([]UnifiedFinding, 
 		// a detector finds something in there in the future (does
 		// not currently appear to be the case).
 		{
-			FilePath:   "/.secguroignore",
+			FilePath:   "/" + ignoreFileName,
 			LineNumber: -1,
 			Rules:      make([]string, 0),
 		},
 		{
-			FilePath:   "/.secguroignore-secrets",
+			FilePath:   "/" + secretsIgnoreFileName,
 			LineNumber: -1,
 			Rules:      make([]string, 0),
 		},

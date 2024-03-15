@@ -70,7 +70,7 @@ func fixSecretStep2(previousStep func() error, secret string) error {
 
 func addSecretToIgnoreList(secret string) error {
 	const filePermissions = 0644
-	file, err := os.OpenFile(directoryToScan+"/.secguroignore-secrets",
+	file, err := os.OpenFile(directoryToScan+"/"+secretsIgnoreFileName,
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY, filePermissions)
 	if err != nil {
 		return err
