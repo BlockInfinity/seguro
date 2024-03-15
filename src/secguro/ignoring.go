@@ -78,7 +78,7 @@ func getNumbersOfMatchingLines(filePath string, pattern string) ([]int, error) {
 func getFileBasedIgnoreInstructions() ([]IgnoreInstruction, error) {
 	ignoreInstructions := make([]IgnoreInstruction, 0)
 
-	file, err := os.Open(".secguroignore")
+	file, err := os.Open(directoryToScan + "/.secguroignore")
 	if err != nil {
 		if os.IsNotExist(err) {
 			return ignoreInstructions, nil
