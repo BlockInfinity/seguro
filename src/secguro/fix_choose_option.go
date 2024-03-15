@@ -8,9 +8,9 @@ import (
 	"github.com/muesli/reflow/wordwrap"
 )
 
-func getOptionChoice(prompt string, choices []string) (int, string, error) {
+func getOptionChoice(prompt string, choices []string) (int, error) {
 	if len(choices) == 0 {
-		return 0, "", errors.New("empty array given for choices")
+		return 0, errors.New("empty array given for choices")
 	}
 
 	p := tea.NewProgram(initialModelChooseOption(prompt, choices), tea.WithAltScreen())
@@ -18,15 +18,15 @@ func getOptionChoice(prompt string, choices []string) (int, string, error) {
 	// Run returns the model as a tea.Model.
 	m, err := p.Run()
 	if err != nil {
-		return 0, "", err
+		return 0, err
 	}
 
 	// Assert the final tea.Model to the local model and return the final state.
 	if m, ok := m.(modelChooseOption); ok && m.choice != "" {
-		return m.cursor, m.choice, nil
+		return m.cursor, nil
 	}
 
-	return 0, "", errors.New("option chooser terminated with error due to failed " +
+	return 0, errors.New("option chooser terminated with error due to failed " +
 		"type assertion or choice being the empty string")
 }
 

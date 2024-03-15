@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	appStyle = lipgloss.NewStyle().Padding(1, 2) //nolint: gomnd
+	appStyle = lipgloss.NewStyle().Padding(1, 2)
 
 	titleStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#FFFDF5")).
