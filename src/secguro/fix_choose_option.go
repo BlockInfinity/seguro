@@ -22,7 +22,7 @@ func getOptionChoice(prompt string, choices []string) (int, error) {
 	}
 
 	// Assert the final tea.Model to the local model and return the final state.
-	if m, ok := m.(modelChooseOption); ok && m.cursor >= 0 {
+	if m, ok := m.(modelChooseOption); ok {
 		return m.cursor, nil
 	}
 
