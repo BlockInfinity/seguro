@@ -146,7 +146,21 @@ func getFindingsNotIgnored(unifiedFindings []UnifiedFinding) ([]UnifiedFinding, 
 		return make([]UnifiedFinding, 0), err
 	}
 
-	ignoreInstructions := []IgnoreInstruction{}
+	ignoreInstructions := []IgnoreInstruction{
+		// Ignore .secguroignore and .secguroignore-secrets in case
+		// a detector finds something in there in the future (does
+		// not currently appear to be the case).
+		{
+			FilePath:   "/.secguroignore",
+			LineNumber: -1,
+			Rules:      make([]string, 0),
+		},
+		{
+			FilePath:   "/.secguroignore-secrets",
+			LineNumber: -1,
+			Rules:      make([]string, 0),
+		},
+	}
 	ignoreInstructions = append(ignoreInstructions, lineBasedIgnoreInstructions...)
 	ignoreInstructions = append(ignoreInstructions, fileBasedIgnoreInstructions...)
 
