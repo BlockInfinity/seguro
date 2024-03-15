@@ -22,7 +22,7 @@ func getOptionChoice(prompt string, choices []string) (int, error) {
 	}
 
 	// Assert the final tea.Model to the local model and return the final state.
-	if m, ok := m.(modelChooseOption); ok && m.choice != "" {
+	if m, ok := m.(modelChooseOption); ok && m.cursor >= 0 {
 		return m.cursor, nil
 	}
 
@@ -35,7 +35,6 @@ type modelChooseOption struct {
 	prompt      string
 	choices     []string
 	cursor      int
-	choice      string
 }
 
 func (m modelChooseOption) Init() tea.Cmd {
@@ -50,12 +49,9 @@ func (m modelChooseOption) Update(msg tea.Msg) (tea.Model, tea.Cmd) { //nolint: 
 		switch msg.String() {
 		case "ctrl+c", "esc":
 			m.cursor = -1
-			m.choice = ""
 			return m, tea.Quit
 
 		case "enter":
-			// Send the choice on the channel and exit.
-			m.choice = m.choices[m.cursor]
 			return m, tea.Quit
 
 		case "down", "j":
@@ -99,6 +95,5 @@ func initialModelChooseOption(prompt string, choices []string) modelChooseOption
 		prompt:      prompt,
 		choices:     choices,
 		cursor:      0,
-		choice:      choices[0],
 	}
 }
