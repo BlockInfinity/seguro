@@ -27,7 +27,7 @@ func getOptionChoice(prompt string, choices []string) (int, error) {
 	}
 
 	return 0, errors.New("option chooser terminated with error due to failed " +
-		"type assertion or choice being the empty string")
+		"type assertion")
 }
 
 type modelChooseOption struct {
