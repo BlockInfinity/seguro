@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	appStyle = lipgloss.NewStyle().Padding(1, 2) //nolint: gomnd
+	appStyle = lipgloss.NewStyle().Padding(1, 2)
 
 	titleStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#FFFDF5")).
@@ -193,10 +193,9 @@ func commandFix(gitMode bool, disabledDetectors []string) error {
 }
 
 func fixUnifiedFinding(previousStep func() error, unifiedFinding UnifiedFinding) error {
-	switch unifiedFinding.Rule {
-	case "generic-api-key":
+	if isSecretDetectionRule(unifiedFinding.Rule) {
 		return fixSecret(previousStep, unifiedFinding)
-	default:
-		return errors.New("Fixing of selected finding not yet supported.")
 	}
+
+	return errors.New("Fixing of selected finding not yet supported.")
 }

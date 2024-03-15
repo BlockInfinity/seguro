@@ -98,3 +98,7 @@ linters-settings:
     initialisms: [""]
   varnamelen:
     max-distance: 16
+  gomnd:
+    ignored-numbers:
+      - 2
+      - 3

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 )
@@ -31,6 +32,61 @@ func fixSecretStep1(previousStep func() error, unifiedFinding UnifiedFinding) er
 }
 
 func fixSecretStep2(previousStep func() error, secret string) error {
+	prompt := "Secret: " + secret +
+		"\n\n" +
+		"If you can change or invalidate this secret, we recommend that you " +
+		"do so and add it to the ignore list. If not, the git history needs " +
+		"to be re-written to remove the secret from it. In this case, please " +
+		"take the necessary precautions: \n" +
+		"• make sure that the latest revision does not contain the secret anymore\n" +
+		"• make sure that your production deployment as well as your CI can access the secret through other means\n" +
+		"• merge all pull requests\n" +
+		"• merge all local branches\n" +
+		"• make sure that your team members merge all of their local branches\n" +
+		"• make sure that you and your team members all pull and are on the same revision" +
+		"\n\n" +
+		"After the secret has been removed from the git history, you will need to force-push " +
+		"and your team members will need to force-pull."
+
+	choices := []string{"back", "Add secret to ignore list.", "Remove secret from git history."}
+	choiceIndex, err := getOptionChoice(prompt, choices)
+	if err != nil {
+		return err
+	}
+	if choiceIndex == -1 || choiceIndex == 0 {
+		return previousStep()
+	}
+
+	if choiceIndex == 1 {
+		return addSecretToIgnoreList(secret)
+	}
+
+	if choiceIndex == 2 {
+		return fixSecretStepB3(func() error { return fixSecretStep2(previousStep, secret) }, secret)
+	}
+
+	return errors.New("unexpected choice index")
+}
+
+func addSecretToIgnoreList(secret string) error {
+	const filePermissions = 0644
+	file, err := os.OpenFile(directoryToScan+"/.secguroignore-secrets",
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, filePermissions)
+	if err != nil {
+		return err
+	}
+	if _, err := file.WriteString("\n" + secret); err != nil {
+		file.Close() // ignore error; Write error takes precedence
+		return err
+	}
+	if err := file.Close(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func fixSecretStepB3(previousStep func() error, secret string) error {
 	for {
 		searchResult, err := findStringInGitIndex(secret)
 		if err != nil {
@@ -56,7 +112,7 @@ func fixSecretStep2(previousStep func() error, secret string) error {
 			"We found the secret in:\n" +
 			searchResult
 		choices := []string{"back", "I have removed the secret from the latest commit."}
-		choiceIndex, _, err := getOptionChoice(prompt, choices)
+		choiceIndex, err := getOptionChoice(prompt, choices)
 		if err != nil {
 			return err
 		}
