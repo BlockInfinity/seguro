@@ -123,3 +123,38 @@ func getFileBasedIgnoreInstructions() ([]IgnoreInstruction, error) {
 
 	return ignoreInstructions, nil
 }
+
+func getIgnoredSecrets() ([]string, error) {
+	ignoredSecrets := make([]string, 0)
+
+	file, err := os.Open(directoryToScan + "/.secguroignore-secrets")
+	if err != nil {
+		if os.IsNotExist(err) {
+			return ignoredSecrets, nil
+		}
+
+		return nil, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+
+		if strings.HasPrefix(line, "#") {
+			continue
+		}
+
+		if line == "" {
+			continue
+		}
+
+		ignoredSecrets = append(ignoredSecrets, line)
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return ignoredSecrets, nil
+}

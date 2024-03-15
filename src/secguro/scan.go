@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	ignore "github.com/sabhiram/go-gitignore"
 )
@@ -138,7 +139,7 @@ func getUnifiedFindings(gitMode bool, disabledDetectors []string) ([]UnifiedFind
 	return unifiedFindings, nil
 }
 
-func getFindingsNotIgnored(unifiedFindings []UnifiedFinding) ([]UnifiedFinding, error) {
+func getFindingsNotIgnored(unifiedFindings []UnifiedFinding) ([]UnifiedFinding, error) { //nolint: cyclop
 	lineBasedIgnoreInstructions := getLineBasedIgnoreInstructions(unifiedFindings)
 	fileBasedIgnoreInstructions, err := getFileBasedIgnoreInstructions()
 	if err != nil {
@@ -149,12 +150,29 @@ func getFindingsNotIgnored(unifiedFindings []UnifiedFinding) ([]UnifiedFinding, 
 	ignoreInstructions = append(ignoreInstructions, lineBasedIgnoreInstructions...)
 	ignoreInstructions = append(ignoreInstructions, fileBasedIgnoreInstructions...)
 
+	ignoredSecrets, err := getIgnoredSecrets()
+	if err != nil {
+		return make([]UnifiedFinding, 0), err
+	}
+
 	unifiedFindingsNotIgnored := Filter(unifiedFindings, func(unifiedFinding UnifiedFinding) bool {
+		// Filter findings based on rules ignored for specific paths as well as on specific lines.
 		for _, ii := range ignoreInstructions {
 			gitIgnoreMatcher := ignore.CompileIgnoreLines(ii.FilePath)
 			if gitIgnoreMatcher.MatchesPath(unifiedFinding.File) &&
 				(ii.LineNumber == unifiedFinding.LineStart || ii.LineNumber == -1) &&
 				(len(ii.Rules) == 0 || arrayIncludes(ii.Rules, unifiedFinding.Rule)) {
+				return false
+			}
+		}
+
+		// Filter findings based on ignored secrets
+		for _, ignoredSecret := range ignoredSecrets {
+			if !isSecretDetectionRule(unifiedFinding.Rule) {
+				continue
+			}
+
+			if strings.Contains(unifiedFinding.Match, ignoredSecret) {
 				return false
 			}
 		}
