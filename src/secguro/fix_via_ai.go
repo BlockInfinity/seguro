@@ -96,7 +96,7 @@ func getFixedFileContentFromChatGpt(fileContent string, problemLineNumber int, h
 						"Just provide the corrected code nicely formatted without any further explanation.\n" +
 						"Do not remove comments.\n" +
 						"Do not remove unnecessary whitespace.\n" +
-						"Under all circumstances make sure you do not introduce any other security vulnerability.",
+						"Under all circumstances make sure that you do not introduce any new security vulnerability.\n",
 				},
 			},
 		},
