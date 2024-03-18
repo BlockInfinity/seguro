@@ -7,8 +7,10 @@ require (
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/charmbracelet/lipgloss v0.10.0
 	github.com/codeclysm/extract/v3 v3.1.1
+	github.com/hexops/gotextdiff v1.0.3
 	github.com/muesli/reflow v0.3.0
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
+	github.com/sashabaranov/go-openai v1.20.4
 	github.com/urfave/cli/v2 v2.27.1
 )
 

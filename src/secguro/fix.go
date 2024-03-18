@@ -1,8 +1,6 @@
 package main
 
 import (
-	"errors"
-
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -197,5 +195,5 @@ func fixUnifiedFinding(previousStep func() error, unifiedFinding UnifiedFinding)
 		return fixSecret(previousStep, unifiedFinding)
 	}
 
-	return errors.New("Fixing of selected finding not yet supported.")
+	return fixProblemViaAi(previousStep, unifiedFinding)
 }
