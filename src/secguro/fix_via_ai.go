@@ -107,7 +107,8 @@ func getFixedFileContentFromChatGpt(fileContent string, problemLineNumber int, h
 
 	fmt.Println("Received fix suggestion")
 
-	newFileContent := resp.Choices[0].Message.Content
+	newFileContent := assimilateEnding(fileContent,
+		removeCodeBlockBackticksIfAny(resp.Choices[0].Message.Content))
 
 	return newFileContent, nil
 }
@@ -129,4 +130,27 @@ func replaceFileContents(filePath string, newFileContent string) error {
 	_, err = file.WriteString(newFileContent)
 
 	return err
+}
+
+func removeCodeBlockBackticksIfAny(s string) string {
+	if len(s) >= 6 && s[0:3] == "```" && s[len(s)-3:] == "```" {
+		return s[3 : len(s)-3]
+	}
+
+	return s
+}
+
+func assimilateEnding(sample string, s string) string {
+	sampleEndsInLinefeed := sample[len(sample)-1:] == "\n"
+	sEndsInLinefeed := s[len(s)-1:] == "\n"
+
+	if sampleEndsInLinefeed == sEndsInLinefeed {
+		return s
+	}
+
+	if sampleEndsInLinefeed {
+		return s + "\n"
+	}
+
+	return s[0 : len(s)-1]
 }
