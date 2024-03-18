@@ -55,6 +55,8 @@ func fixProblemViaAiStep2(previousStep func() error, retry func() error,
 			return err
 		}
 		fmt.Println("Appplied fix")
+
+		return nil
 	}
 
 	return errors.New("unexpected choice index")
