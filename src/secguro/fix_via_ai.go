@@ -117,7 +117,6 @@ func getFixedFileContentFromChatGpt(fileContent string, problemLineNumber int, h
 
 func getDiff(contentBefore string, contentAfter string) string {
 	dmp := diffmatchpatch.New()
-	dmp.PatchMargin = 5
 	diff := dmp.DiffMain(contentBefore, contentAfter, false)
 	hunks := getDiffHunks(diff)
 
