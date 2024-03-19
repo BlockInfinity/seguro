@@ -123,7 +123,7 @@ func getDiff(contentBefore string, contentAfter string) string {
 	diffFormatted := ""
 	for i, hunk := range hunks {
 		if i != 0 {
-			diffFormatted += "-----\n"
+			diffFormatted += changeColor(Cyan) + "-----" + changeColor(NoColor) + "\n"
 		}
 
 		diffFormatted += dmp.DiffPrettyText(hunk)
