@@ -6,11 +6,10 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"strings"
 
-	"github.com/hexops/gotextdiff"
-	"github.com/hexops/gotextdiff/myers"
-	"github.com/hexops/gotextdiff/span"
 	openai "github.com/sashabaranov/go-openai"
+	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
 const openAiApiKeyEnvVarName = "OPEN_AI_API_KEY"
@@ -117,9 +116,87 @@ func getFixedFileContentFromChatGpt(fileContent string, problemLineNumber int, h
 }
 
 func getDiff(contentBefore string, contentAfter string) string {
-	edits := myers.ComputeEdits(span.URIFromPath("before"), contentBefore, contentAfter)
-	diff := fmt.Sprint(gotextdiff.ToUnified("before", "after", contentBefore, edits))
-	return diff
+	dmp := diffmatchpatch.New()
+	dmp.PatchMargin = 5
+	diff := dmp.DiffMain(contentBefore, contentAfter, false)
+	hunks := getDiffHunks(diff)
+
+	diffFormatted := ""
+	for i, hunk := range hunks {
+		if i != 0 {
+			diffFormatted += "-----\n"
+		}
+
+		diffFormatted += dmp.DiffPrettyText(hunk)
+	}
+
+	return diffFormatted
+}
+
+func getDiffHunks(diff []diffmatchpatch.Diff) [][]diffmatchpatch.Diff {
+	const contextSize = 4
+
+	diffSplitByLines := getDiffSplitByLines(diff)
+
+	result := make([][]diffmatchpatch.Diff, 0)
+
+	// when currentHunk is nil, the loop is in skip mode
+	var currentHunk []diffmatchpatch.Diff = nil //nolint: prealloc
+
+	availableContext := contextSize
+	for diffLineIndex, diffLine := range diffSplitByLines {
+		skipMode := currentHunk == nil
+
+		if skipMode {
+			if diffLine.Type == diffmatchpatch.DiffEqual {
+				continue
+			} else {
+				// exit skip mode and fill current hunk with context
+				currentHunk = make([]diffmatchpatch.Diff, 0)
+				for i := max(0, diffLineIndex-contextSize-1); i < diffLineIndex; i++ {
+					currentHunk = append(currentHunk, diffSplitByLines[i])
+				}
+			}
+		}
+
+		if diffLine.Type == diffmatchpatch.DiffEqual {
+			availableContext--
+		} else {
+			availableContext = contextSize
+		}
+
+		currentHunk = append(currentHunk, diffLine)
+
+		if availableContext == 0 || diffLineIndex == len(diffSplitByLines)-1 {
+			result = append(result, currentHunk)
+			currentHunk = nil
+		}
+	}
+
+	return result
+}
+
+func getDiffSplitByLines(diff []diffmatchpatch.Diff) []diffmatchpatch.Diff {
+	result := make([]diffmatchpatch.Diff, 0)
+
+	for _, diffEntry := range diff {
+		textFragments := strings.Split(diffEntry.Text, "\n")
+		for i, textFragment := range textFragments {
+			completeTextFragment := textFragment
+			if i != len(textFragments)-1 {
+				completeTextFragment += "\n"
+			}
+
+			diffFragment := diffmatchpatch.Diff{
+				Type: diffEntry.Type,
+				Text: completeTextFragment,
+			}
+
+			result = append(result, diffFragment)
+		}
+	}
+
+	return result
 }
 
 func replaceFileContents(filePath string, newFileContent string) error {
