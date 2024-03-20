@@ -34,8 +34,35 @@ func fixSecretStep1(previousStep func() error, unifiedFinding UnifiedFinding) er
 func fixSecretStep2(previousStep func() error, secret string) error {
 	prompt := "Secret: " + secret +
 		"\n\n" +
-		"If you can change or invalidate this secret, we recommend that you " +
-		"do so and add it to the ignore list. If not, the git history needs " +
+		"Replace how you access this secret now." +
+		"\n\n" +
+		"You may use environmnt variables to insert secrets into your " +
+		"program. Make sure that your secrets are also available in any " +
+		"CI tools you are using, as well as your production and CD environments. " +
+		"Check out: https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions" +
+		"\n\n" +
+		"If you can change or invalidate this secret, we recommend that you do so."
+
+	choices := []string{"back", "continue"}
+	choiceIndex, err := getOptionChoice(prompt, choices)
+	if err != nil {
+		return err
+	}
+	if choiceIndex == -1 || choiceIndex == 0 {
+		return previousStep()
+	}
+
+	if choiceIndex == 1 {
+		return fixSecretStep3(func() error { return fixSecretStep2(previousStep, secret) }, secret)
+	}
+
+	return errors.New("unexpected choice index")
+}
+
+func fixSecretStep3(previousStep func() error, secret string) error {
+	prompt := "Secret: " + secret +
+		"\n\n" +
+		"If you were not able to invalidate the secret, the git history needs " +
 		"to be re-written to remove the secret from it. In this case, please " +
 		"take the necessary precautions: \n" +
 		"• make sure that the latest revision does not contain the secret anymore\n" +
@@ -48,7 +75,12 @@ func fixSecretStep2(previousStep func() error, secret string) error {
 		"After the secret has been removed from the git history, you will need to force-push " +
 		"and your team members will need to force-pull."
 
-	choices := []string{"back", "Add secret to ignore list.", "Remove secret from git history."}
+	choices := []string{
+		"back",
+		"This secret is not valid anymore. Do not detect it in the future.",
+		"Remove the secret from the git history. (Avoids future detection too.)",
+		"Do nothing.",
+	}
 	choiceIndex, err := getOptionChoice(prompt, choices)
 	if err != nil {
 		return err
@@ -62,7 +94,11 @@ func fixSecretStep2(previousStep func() error, secret string) error {
 	}
 
 	if choiceIndex == 2 {
-		return fixSecretStepB3(func() error { return fixSecretStep2(previousStep, secret) }, secret)
+		return fixSecretStepB3(func() error { return fixSecretStep3(previousStep, secret) }, secret)
+	}
+
+	if choiceIndex == 3 {
+		return nil
 	}
 
 	return errors.New("unexpected choice index")
@@ -104,11 +140,7 @@ func fixSecretStepB3(previousStep func() error, secret string) error {
 			"code keeps working. The file system state of your latest commit " +
 			"will never be modified by secguro when deleting secrets." +
 			"\n\n" +
-			"You may use environmnt variables to insert secrets into your " +
-			"program. Make sure that your secrets are also available in any " +
-			"CI tools you are using, as well as your production and CD environments. " +
-			"Check out: https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions" +
-			"\n\n" +
+
 			"We found the secret in:\n" +
 			searchResult
 		choices := []string{"back", "I have removed the secret from the latest commit."}
