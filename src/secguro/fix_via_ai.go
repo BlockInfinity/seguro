@@ -212,8 +212,8 @@ func replaceFileContents(filePath string, newFileContent string) error {
 }
 
 func removeCodeBlockBackticksIfAny(s string) string {
-	if len(s) >= 6 && s[0:3] == "```" && s[len(s)-3:] == "```" {
-		return s[3 : len(s)-3]
+	if len(s) >= 7 && s[0:4] == "```\n" && s[len(s)-3:] == "```" {
+		return s[4 : len(s)-3]
 	}
 
 	return s
