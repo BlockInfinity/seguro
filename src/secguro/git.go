@@ -18,8 +18,14 @@ func getGitInfo(filePath string, lineNumber int, gitMode bool) (*GitInfo, error)
 	}
 
 	gitBlameOutput, err := getGitBlameOutput(filePath, lineNumber)
+
+	// If the file is not tracked with git, getGitBlameOutput() returns an error
+	// because `git blame` exits with exit code 128. However, this behavior does
+	// not seem to be documented. Therefore, the exit code is not checked here.
+	// Instead, failure of `git blame` is assumed to always mean that the file
+	// is not tracked with git.
 	if err != nil {
-		return nil, err
+		return nil, nil //nolint: nilnil, nilerr
 	}
 
 	gitInfo, err := parseGitBlameOutput(gitBlameOutput)
