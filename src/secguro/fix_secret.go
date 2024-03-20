@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 )
@@ -105,6 +106,8 @@ func fixSecretStep3(previousStep func() error, secret string) error {
 }
 
 func addSecretToIgnoreList(secret string) error {
+	fmt.Print("Adding secret to ignore list...")
+
 	const filePermissions = 0644
 	file, err := os.OpenFile(directoryToScan+"/"+secretsIgnoreFileName,
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY, filePermissions)
@@ -118,6 +121,8 @@ func addSecretToIgnoreList(secret string) error {
 	if err := file.Close(); err != nil {
 		return err
 	}
+
+	fmt.Println("done")
 
 	return nil
 }
