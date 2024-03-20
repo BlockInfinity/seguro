@@ -48,12 +48,12 @@ func fixProblemViaAiStep2(previousStep func() error, retry func() error,
 	}
 
 	if choiceIndex == 2 {
-		fmt.Println("Applying fix...")
+		fmt.Print("Applying fix...")
 		err := replaceFileContents(filePath, newFileContent)
 		if err != nil {
 			return err
 		}
-		fmt.Println("Appplied fix")
+		fmt.Println("done")
 
 		return nil
 	}
@@ -81,7 +81,7 @@ func getFixedFileContentAndDiff(unifiedFinding UnifiedFinding) (string, string, 
 }
 
 func getFixedFileContentFromChatGpt(fileContent string, problemLineNumber int, hint string) (string, error) {
-	fmt.Println("Requesting fix suggestion...")
+	fmt.Print("Requesting fix suggestion...")
 
 	client := openai.NewClient(os.Getenv(openAiApiKeyEnvVarName))
 	resp, err := client.CreateChatCompletion(
@@ -107,7 +107,7 @@ func getFixedFileContentFromChatGpt(fileContent string, problemLineNumber int, h
 		return "", err
 	}
 
-	fmt.Println("Received fix suggestion")
+	fmt.Println("done")
 
 	newFileContent := assimilateEnding(fileContent,
 		removeCodeBlockBackticksIfAny(resp.Choices[0].Message.Content))

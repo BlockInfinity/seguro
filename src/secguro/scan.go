@@ -51,18 +51,19 @@ func commandScan(gitMode bool, disabledDetectors []string,
 }
 
 func performScan(gitMode bool, disabledDetectors []string) ([]UnifiedFinding, error) {
-	fmt.Println("Downloading and extracting dependencies...")
+	fmt.Print("Downloading and extracting dependencies...")
 	err := installDependencies(disabledDetectors)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("done")
 
-	fmt.Println("Scanning...")
+	fmt.Print("Scanning...")
 	unifiedFindings, err := getUnifiedFindings(gitMode, disabledDetectors)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("Scanning done")
+	fmt.Println("done")
 
 	unifiedFindingsNotIgnored, err := getFindingsNotIgnored(unifiedFindings)
 	if err != nil {
