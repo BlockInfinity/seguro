@@ -106,7 +106,7 @@ func fixSecretStepB3(previousStep func() error, secret string) error {
 			"\n\n" +
 			"You may use environmnt variables to insert secrets into your " +
 			"program. Make sure that your secrets are also available in any " +
-			"CI tools you are using, as well as your production and CD environments." +
+			"CI tools you are using, as well as your production and CD environments. " +
 			"Check out: https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions" +
 			"\n\n" +
 			"We found the secret in:\n" +
