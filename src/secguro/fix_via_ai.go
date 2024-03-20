@@ -81,7 +81,7 @@ func getFixedFileContentAndDiff(unifiedFinding UnifiedFinding) (string, string, 
 }
 
 func getFixedFileContentFromChatGpt(fileContent string, problemLineNumber int, hint string) (string, error) {
-	fmt.Println("Requesting fix suggestion from ChatGPT...")
+	fmt.Println("Requesting fix suggestion...")
 
 	client := openai.NewClient(os.Getenv(openAiApiKeyEnvVarName))
 	resp, err := client.CreateChatCompletion(
