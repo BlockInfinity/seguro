@@ -85,7 +85,12 @@ func parseGitBlameOutput(gitBlameOutput []byte) (GitInfo, error) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		return GitInfo{}, err
+		// Ignore this error because it can only happen with the last line of the output
+		// (the line git blame was called on) as the others are always short enough.
+		// This line is not used by this function.
+		if err.Error() != "bufio.Scanner: token too long" {
+			return GitInfo{}, err
+		}
 	}
 
 	return gitInfo, nil
