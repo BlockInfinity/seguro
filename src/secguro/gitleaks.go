@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 )
 
@@ -90,8 +91,17 @@ func getGitleaksFindingsAsUnified(gitMode bool) ([]UnifiedFinding, error) {
 }
 
 func downloadAndExtractGitleaks() error {
-	err := downloadDependency("gitleaks", "tar.gz",
-		"https://github.com/gitleaks/gitleaks/releases/download/v8.18.2/gitleaks_8.18.2_linux_x64.tar.gz")
+	var url string
+	switch runtime.GOOS {
+	case "linux":
+		url = "https://github.com/gitleaks/gitleaks/releases/download/v8.18.2/gitleaks_8.18.2_linux_x64.tar.gz"
+	case "darwin":
+		url = "https://github.com/gitleaks/gitleaks/releases/download/v8.18.2/gitleaks_8.18.2_darwin_arm64.tar.gz"
+	default:
+		return errors.New("Unsupported platform")
+	}
+
+	err := downloadDependency("gitleaks", "tar.gz", url)
 	if err != nil {
 		return err
 	}
