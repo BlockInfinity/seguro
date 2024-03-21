@@ -83,6 +83,7 @@ OPTIONS:
    --help, -h                                                 show help
 ```
 
+### Development
 ### Linter
 - Installation: `yay -S golangci-lint` or https://golangci-lint.run/usage/install/#local-installation
 - Manual invocation: `make lint`
