@@ -1,3 +1,17 @@
+## Prerequisites
+### Operating System and Architecture
+Either:
+- GNU/Linux AMD64
+- Darwin ARM64
+
+### Dependencies for Use
+- Python 3 + pipx
+- Java 8 or above; If Java 8, update version must be 251 or above
+
+### Dependencies for Development
+- [Dependencies for use](#dependencies-for-use)
+- Go version 1.21.7
+
 ## Installation
 - Download: `wget 'https://secguro.github.io/secguro-cli/secguro'`
 - Make executable: `chmod +x secguro`
@@ -68,9 +82,6 @@ OPTIONS:
    --disabled-detectors value [ --disabled-detectors value ]  list of detectors to disable (semgrep,gitleaks,dependencycheck)
    --help, -h                                                 show help
 ```
-
-## Deveploment
-- Go version: 1.21.7
 
 ### Linter
 - Installation: `yay -S golangci-lint` or https://golangci-lint.run/usage/install/#local-installation
