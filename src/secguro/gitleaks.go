@@ -40,14 +40,21 @@ func convertGitleaksFindingToUnifiedFinding(gitMode bool,
 	unifiedFinding := UnifiedFinding{
 		Detector:    "gitleaks",
 		Rule:        gitleaksFinding.RuleID,
-		File:        currentLocationGitInfo.File,
-		LineStart:   currentLocationGitInfo.Line,
-		LineEnd:     currentLocationGitInfo.Line + gitleaksFinding.EndLine - gitleaksFinding.StartLine,
+		File:        gitleaksFinding.File,
+		LineStart:   gitleaksFinding.StartLine,
+		LineEnd:     gitleaksFinding.EndLine,
 		ColumnStart: gitleaksFinding.StartColumn,
 		ColumnEnd:   gitleaksFinding.EndColumn,
 		Match:       gitleaksFinding.Match,
 		Hint:        "",
 		GitInfo:     gitInfo,
+	}
+
+	if currentLocationGitInfo != nil {
+		unifiedFinding.File = currentLocationGitInfo.File
+		unifiedFinding.LineStart = currentLocationGitInfo.Line
+		unifiedFinding.LineEnd =
+			currentLocationGitInfo.Line + gitleaksFinding.EndLine - gitleaksFinding.StartLine
 	}
 
 	return unifiedFinding, nil
