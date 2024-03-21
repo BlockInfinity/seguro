@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os/exec"
 	"strconv"
@@ -40,21 +41,21 @@ func getGitInfo(gitMode bool, revision string,
 func getGitBlameOutput(revision string, filePath string, lineNumber int, reverse bool) ([]byte, error) {
 	lineRange := fmt.Sprintf("%d,%d", lineNumber, lineNumber)
 	// TODO: refactor to deduplicate and eliminate linting exception
-	cmd := (func() *exec.Cmd {
-		if revision == "" { //nolint: nestif
-			if reverse {
-				return exec.Command("git", "blame", "-L", lineRange, "--reverse", "-p", "--", filePath)
-			} else {
-				return exec.Command("git", "blame", "-L", lineRange, "-p", "--", filePath)
-			}
+	var cmd *exec.Cmd
+	if revision == "" { //nolint: nestif
+		if reverse {
+			return make([]byte, 0), errors.New(
+				"git blame in reverse does not make sense without a given revision")
 		} else {
-			if reverse {
-				return exec.Command("git", "blame", "-L", lineRange, "--reverse", "-p", revision, "--", filePath)
-			} else {
-				return exec.Command("git", "blame", "-L", lineRange, "-p", revision, "--", filePath)
-			}
+			cmd = exec.Command("git", "blame", "-p", "-L", lineRange, "--", filePath)
 		}
-	})()
+	} else {
+		if reverse {
+			cmd = exec.Command("git", "blame", "-p", "-L", lineRange, "--reverse", revision+"..HEAD", "--", filePath)
+		} else {
+			cmd = exec.Command("git", "blame", "-p", "-L", lineRange, revision, "--", filePath)
+		}
+	}
 
 	cmd.Dir = directoryToScan
 	gitBlameOutput, err := cmd.Output()
