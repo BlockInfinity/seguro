@@ -99,6 +99,10 @@ func getFindingBody(gitMode bool, unifiedFinding UnifiedFinding) string {
 }
 
 func getLocation(path string, line int, column int) string {
+	if path == "" {
+		return "\033[3m(does not exist)\033[0m\n"
+	}
+
 	if line != -1 && column != -1 {
 		return fmt.Sprintf("%v:%v:%v\n", path, line, column)
 	} else {
