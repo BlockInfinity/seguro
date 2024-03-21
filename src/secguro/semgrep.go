@@ -29,8 +29,8 @@ type SemgrepFinding_extra struct {
 	Message string
 }
 
-func convertSemgrepFindingToUnifiedFinding(semgrepFinding SemgrepFinding, gitMode bool) (UnifiedFinding, error) {
-	gitInfo, err := getGitInfo(semgrepFinding.Path, semgrepFinding.Start.Line, gitMode)
+func convertSemgrepFindingToUnifiedFinding(gitMode bool, semgrepFinding SemgrepFinding) (UnifiedFinding, error) {
+	gitInfo, err := getGitInfo(gitMode, "", semgrepFinding.Path, semgrepFinding.Start.Line, false)
 	if err != nil {
 		return UnifiedFinding{}, err
 	}
@@ -83,7 +83,7 @@ func getSemgrepFindingsAsUnified(gitMode bool) ([]UnifiedFinding, error) {
 
 	unifiedFindings, err := MapWithError(semgrepFindings,
 		func(semgrepFinding SemgrepFinding) (UnifiedFinding, error) {
-			return convertSemgrepFindingToUnifiedFinding(semgrepFinding, gitMode)
+			return convertSemgrepFindingToUnifiedFinding(gitMode, semgrepFinding)
 		})
 	if err != nil {
 		return make([]UnifiedFinding, 0), err
