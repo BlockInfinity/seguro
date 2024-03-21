@@ -30,7 +30,7 @@ type SemgrepFinding_extra struct {
 }
 
 func convertSemgrepFindingToUnifiedFinding(gitMode bool, semgrepFinding SemgrepFinding) (UnifiedFinding, error) {
-	gitInfo, err := getGitInfo(gitMode, "", semgrepFinding.Path, semgrepFinding.Start.Line)
+	gitInfo, err := getGitInfo(gitMode, "", semgrepFinding.Path, semgrepFinding.Start.Line, false)
 	if err != nil {
 		return UnifiedFinding{}, err
 	}

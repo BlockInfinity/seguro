@@ -16,6 +16,8 @@ type GitInfo struct {
 	AuthorName         string
 	AuthorEmailAddress string
 	CommitSummary      string
+	File               string
+	Line               int
 }
 
 // The attributes need to start with capital letter because

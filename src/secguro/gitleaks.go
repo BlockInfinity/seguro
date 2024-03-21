@@ -25,7 +25,14 @@ type GitleaksFinding struct {
 
 func convertGitleaksFindingToUnifiedFinding(gitMode bool,
 	gitleaksFinding GitleaksFinding) (UnifiedFinding, error) {
-	gitInfo, err := getGitInfo(gitMode, gitleaksFinding.Commit, gitleaksFinding.File, gitleaksFinding.StartLine)
+	gitInfo, err := getGitInfo(gitMode, gitleaksFinding.Commit,
+		gitleaksFinding.File, gitleaksFinding.StartLine, false)
+	if err != nil {
+		return UnifiedFinding{}, err
+	}
+
+	currentLocationGitInfo, err := getGitInfo(gitMode, gitleaksFinding.Commit,
+		gitleaksFinding.File, gitleaksFinding.StartLine, true)
 	if err != nil {
 		return UnifiedFinding{}, err
 	}
@@ -33,9 +40,9 @@ func convertGitleaksFindingToUnifiedFinding(gitMode bool,
 	unifiedFinding := UnifiedFinding{
 		Detector:    "gitleaks",
 		Rule:        gitleaksFinding.RuleID,
-		File:        gitleaksFinding.File,
-		LineStart:   gitleaksFinding.StartLine,
-		LineEnd:     gitleaksFinding.EndLine,
+		File:        currentLocationGitInfo.File,
+		LineStart:   currentLocationGitInfo.Line,
+		LineEnd:     currentLocationGitInfo.Line + gitleaksFinding.EndLine - gitleaksFinding.StartLine,
 		ColumnStart: gitleaksFinding.StartColumn,
 		ColumnEnd:   gitleaksFinding.EndColumn,
 		Match:       gitleaksFinding.Match,

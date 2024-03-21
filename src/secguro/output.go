@@ -79,6 +79,10 @@ func getFindingBody(gitMode bool, unifiedFinding UnifiedFinding) string {
 	result += fmt.Sprintf("  rule: %v\n", unifiedFinding.Rule)
 	result += "  location: " +
 		getLocation(unifiedFinding.File, unifiedFinding.LineStart, unifiedFinding.ColumnStart)
+	if gitMode && unifiedFinding.GitInfo != nil {
+		result += "  current location: " +
+			getLocation(unifiedFinding.GitInfo.File, unifiedFinding.GitInfo.Line, unifiedFinding.ColumnStart)
+	}
 	result += fmt.Sprintf("  match: %v\n", unifiedFinding.Match)
 	if len(unifiedFinding.Hint) > 0 {
 		result += fmt.Sprintf("  hint: %v\n", unifiedFinding.Hint)

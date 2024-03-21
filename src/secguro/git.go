@@ -12,12 +12,13 @@ import (
 /**
  * Returns git info if in git mode; otherwise returns nil.
  */
-func getGitInfo(gitMode bool, revision string, filePath string, lineNumber int) (*GitInfo, error) {
+func getGitInfo(gitMode bool, revision string,
+	filePath string, lineNumber int, reverse bool) (*GitInfo, error) {
 	if !gitMode {
 		return nil, nil //nolint: nilnil
 	}
 
-	gitBlameOutput, err := getGitBlameOutput(revision, filePath, lineNumber)
+	gitBlameOutput, err := getGitBlameOutput(revision, filePath, lineNumber, reverse)
 
 	// If the file is not tracked with git, getGitBlameOutput() returns an error
 	// because `git blame` exits with exit code 128. However, this behavior does
@@ -36,13 +37,22 @@ func getGitInfo(gitMode bool, revision string, filePath string, lineNumber int) 
 /**
  * Empty string for revision means working directory.
  */
-func getGitBlameOutput(revision string, filePath string, lineNumber int) ([]byte, error) {
+func getGitBlameOutput(revision string, filePath string, lineNumber int, reverse bool) ([]byte, error) {
 	lineRange := fmt.Sprintf("%d,%d", lineNumber, lineNumber)
+	// TODO: refactor to deduplicate and eliminate linting exception
 	cmd := (func() *exec.Cmd {
-		if revision == "" {
-			return exec.Command("git", "blame", "-L", lineRange, "-p", "--", filePath)
+		if revision == "" { //nolint: nestif
+			if reverse {
+				return exec.Command("git", "blame", "-L", lineRange, "--reverse", "-p", "--", filePath)
+			} else {
+				return exec.Command("git", "blame", "-L", lineRange, "-p", "--", filePath)
+			}
 		} else {
-			return exec.Command("git", "blame", "-L", lineRange, "-p", revision, "--", filePath)
+			if reverse {
+				return exec.Command("git", "blame", "-L", lineRange, "--reverse", "-p", revision, "--", filePath)
+			} else {
+				return exec.Command("git", "blame", "-L", lineRange, "-p", revision, "--", filePath)
+			}
 		}
 	})()
 
@@ -52,7 +62,7 @@ func getGitBlameOutput(revision string, filePath string, lineNumber int) ([]byte
 	return gitBlameOutput, err
 }
 
-func parseGitBlameOutput(gitBlameOutput []byte) (GitInfo, error) {
+func parseGitBlameOutput(gitBlameOutput []byte) (GitInfo, error) { //nolint: cyclop
 	scanner := bufio.NewScanner(strings.NewReader(string(gitBlameOutput)))
 	gitInfo := GitInfo{} //nolint: exhaustruct
 	isFirstLine := true
@@ -60,12 +70,20 @@ func parseGitBlameOutput(gitBlameOutput []byte) (GitInfo, error) {
 		line := scanner.Text()
 
 		if isFirstLine {
-			gitInfo.CommitHash = strings.Fields(line)[0]
+			lineFields := strings.Fields(line)
+			gitInfo.CommitHash = lineFields[0]
+			lineNumber, err := strconv.Atoi(lineFields[1])
+			if err != nil {
+				return GitInfo{}, err
+			}
+			gitInfo.Line = lineNumber
 			isFirstLine = false
+
 			continue
 		}
 
-		//nolint: gocritic
+		// TODO: refactor
+		//nolint: gocritic,nestif
 		if strings.HasPrefix(line, "summary ") {
 			gitInfo.CommitSummary = strings.TrimPrefix(line, "summary ")
 		} else if strings.HasPrefix(line, "author ") {
@@ -81,6 +99,8 @@ func parseGitBlameOutput(gitBlameOutput []byte) (GitInfo, error) {
 			authorTime := time.Unix(int64(authorTimeInt), 0)
 			authorTimeFormatted := authorTime.UTC().Format(time.RFC3339)
 			gitInfo.CommitDate = authorTimeFormatted
+		} else if strings.HasPrefix(line, "filename ") {
+			gitInfo.File = strings.TrimPrefix(line, "filename ")
 		}
 	}
 
