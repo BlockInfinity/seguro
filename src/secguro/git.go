@@ -116,3 +116,16 @@ func parseGitBlameOutput(gitBlameOutput []byte) (GitInfo, error) { //nolint: cyc
 
 	return gitInfo, nil
 }
+
+func getLatestCommitHash() (string, error) {
+	cmd := exec.Command("git", "rev-parse", "HEAD")
+	cmd.Dir = directoryToScan
+	gitRevParseOutput, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+
+	latestCommitHash := strings.TrimSuffix(string(gitRevParseOutput), "\n")
+
+	return latestCommitHash, nil
+}

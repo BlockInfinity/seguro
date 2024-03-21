@@ -51,10 +51,21 @@ func convertGitleaksFindingToUnifiedFinding(gitMode bool,
 	}
 
 	if currentLocationGitInfo != nil {
-		unifiedFinding.File = currentLocationGitInfo.File
-		unifiedFinding.LineStart = currentLocationGitInfo.Line
-		unifiedFinding.LineEnd =
-			currentLocationGitInfo.Line + gitleaksFinding.EndLine - gitleaksFinding.StartLine
+		latestCommitHash, err := getLatestCommitHash()
+		if err != nil {
+			return UnifiedFinding{}, err
+		}
+
+		if currentLocationGitInfo.CommitHash == latestCommitHash {
+			unifiedFinding.File = currentLocationGitInfo.File
+			unifiedFinding.LineStart = currentLocationGitInfo.Line
+			unifiedFinding.LineEnd =
+				currentLocationGitInfo.Line + gitleaksFinding.EndLine - gitleaksFinding.StartLine
+		} else {
+			unifiedFinding.File = ""
+			unifiedFinding.LineStart = -1
+			unifiedFinding.LineEnd = -1
+		}
 	}
 
 	return unifiedFinding, nil
