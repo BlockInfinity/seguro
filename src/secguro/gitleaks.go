@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
-	"strings"
 )
 
 type GitleaksFinding struct {
@@ -24,10 +23,14 @@ type GitleaksFinding struct {
 	Message     string
 }
 
-func convertGitleaksFindingToUnifiedFinding(gitleaksFinding GitleaksFinding) UnifiedFinding {
-	commitSummary, _, _ := strings.Cut(gitleaksFinding.Message, "\n")
+func convertGitleaksFindingToUnifiedFinding(gitMode bool,
+	gitleaksFinding GitleaksFinding) (UnifiedFinding, error) {
+	gitInfo, err := getGitInfo(gitMode, gitleaksFinding.Commit, gitleaksFinding.File, gitleaksFinding.StartLine)
+	if err != nil {
+		return UnifiedFinding{}, err
+	}
 
-	return UnifiedFinding{
+	unifiedFinding := UnifiedFinding{
 		Detector:    "gitleaks",
 		Rule:        gitleaksFinding.RuleID,
 		File:        gitleaksFinding.File,
@@ -37,14 +40,10 @@ func convertGitleaksFindingToUnifiedFinding(gitleaksFinding GitleaksFinding) Uni
 		ColumnEnd:   gitleaksFinding.EndColumn,
 		Match:       gitleaksFinding.Match,
 		Hint:        "",
-		GitInfo: &GitInfo{
-			CommitHash:         gitleaksFinding.Commit,
-			CommitDate:         gitleaksFinding.Date,
-			AuthorName:         gitleaksFinding.Author,
-			AuthorEmailAddress: gitleaksFinding.Email,
-			CommitSummary:      commitSummary,
-		},
+		GitInfo:     gitInfo,
 	}
+
+	return unifiedFinding, nil
 }
 
 func getGitleaksOutputJson(gitMode bool) ([]byte, error) {
@@ -85,7 +84,13 @@ func getGitleaksFindingsAsUnified(gitMode bool) ([]UnifiedFinding, error) {
 		return nil, err
 	}
 
-	unifiedFindings := Map(gitleaksFindings, convertGitleaksFindingToUnifiedFinding)
+	unifiedFindings, err := MapWithError(gitleaksFindings,
+		func(gitleaksFinding GitleaksFinding) (UnifiedFinding, error) {
+			return convertGitleaksFindingToUnifiedFinding(gitMode, gitleaksFinding)
+		})
+	if err != nil {
+		return make([]UnifiedFinding, 0), err
+	}
 
 	return unifiedFindings, nil
 }

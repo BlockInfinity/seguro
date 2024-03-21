@@ -12,12 +12,12 @@ import (
 /**
  * Returns git info if in git mode; otherwise returns nil.
  */
-func getGitInfo(filePath string, lineNumber int, gitMode bool) (*GitInfo, error) {
+func getGitInfo(gitMode bool, revision string, filePath string, lineNumber int) (*GitInfo, error) {
 	if !gitMode {
 		return nil, nil //nolint: nilnil
 	}
 
-	gitBlameOutput, err := getGitBlameOutput(filePath, lineNumber)
+	gitBlameOutput, err := getGitBlameOutput(revision, filePath, lineNumber)
 
 	// If the file is not tracked with git, getGitBlameOutput() returns an error
 	// because `git blame` exits with exit code 128. However, this behavior does
@@ -33,9 +33,19 @@ func getGitInfo(filePath string, lineNumber int, gitMode bool) (*GitInfo, error)
 	return &gitInfo, err
 }
 
-func getGitBlameOutput(filePath string, lineNumber int) ([]byte, error) {
+/**
+ * Empty string for revision means working directory.
+ */
+func getGitBlameOutput(revision string, filePath string, lineNumber int) ([]byte, error) {
 	lineRange := fmt.Sprintf("%d,%d", lineNumber, lineNumber)
-	cmd := exec.Command("git", "blame", "-L", lineRange, "-p", filePath)
+	cmd := (func() *exec.Cmd {
+		if revision == "" {
+			return exec.Command("git", "blame", "-L", lineRange, "-p", "--", filePath)
+		} else {
+			return exec.Command("git", "blame", "-L", lineRange, "-p", revision, "--", filePath)
+		}
+	})()
+
 	cmd.Dir = directoryToScan
 	gitBlameOutput, err := cmd.Output()
 
