@@ -80,7 +80,7 @@ func getFindingBody(gitMode bool, unifiedFinding UnifiedFinding) string {
 	result += "  location: " +
 		getLocation(unifiedFinding.File, unifiedFinding.LineStart, unifiedFinding.ColumnStart)
 	if gitMode && unifiedFinding.GitInfo != nil {
-		result += "  current location: " +
+		result += "  historical location: " +
 			getLocation(unifiedFinding.GitInfo.File, unifiedFinding.GitInfo.Line, unifiedFinding.ColumnStart)
 	}
 	result += fmt.Sprintf("  match: %v\n", unifiedFinding.Match)
