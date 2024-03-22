@@ -40,23 +40,26 @@ func getGitInfo(gitMode bool, revision string,
  */
 func getGitBlameOutput(revision string, filePath string, lineNumber int, reverse bool) ([]byte, error) {
 	lineRange := fmt.Sprintf("%d,%d", lineNumber, lineNumber)
-	// TODO: refactor to deduplicate and eliminate linting exception
-	var cmd *exec.Cmd
+
+	args := []string{"git", "blame", "-p", "-L", lineRange}
 	if revision == "" { //nolint: nestif
 		if reverse {
 			return make([]byte, 0), errors.New(
 				"git blame in reverse does not make sense without a given revision")
-		} else {
-			cmd = exec.Command("git", "blame", "-p", "-L", lineRange, "--", filePath)
+		} else { //nolint: staticcheck
+			// args do not need to be modified
 		}
 	} else {
 		if reverse {
-			cmd = exec.Command("git", "blame", "-p", "-L", lineRange, "--reverse", revision+"..HEAD", "--", filePath)
+			args = append(args, "--reverse", revision+"..HEAD")
 		} else {
-			cmd = exec.Command("git", "blame", "-p", "-L", lineRange, revision, "--", filePath)
+			args = append(args, revision)
 		}
 	}
 
+	args = append(args, "--", filePath)
+
+	cmd := exec.Command("git", args...)
 	cmd.Dir = directoryToScan
 	gitBlameOutput, err := cmd.Output()
 
@@ -83,15 +86,14 @@ func parseGitBlameOutput(gitBlameOutput []byte) (GitInfo, error) { //nolint: cyc
 			continue
 		}
 
-		// TODO: refactor
-		//nolint: gocritic,nestif
-		if strings.HasPrefix(line, "summary ") {
+		switch {
+		case strings.HasPrefix(line, "summary "):
 			gitInfo.CommitSummary = strings.TrimPrefix(line, "summary ")
-		} else if strings.HasPrefix(line, "author ") {
+		case strings.HasPrefix(line, "author "):
 			gitInfo.AuthorName = strings.TrimPrefix(line, "author ")
-		} else if strings.HasPrefix(line, "author-mail ") {
+		case strings.HasPrefix(line, "author-mail "):
 			gitInfo.AuthorEmailAddress = strings.TrimSuffix(strings.TrimPrefix(line, "author-mail <"), ">")
-		} else if strings.HasPrefix(line, "author-time ") {
+		case strings.HasPrefix(line, "author-time "):
 			authorTimeString := strings.TrimPrefix(line, "author-time ")
 			authorTimeInt, err := strconv.Atoi(authorTimeString)
 			if err != nil {
@@ -100,7 +102,7 @@ func parseGitBlameOutput(gitBlameOutput []byte) (GitInfo, error) { //nolint: cyc
 			authorTime := time.Unix(int64(authorTimeInt), 0)
 			authorTimeFormatted := authorTime.UTC().Format(time.RFC3339)
 			gitInfo.CommitDate = authorTimeFormatted
-		} else if strings.HasPrefix(line, "filename ") {
+		case strings.HasPrefix(line, "filename "):
 			gitInfo.File = strings.TrimPrefix(line, "filename ")
 		}
 	}
