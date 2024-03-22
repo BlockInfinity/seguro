@@ -9,9 +9,6 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// TODO: dynamically figure out name of default branch (appears to be in the result when querying the entire repo)
-const nameDefaultBranch = "master"
-
 const githubPersonalAccessTokenEnvVarName = "GITHUB_PERSONAL_ACCESS_TOKEN"
 
 func createPrTest() {
@@ -38,7 +35,13 @@ func createPullRequestForFileContentChange(owner, repo, nameNewBranch, filePath,
 	ctx := context.Background()
 
 	client := getGithubClient(ctx)
-	err := createBranchBasedOffDefaultBranch(ctx, client, owner, repo, nameNewBranch)
+
+	nameDefaultBranch, err := getNameOfDefaultBranch(ctx, client, owner, repo)
+	if err != nil {
+		return err
+	}
+
+	err = createBranch(ctx, client, owner, repo, nameDefaultBranch, nameNewBranch)
 	if err != nil {
 		return err
 	}
@@ -48,12 +51,22 @@ func createPullRequestForFileContentChange(owner, repo, nameNewBranch, filePath,
 		return err
 	}
 
-	err = createPullRequest(ctx, client, owner, repo, nameNewBranch, title, description)
+	err = createPullRequest(ctx, client, owner, repo, nameDefaultBranch, nameNewBranch, title, description)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func getNameOfDefaultBranch(ctx context.Context, client *github.Client,
+	owner, repo string) (string, error) {
+	repository, _, err := client.Repositories.Get(ctx, owner, repo)
+	if err != nil {
+		return "", err
+	}
+
+	return repository.GetDefaultBranch(), nil
 }
 
 func getGithubClient(ctx context.Context) *github.Client {
@@ -78,9 +91,9 @@ func getBranchSha(ctx context.Context, client *github.Client,
 	return branch.Commit.GetSHA(), nil
 }
 
-func createBranchBasedOffDefaultBranch(ctx context.Context, client *github.Client,
-	owner, repo, nameNewBranch string) error {
-	defaultBranchSha, err := getBranchSha(ctx, client, owner, repo, nameDefaultBranch)
+func createBranch(ctx context.Context, client *github.Client,
+	owner, repo, nameBaseBranch, nameNewBranch string) error {
+	baseBranchSha, err := getBranchSha(ctx, client, owner, repo, nameBaseBranch)
 	if err != nil {
 		return err
 	}
@@ -88,7 +101,7 @@ func createBranchBasedOffDefaultBranch(ctx context.Context, client *github.Clien
 	_, _, err = client.Git.CreateRef(ctx, owner, repo, &github.Reference{ //nolint: exhaustruct
 		Ref: github.String("refs/heads/" + nameNewBranch),
 		Object: &github.GitObject{ //nolint: exhaustruct
-			SHA: github.String(defaultBranchSha),
+			SHA: github.String(baseBranchSha),
 		},
 	})
 
@@ -113,12 +126,12 @@ func commitFileChange(ctx context.Context, client *github.Client,
 }
 
 func createPullRequest(ctx context.Context, client *github.Client,
-	owner, repo, nameNewBranch, title, description string) error {
+	owner, repo, nameBaseBranch, nameNewBranch, title, description string) error {
 	pr := &github.NewPullRequest{ //nolint: exhaustruct
 		Title: github.String(title),
 		Body:  github.String(description),
 		Head:  github.String(nameNewBranch),
-		Base:  github.String(nameDefaultBranch),
+		Base:  github.String(nameBaseBranch),
 	}
 
 	_, _, err := client.PullRequests.Create(ctx, owner, repo, pr)
