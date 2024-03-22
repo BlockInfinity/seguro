@@ -12,6 +12,12 @@ import (
 var directoryToScan = "."
 
 func main() { //nolint: funlen, cyclop
+	// call otherwise unused function to suppress linting violations
+	// due to unused symbols
+	if false {
+		createPrTest()
+	}
+
 	var flagGitMode bool
 	var flagFormat string
 	var flagOutput string
