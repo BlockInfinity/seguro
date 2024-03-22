@@ -97,16 +97,12 @@ func getFileBasedIgnoreInstructions() ([]IgnoreInstruction, error) {
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 
-		if strings.HasPrefix(line, "#") {
-			continue
-		}
-
-		if line == "" {
+		switch {
+		case strings.HasPrefix(line, "#"):
+			// do nothing
+		case line == "":
 			inNewParagraph = true
-			continue
-		}
-
-		if inNewParagraph {
+		case inNewParagraph:
 			ignoreInstructions = append(ignoreInstructions, IgnoreInstruction{
 				FilePath:   line,
 				LineNumber: -1,
@@ -114,7 +110,7 @@ func getFileBasedIgnoreInstructions() ([]IgnoreInstruction, error) {
 			})
 
 			inNewParagraph = false
-		} else {
+		default:
 			ignoreInstruction := &ignoreInstructions[len(ignoreInstructions)-1]
 			ignoreInstruction.Rules = append(ignoreInstruction.Rules, line)
 		}
@@ -144,15 +140,12 @@ func getIgnoredSecrets() ([]string, error) {
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 
-		if strings.HasPrefix(line, "#") {
-			continue
+		switch {
+		case strings.HasPrefix(line, "#") || line == "":
+			// do nothing
+		default:
+			ignoredSecrets = append(ignoredSecrets, line)
 		}
-
-		if line == "" {
-			continue
-		}
-
-		ignoredSecrets = append(ignoredSecrets, line)
 	}
 
 	if err := scanner.Err(); err != nil {
