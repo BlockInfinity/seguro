@@ -40,23 +40,26 @@ func getGitInfo(gitMode bool, revision string,
  */
 func getGitBlameOutput(revision string, filePath string, lineNumber int, reverse bool) ([]byte, error) {
 	lineRange := fmt.Sprintf("%d,%d", lineNumber, lineNumber)
-	// TODO: refactor to deduplicate and eliminate linting exception
-	var cmd *exec.Cmd
+
+	args := []string{"git", "blame", "-p", "-L", lineRange}
 	if revision == "" { //nolint: nestif
 		if reverse {
 			return make([]byte, 0), errors.New(
 				"git blame in reverse does not make sense without a given revision")
-		} else {
-			cmd = exec.Command("git", "blame", "-p", "-L", lineRange, "--", filePath)
+		} else { //nolint: staticcheck
+			// args do not need to be modified
 		}
 	} else {
 		if reverse {
-			cmd = exec.Command("git", "blame", "-p", "-L", lineRange, "--reverse", revision+"..HEAD", "--", filePath)
+			args = append(args, "--reverse", revision+"..HEAD")
 		} else {
-			cmd = exec.Command("git", "blame", "-p", "-L", lineRange, revision, "--", filePath)
+			args = append(args, revision)
 		}
 	}
 
+	args = append(args, "--", filePath)
+
+	cmd := exec.Command("git", args...)
 	cmd.Dir = directoryToScan
 	gitBlameOutput, err := cmd.Output()
 
