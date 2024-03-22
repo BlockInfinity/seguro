@@ -44,7 +44,7 @@ func fixSecretStep2(previousStep func() error, secret string) error {
 		"\n\n" +
 		"If you can change or invalidate this secret, we recommend that you do so."
 
-	choices := []string{"back", "continue", "This is a false positive. Do not detect it in the future."}
+	choices := []string{"back", "continue", "This is a false positive. Add it to the ignore list."}
 	choiceIndex, err := getOptionChoice(prompt, choices)
 	if err != nil {
 		return err
@@ -80,7 +80,7 @@ func fixSecretStep3(previousStep func() error, secret string) error {
 
 	choices := []string{
 		"back",
-		"This secret is not valid anymore. Do not detect it in the future.",
+		"This secret is not valid anymore. Add it to the ignore list.",
 		"Remove the secret from the git history. (Avoids future detection too.)",
 		"Do nothing.",
 	}
