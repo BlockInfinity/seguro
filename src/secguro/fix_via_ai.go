@@ -39,15 +39,12 @@ func fixProblemViaAiStep2(previousStep func() error, retry func() error,
 	if err != nil {
 		return err
 	}
-	if choiceIndex == -1 || choiceIndex == 0 {
+	switch choiceIndex {
+	case -1, 0:
 		return previousStep()
-	}
-
-	if choiceIndex == 1 {
+	case 1:
 		return retry()
-	}
-
-	if choiceIndex == 2 {
+	case 2:
 		fmt.Print("Applying fix...")
 		err := replaceFileContents(filePath, newFileContent)
 		if err != nil {

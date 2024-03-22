@@ -88,19 +88,14 @@ func fixSecretStep3(previousStep func() error, secret string) error {
 	if err != nil {
 		return err
 	}
-	if choiceIndex == -1 || choiceIndex == 0 {
+	switch choiceIndex {
+	case -1, 0:
 		return previousStep()
-	}
-
-	if choiceIndex == 1 {
+	case 1:
 		return addSecretToIgnoreList(secret)
-	}
-
-	if choiceIndex == 2 {
+	case 2:
 		return fixSecretStepB3(func() error { return fixSecretStep3(previousStep, secret) }, secret)
-	}
-
-	if choiceIndex == 3 {
+	case 3:
 		return nil
 	}
 
