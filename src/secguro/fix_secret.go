@@ -44,17 +44,19 @@ func fixSecretStep2(previousStep func() error, secret string) error {
 		"\n\n" +
 		"If you can change or invalidate this secret, we recommend that you do so."
 
-	choices := []string{"back", "continue"}
+	choices := []string{"back", "continue", "This is a false positive. Add it to the ignore list."}
 	choiceIndex, err := getOptionChoice(prompt, choices)
 	if err != nil {
 		return err
 	}
-	if choiceIndex == -1 || choiceIndex == 0 {
-		return previousStep()
-	}
 
-	if choiceIndex == 1 {
+	switch choiceIndex {
+	case -1, 0:
+		return previousStep()
+	case 1:
 		return fixSecretStep3(func() error { return fixSecretStep2(previousStep, secret) }, secret)
+	case 2:
+		return addSecretToIgnoreList(secret)
 	}
 
 	return errors.New("unexpected choice index")
@@ -78,7 +80,7 @@ func fixSecretStep3(previousStep func() error, secret string) error {
 
 	choices := []string{
 		"back",
-		"This secret is not valid anymore. Do not detect it in the future.",
+		"This secret is not valid anymore. Add it to the ignore list.",
 		"Remove the secret from the git history. (Avoids future detection too.)",
 		"Do nothing.",
 	}
