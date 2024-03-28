@@ -1,10 +1,14 @@
-package main
+package fix
 
 import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"secguro.com/secguro/pkg/functional"
+	"secguro.com/secguro/pkg/output"
+	"secguro.com/secguro/pkg/scan"
+	"secguro.com/secguro/pkg/types"
 )
 
 var (
@@ -23,7 +27,7 @@ var (
 type item struct {
 	title          string
 	description    string
-	unifiedFinding UnifiedFinding
+	unifiedFinding types.UnifiedFinding
 }
 
 func (i item) Title() string       { return i.title }
@@ -69,20 +73,21 @@ type model struct {
 	delegateKeys *delegateKeyMap
 }
 
-func newModel(unifiedFindingsNotIgnored []UnifiedFinding) model {
+func newModel(unifiedFindingsNotIgnored []types.UnifiedFinding) model {
 	var (
 		delegateKeys = newDelegateKeyMap()
 		listKeys     = newListKeyMap()
 	)
 
 	// Make initial list of items
-	items := MapWithIndex(unifiedFindingsNotIgnored, func(unifiedFinding UnifiedFinding, i int) list.Item {
-		return item{
-			title:          getFindingTitle(i),
-			description:    getFindingBody(false, unifiedFinding),
-			unifiedFinding: unifiedFinding,
-		}
-	})
+	items := functional.MapWithIndex(unifiedFindingsNotIgnored,
+		func(unifiedFinding types.UnifiedFinding, i int) list.Item {
+			return item{
+				title:          output.GetFindingTitle(i),
+				description:    output.GetFindingBody(false, unifiedFinding),
+				unifiedFinding: unifiedFinding,
+			}
+		})
 
 	// Setup list
 	delegate := newItemDelegate(delegateKeys)
@@ -167,8 +172,8 @@ var actionPastFixSelection func() error = nil
 
 var showProblemsList func() error = nil
 
-func commandFix(gitMode bool, disabledDetectors []string) error {
-	unifiedFindingsNotIgnored, err := performScan(gitMode, disabledDetectors)
+func CommandFix(gitMode bool, disabledDetectors []string) error {
+	unifiedFindingsNotIgnored, err := scan.PerformScan(gitMode, disabledDetectors)
 	if err != nil {
 		return err
 	}
@@ -190,8 +195,8 @@ func commandFix(gitMode bool, disabledDetectors []string) error {
 	return showProblemsList()
 }
 
-func fixUnifiedFinding(previousStep func() error, unifiedFinding UnifiedFinding) error {
-	if isSecretDetectionRule(unifiedFinding.Rule) {
+func fixUnifiedFinding(previousStep func() error, unifiedFinding types.UnifiedFinding) error {
+	if scan.IsSecretDetectionRule(unifiedFinding.Rule) {
 		return fixSecret(previousStep, unifiedFinding)
 	}
 

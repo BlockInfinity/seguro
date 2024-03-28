@@ -7,15 +7,19 @@ import (
 	"os"
 
 	"github.com/urfave/cli/v2"
+	"secguro.com/secguro/pkg/config"
+	"secguro.com/secguro/pkg/dependencycheck"
+	"secguro.com/secguro/pkg/fix"
+	"secguro.com/secguro/pkg/functional"
+	"secguro.com/secguro/pkg/github"
+	"secguro.com/secguro/pkg/scan"
 )
-
-var directoryToScan = "."
 
 func main() { //nolint: funlen, cyclop
 	// call otherwise unused function to suppress linting violations
 	// due to unused symbols
 	if false {
-		createPrTest()
+		github.CreatePrTest()
 	}
 
 	var flagGitMode bool
@@ -64,19 +68,19 @@ func main() { //nolint: funlen, cyclop
 
 	action := func(cCtx *cli.Context) error {
 		if cCtx.NArg() > 0 {
-			directoryToScan = cCtx.Args().Get(0)
+			config.DirectoryToScan = cCtx.Args().Get(0)
 		}
 
 		if cCtx.NArg() > 1 {
 			return errors.New("too many arguments")
 		}
 
-		if !arrayIncludes(flagDisabledDetectors, "dependencycheck") {
-			if os.Getenv(nvdApiKeyEnvVarName) == "" {
+		if !functional.ArrayIncludes(flagDisabledDetectors, "dependencycheck") {
+			if os.Getenv(dependencycheck.NvdApiKeyEnvVarName) == "" {
 				fmt.Printf("Disabling detector dependencycheck because "+
 					"environment variable %s is not set or is empty. "+
 					"You may apply for an API key at: "+
-					"https://nvd.nist.gov/developers/request-an-api-key\n", nvdApiKeyEnvVarName)
+					"https://nvd.nist.gov/developers/request-an-api-key\n", dependencycheck.NvdApiKeyEnvVarName)
 
 				flagDisabledDetectors = append(flagDisabledDetectors, "dependencycheck")
 			}
@@ -90,7 +94,7 @@ func main() { //nolint: funlen, cyclop
 				}
 				printAsJson := flagFormat == "json"
 
-				err := commandScan(flagGitMode, flagDisabledDetectors,
+				err := scan.CommandScan(flagGitMode, flagDisabledDetectors,
 					printAsJson, flagOutput, flagTolerance)
 				if err != nil {
 					return err
@@ -98,7 +102,7 @@ func main() { //nolint: funlen, cyclop
 			}
 		case "fix":
 			{
-				err := commandFix(flagGitMode, flagDisabledDetectors)
+				err := fix.CommandFix(flagGitMode, flagDisabledDetectors)
 				if err != nil {
 					return err
 				}

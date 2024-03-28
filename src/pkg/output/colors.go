@@ -1,4 +1,4 @@
-package main
+package output
 
 var Black = "0;30"
 var DarkGray = "1;30"
@@ -18,6 +18,6 @@ var LightGray = "0;37"
 var White = "1;37"
 var NoColor = "0"
 
-func changeColor(color string) string {
+func ChangeColor(color string) string {
 	return "\033[" + color + "m"
 }

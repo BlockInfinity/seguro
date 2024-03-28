@@ -1,4 +1,4 @@
-package main
+package git
 
 import (
 	"bufio"
@@ -8,13 +8,16 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"secguro.com/secguro/pkg/config"
+	"secguro.com/secguro/pkg/types"
 )
 
 /**
  * Returns git info if in git mode; otherwise returns nil.
  */
-func getGitInfo(gitMode bool, revision string,
-	filePath string, lineNumber int, reverse bool) (*GitInfo, error) {
+func GetGitInfo(gitMode bool, revision string,
+	filePath string, lineNumber int, reverse bool) (*types.GitInfo, error) {
 	if !gitMode {
 		return nil, nil //nolint: nilnil
 	}
@@ -60,15 +63,15 @@ func getGitBlameOutput(revision string, filePath string, lineNumber int, reverse
 	args = append(args, "--", filePath)
 
 	cmd := exec.Command("git", args...)
-	cmd.Dir = directoryToScan
+	cmd.Dir = config.DirectoryToScan
 	gitBlameOutput, err := cmd.Output()
 
 	return gitBlameOutput, err
 }
 
-func parseGitBlameOutput(gitBlameOutput []byte) (GitInfo, error) { //nolint: cyclop
+func parseGitBlameOutput(gitBlameOutput []byte) (types.GitInfo, error) { //nolint: cyclop
 	scanner := bufio.NewScanner(strings.NewReader(string(gitBlameOutput)))
-	gitInfo := GitInfo{} //nolint: exhaustruct
+	gitInfo := types.GitInfo{} //nolint: exhaustruct
 	isFirstLine := true
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -78,7 +81,7 @@ func parseGitBlameOutput(gitBlameOutput []byte) (GitInfo, error) { //nolint: cyc
 			gitInfo.CommitHash = lineFields[0]
 			lineNumber, err := strconv.Atoi(lineFields[1])
 			if err != nil {
-				return GitInfo{}, err
+				return types.GitInfo{}, err
 			}
 			gitInfo.Line = lineNumber
 			isFirstLine = false
@@ -97,7 +100,7 @@ func parseGitBlameOutput(gitBlameOutput []byte) (GitInfo, error) { //nolint: cyc
 			authorTimeString := strings.TrimPrefix(line, "author-time ")
 			authorTimeInt, err := strconv.Atoi(authorTimeString)
 			if err != nil {
-				return GitInfo{}, err
+				return types.GitInfo{}, err
 			}
 			authorTime := time.Unix(int64(authorTimeInt), 0)
 			authorTimeFormatted := authorTime.UTC().Format(time.RFC3339)
@@ -112,16 +115,16 @@ func parseGitBlameOutput(gitBlameOutput []byte) (GitInfo, error) { //nolint: cyc
 		// (the line git blame was called on) as the others are always short enough.
 		// This line is not used by this function.
 		if err.Error() != "bufio.Scanner: token too long" {
-			return GitInfo{}, err
+			return types.GitInfo{}, err
 		}
 	}
 
 	return gitInfo, nil
 }
 
-func getLatestCommitHash() (string, error) {
+func GetLatestCommitHash() (string, error) {
 	cmd := exec.Command("git", "rev-parse", "HEAD")
-	cmd.Dir = directoryToScan
+	cmd.Dir = config.DirectoryToScan
 	gitRevParseOutput, err := cmd.Output()
 	if err != nil {
 		return "", err

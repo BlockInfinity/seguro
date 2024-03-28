@@ -1,4 +1,4 @@
-package main
+package dependencycheck
 
 import (
 	"encoding/json"
@@ -7,6 +7,10 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"secguro.com/secguro/pkg/config"
+	"secguro.com/secguro/pkg/dependencies"
+	"secguro.com/secguro/pkg/types"
 )
 
 type Meta_DependencycheckFinding struct {
@@ -22,10 +26,10 @@ type DependencycheckFinding_Vulnerabilities struct {
 	Name string
 }
 
-const nvdApiKeyEnvVarName = "NVD_API_KEY"
+const NvdApiKeyEnvVarName = "NVD_API_KEY"
 
 func convertDependencycheckFindingToUnifiedFinding(dependencycheckFinding DependencycheckFinding,
-	vulnerabilityIndex int) UnifiedFinding {
+	vulnerabilityIndex int) types.UnifiedFinding {
 	// dependencycheck uses "?" for npm dependencies but ":" or none at att for go dependencies.
 	separator := "?"
 	separatorIndex := strings.LastIndex(dependencycheckFinding.FilePath, separator)
@@ -44,7 +48,7 @@ func convertDependencycheckFindingToUnifiedFinding(dependencycheckFinding Depend
 	packageAndVersionPossiblePrefixed := dependencycheckFinding.FilePath[separatorIndex+len(separator):]
 	packageAndVersion := strings.TrimPrefix(packageAndVersionPossiblePrefixed, "/")
 
-	return UnifiedFinding{
+	return types.UnifiedFinding{
 		Detector:    "dependencycheck",
 		Rule:        dependencycheckFinding.Vulnerabilities[vulnerabilityIndex].Name,
 		File:        file,
@@ -59,20 +63,20 @@ func convertDependencycheckFindingToUnifiedFinding(dependencycheckFinding Depend
 }
 
 func getDependencycheckOutputJson(_gitMode bool) ([]byte, error) {
-	dependencycheckOutputDirPath := dependenciesDir + "/dependencycheckOutput"
+	dependencycheckOutputDirPath := dependencies.DependenciesDir + "/dependencycheckOutput"
 	dependencycheckOutputJsonPath := dependencycheckOutputDirPath + "/dependency-check-report.json"
 
 	// secguro-ignore-next-line
-	cmd := exec.Command(dependenciesDir+"/dependencycheck/dependency-check/bin/dependency-check.sh",
+	cmd := exec.Command(dependencies.DependenciesDir+"/dependencycheck/dependency-check/bin/dependency-check.sh",
 		"--enableExperimental", // necessary for support of go dependencies
-		"--scan", directoryToScan+"/**/package.json",
-		"--scan", directoryToScan+"/**/package-lock.json",
-		"--scan", directoryToScan+"/**/go.mod", // .sum files are not considered by dependencycheck
+		"--scan", config.DirectoryToScan+"/**/package.json",
+		"--scan", config.DirectoryToScan+"/**/package-lock.json",
+		"--scan", config.DirectoryToScan+"/**/go.mod", // .sum files are not considered by dependencycheck
 		"--format", "JSON", "--out", dependencycheckOutputDirPath,
-		"--nvdApiKey", os.Getenv(nvdApiKeyEnvVarName))
+		"--nvdApiKey", os.Getenv(NvdApiKeyEnvVarName))
 	out, err := cmd.Output()
 	if err != nil {
-		if !config.tolerateDependecycheckErrorExitCodes {
+		if !config.TolerateDependecycheckErrorExitCodes {
 			fmt.Println("Received output from dependencycheck:")
 			fmt.Println(out)
 			fmt.Println("Received error from dependencycheck:")
@@ -93,7 +97,7 @@ func getDependencycheckOutputJson(_gitMode bool) ([]byte, error) {
 	return dependencycheckOutputJson, err
 }
 
-func getDependencycheckFindingsAsUnified(gitMode bool) ([]UnifiedFinding, error) {
+func GetDependencycheckFindingsAsUnified(gitMode bool) ([]types.UnifiedFinding, error) {
 	dependencycheckOutputJson, err := getDependencycheckOutputJson(gitMode)
 	if err != nil {
 		return nil, err
@@ -106,7 +110,7 @@ func getDependencycheckFindingsAsUnified(gitMode bool) ([]UnifiedFinding, error)
 	}
 
 	dependencycheckFindings := metaDependencycheckFindings.Dependencies
-	unifiedFindings := make([]UnifiedFinding, 0)
+	unifiedFindings := make([]types.UnifiedFinding, 0)
 	for _, dependencycheckFinding := range dependencycheckFindings {
 		for vulnerabilityIndex := range dependencycheckFinding.Vulnerabilities {
 			unifiedFinding := convertDependencycheckFindingToUnifiedFinding(
@@ -116,16 +120,4 @@ func getDependencycheckFindingsAsUnified(gitMode bool) ([]UnifiedFinding, error)
 	}
 
 	return unifiedFindings, nil
-}
-
-func downloadAndExtractDependencycheck() error {
-	err := downloadDependency("dependencycheck", "zip",
-		"https://github.com/jeremylong/DependencyCheck/releases/download/v9.0.9/dependency-check-9.0.9-release.zip")
-	if err != nil {
-		return err
-	}
-
-	err = extractZipDependency("dependencycheck")
-
-	return err
 }

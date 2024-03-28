@@ -1,10 +1,16 @@
-package main
+package semgrep
 
 import (
 	"encoding/json"
 	"errors"
 	"os"
 	"os/exec"
+
+	"secguro.com/secguro/pkg/config"
+	"secguro.com/secguro/pkg/dependencies"
+	"secguro.com/secguro/pkg/functional"
+	"secguro.com/secguro/pkg/git"
+	"secguro.com/secguro/pkg/types"
 )
 
 type Meta_SemgrepFinding struct {
@@ -29,13 +35,13 @@ type SemgrepFinding_extra struct {
 	Message string
 }
 
-func convertSemgrepFindingToUnifiedFinding(gitMode bool, semgrepFinding SemgrepFinding) (UnifiedFinding, error) {
-	gitInfo, err := getGitInfo(gitMode, "", semgrepFinding.Path, semgrepFinding.Start.Line, false)
+func convertSemgrepFindingToUnifiedFinding(gitMode bool, semgrepFinding SemgrepFinding) (types.UnifiedFinding, error) {
+	gitInfo, err := git.GetGitInfo(gitMode, "", semgrepFinding.Path, semgrepFinding.Start.Line, false)
 	if err != nil {
-		return UnifiedFinding{}, err
+		return types.UnifiedFinding{}, err
 	}
 
-	unifiedFinding := UnifiedFinding{
+	unifiedFinding := types.UnifiedFinding{
 		Detector:    "semgrep",
 		Rule:        semgrepFinding.Check_id,
 		File:        semgrepFinding.Path,
@@ -52,10 +58,10 @@ func convertSemgrepFindingToUnifiedFinding(gitMode bool, semgrepFinding SemgrepF
 }
 
 func getSemgrepOutputJson() ([]byte, error) {
-	semgrepOutputJsonPath := dependenciesDir + "/semgrepOutput.json"
+	semgrepOutputJsonPath := dependencies.DependenciesDir + "/semgrepOutput.json"
 
 	cmd := exec.Command("semgrep", "scan", "--json", "-o", semgrepOutputJsonPath)
-	cmd.Dir = directoryToScan
+	cmd.Dir = config.DirectoryToScan
 	// Ignore error because this is expected to deliver an exit code not equal to 0 and write to stderr.
 	out, _ := cmd.Output()
 	if len(out) != 0 {
@@ -67,7 +73,7 @@ func getSemgrepOutputJson() ([]byte, error) {
 	return semgrepOutputJson, err
 }
 
-func getSemgrepFindingsAsUnified(gitMode bool) ([]UnifiedFinding, error) {
+func GetSemgrepFindingsAsUnified(gitMode bool) ([]types.UnifiedFinding, error) {
 	semgrepOutputJson, err := getSemgrepOutputJson()
 	if err != nil {
 		return nil, err
@@ -81,23 +87,13 @@ func getSemgrepFindingsAsUnified(gitMode bool) ([]UnifiedFinding, error) {
 
 	semgrepFindings := metaSemgrepFindings.Results
 
-	unifiedFindings, err := MapWithError(semgrepFindings,
-		func(semgrepFinding SemgrepFinding) (UnifiedFinding, error) {
+	unifiedFindings, err := functional.MapWithError(semgrepFindings,
+		func(semgrepFinding SemgrepFinding) (types.UnifiedFinding, error) {
 			return convertSemgrepFindingToUnifiedFinding(gitMode, semgrepFinding)
 		})
 	if err != nil {
-		return make([]UnifiedFinding, 0), err
+		return make([]types.UnifiedFinding, 0), err
 	}
 
 	return unifiedFindings, nil
-}
-
-func installSemgrep() error {
-	cmd := exec.Command("python3", "-m", "pipx", "install", "semgrep")
-	_, err := cmd.Output()
-	if err != nil {
-		return errors.New("Failed to install Semgrep. Make sure that python3 and pipx are installed.")
-	}
-
-	return nil
 }

@@ -1,4 +1,4 @@
-package main
+package github
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 
 const githubPersonalAccessTokenEnvVarName = "GITHUB_PERSONAL_ACCESS_TOKEN"
 
-func createPrTest() {
+func CreatePrTest() {
 	filePath := "path/to/file.txt"
 	newContent := "New file contents"
 	owner := "secguro"

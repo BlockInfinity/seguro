@@ -1,4 +1,4 @@
-package main
+package functional
 
 // https://stackoverflow.com/a/71624929
 func Map[T, U any](ts []T, f func(T) U) []U {
@@ -44,7 +44,7 @@ func Filter[T any](ss []T, test func(T) bool) []T {
 	return ret
 }
 
-func arrayIncludes[T comparable](s []T, e T) bool {
+func ArrayIncludes[T comparable](s []T, e T) bool {
 	for _, a := range s {
 		if a == e {
 			return true

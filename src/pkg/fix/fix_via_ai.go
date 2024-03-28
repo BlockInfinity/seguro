@@ -1,4 +1,4 @@
-package main
+package fix
 
 import (
 	"context"
@@ -10,15 +10,18 @@ import (
 
 	openai "github.com/sashabaranov/go-openai"
 	"github.com/sergi/go-diff/diffmatchpatch"
+	"secguro.com/secguro/pkg/config"
+	"secguro.com/secguro/pkg/output"
+	"secguro.com/secguro/pkg/types"
 )
 
 const openAiApiKeyEnvVarName = "OPEN_AI_API_KEY"
 
-func fixProblemViaAi(previousStep func() error, unifiedFinding UnifiedFinding) error {
+func fixProblemViaAi(previousStep func() error, unifiedFinding types.UnifiedFinding) error {
 	return fixProblemViaAiStep1(previousStep, unifiedFinding)
 }
 
-func fixProblemViaAiStep1(previousStep func() error, unifiedFinding UnifiedFinding) error {
+func fixProblemViaAiStep1(previousStep func() error, unifiedFinding types.UnifiedFinding) error {
 	newFileContent, diff, err := getFixedFileContentAndDiff(unifiedFinding)
 	if err != nil {
 		return err
@@ -58,8 +61,8 @@ func fixProblemViaAiStep2(previousStep func() error, retry func() error,
 	return errors.New("unexpected choice index")
 }
 
-func getFixedFileContentAndDiff(unifiedFinding UnifiedFinding) (string, string, error) {
-	fileContentByteArr, err := os.ReadFile(directoryToScan + "/" + unifiedFinding.File)
+func getFixedFileContentAndDiff(unifiedFinding types.UnifiedFinding) (string, string, error) {
+	fileContentByteArr, err := os.ReadFile(config.DirectoryToScan + "/" + unifiedFinding.File)
 	if err != nil {
 		return "", "", err
 	}
@@ -120,7 +123,7 @@ func getDiff(contentBefore string, contentAfter string) string {
 	diffFormatted := ""
 	for i, hunk := range hunks {
 		if i != 0 {
-			diffFormatted += changeColor(Cyan) + "-----" + changeColor(NoColor) + "\n"
+			diffFormatted += output.ChangeColor(output.Cyan) + "-----" + output.ChangeColor(output.NoColor) + "\n"
 		}
 
 		diffFormatted += dmp.DiffPrettyText(hunk)
@@ -197,7 +200,7 @@ func getDiffSplitByLines(diff []diffmatchpatch.Diff) []diffmatchpatch.Diff {
 
 func replaceFileContents(filePath string, newFileContent string) error {
 	const fileMode fs.FileMode = 0666
-	file, err := os.OpenFile(directoryToScan+"/"+filePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, fileMode)
+	file, err := os.OpenFile(config.DirectoryToScan+"/"+filePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, fileMode)
 	if err != nil {
 		return err
 	}
