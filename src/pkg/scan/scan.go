@@ -11,7 +11,9 @@ import (
 	"secguro.com/secguro/pkg/functional"
 	"secguro.com/secguro/pkg/gitleaks"
 	"secguro.com/secguro/pkg/ignoring"
+	"secguro.com/secguro/pkg/login"
 	"secguro.com/secguro/pkg/output"
+	"secguro.com/secguro/pkg/reporting"
 	"secguro.com/secguro/pkg/semgrep"
 	"secguro.com/secguro/pkg/types"
 )
@@ -28,6 +30,17 @@ func CommandScan(gitMode bool, disabledDetectors []string,
 	err = writeOutput(gitMode, printAsJson, outputDestination, unifiedFindingsNotIgnored)
 	if err != nil {
 		return err
+	}
+
+	isLoggedIn, err := login.IsUserLoggedIn()
+	if err != nil {
+		return err
+	}
+	if isLoggedIn {
+		err = reporting.ReportScan(unifiedFindingsNotIgnored)
+		if err != nil {
+			return err
+		}
 	}
 
 	exitWithAppropriateExitCode(len(unifiedFindingsNotIgnored), tolerance)
