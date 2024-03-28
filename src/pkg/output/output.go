@@ -1,8 +1,11 @@
-package main
+package output
 
 import (
 	"encoding/json"
 	"fmt"
+
+	"secguro.com/secguro/pkg/functional"
+	"secguro.com/secguro/pkg/types"
 )
 
 type UnifiedFindingSansGitInfo struct {
@@ -17,29 +20,30 @@ type UnifiedFindingSansGitInfo struct {
 	Hint        string
 }
 
-func printJson(unifiedFindings []UnifiedFinding, gitMode bool) (string, error) {
+func PrintJson(unifiedFindings []types.UnifiedFinding, gitMode bool) (string, error) {
 	if gitMode {
 		return printJsonInternal(unifiedFindings)
 	} else {
-		unifiedFindingsSansGitInfo := Map(unifiedFindings, func(unifiedFinding UnifiedFinding) UnifiedFindingSansGitInfo {
-			return UnifiedFindingSansGitInfo{
-				unifiedFinding.Detector,
-				unifiedFinding.Rule,
-				unifiedFinding.File,
-				unifiedFinding.LineStart,
-				unifiedFinding.LineEnd,
-				unifiedFinding.ColumnStart,
-				unifiedFinding.ColumnEnd,
-				unifiedFinding.Match,
-				unifiedFinding.Hint,
-			}
-		})
+		unifiedFindingsSansGitInfo := functional.Map(unifiedFindings,
+			func(unifiedFinding types.UnifiedFinding) UnifiedFindingSansGitInfo {
+				return UnifiedFindingSansGitInfo{
+					unifiedFinding.Detector,
+					unifiedFinding.Rule,
+					unifiedFinding.File,
+					unifiedFinding.LineStart,
+					unifiedFinding.LineEnd,
+					unifiedFinding.ColumnStart,
+					unifiedFinding.ColumnEnd,
+					unifiedFinding.Match,
+					unifiedFinding.Hint,
+				}
+			})
 
 		return printJsonInternal(unifiedFindingsSansGitInfo)
 	}
 }
 
-func printJsonInternal[T UnifiedFinding | UnifiedFindingSansGitInfo](unifiedFindings []T) (string, error) {
+func printJsonInternal[T types.UnifiedFinding | UnifiedFindingSansGitInfo](unifiedFindings []T) (string, error) {
 	// Handle case of un-initialzed array (would cause
 	// conversion to "null" instead of "[]").
 	if unifiedFindings == nil {
@@ -54,7 +58,7 @@ func printJsonInternal[T UnifiedFinding | UnifiedFindingSansGitInfo](unifiedFind
 	return string(resultJson), nil
 }
 
-func printText(unifiedFindings []UnifiedFinding, gitMode bool) string {
+func PrintText(unifiedFindings []types.UnifiedFinding, gitMode bool) string {
 	if len(unifiedFindings) == 0 {
 		return "no findings"
 	}
@@ -62,18 +66,18 @@ func printText(unifiedFindings []UnifiedFinding, gitMode bool) string {
 	result := ""
 
 	for i, unifiedFinding := range unifiedFindings {
-		result += getFindingTitle(i) + "\n"
-		result += getFindingBody(gitMode, unifiedFinding) + "\n"
+		result += GetFindingTitle(i) + "\n"
+		result += GetFindingBody(gitMode, unifiedFinding) + "\n"
 	}
 
 	return result
 }
 
-func getFindingTitle(index int) string {
+func GetFindingTitle(index int) string {
 	return fmt.Sprintf("Finding %d:", index+1)
 }
 
-func getFindingBody(gitMode bool, unifiedFinding UnifiedFinding) string {
+func GetFindingBody(gitMode bool, unifiedFinding types.UnifiedFinding) string {
 	result := ""
 	result += fmt.Sprintf("  detector: %v\n", unifiedFinding.Detector)
 	result += fmt.Sprintf("  rule: %v\n", unifiedFinding.Rule)

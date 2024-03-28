@@ -1,17 +1,22 @@
-package main
+package fix
 
 import (
 	"errors"
 	"fmt"
 	"os"
 	"os/exec"
+
+	"secguro.com/secguro/pkg/config"
+	"secguro.com/secguro/pkg/dependencies"
+	"secguro.com/secguro/pkg/ignoring"
+	"secguro.com/secguro/pkg/types"
 )
 
-func fixSecret(previousStep func() error, unifiedFinding UnifiedFinding) error {
+func fixSecret(previousStep func() error, unifiedFinding types.UnifiedFinding) error {
 	return fixSecretStep1(previousStep, unifiedFinding)
 }
 
-func fixSecretStep1(previousStep func() error, unifiedFinding UnifiedFinding) error {
+func fixSecretStep1(previousStep func() error, unifiedFinding types.UnifiedFinding) error {
 	prompt := "Please specify the secret in question. " +
 		"Note that we are not always able to determine the exact bounds of " +
 		"the secret, so it's important you specify the secret exactly."
@@ -106,7 +111,7 @@ func addSecretToIgnoreList(secret string) error {
 	fmt.Print("Adding secret to ignore list...")
 
 	const filePermissions = 0644
-	file, err := os.OpenFile(directoryToScan+"/"+secretsIgnoreFileName,
+	file, err := os.OpenFile(config.DirectoryToScan+"/"+ignoring.SecretsIgnoreFileName,
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY, filePermissions)
 	if err != nil {
 		return err
@@ -160,7 +165,7 @@ func fixSecretStepB3(previousStep func() error, secret string) error {
 
 func findStringInGitIndex(secret string) (string, error) {
 	cmd := exec.Command("git", "grep", "--color", secret, "HEAD", "--", ".")
-	cmd.Dir = directoryToScan
+	cmd.Dir = config.DirectoryToScan
 	out, err := cmd.Output()
 	if err != nil {
 		// This is expected to happen when there are no search results.
@@ -174,19 +179,13 @@ func findStringInGitIndex(secret string) (string, error) {
 	return string(out), nil
 }
 
-func downloadBfg() error {
-	err := downloadDependency("bfg", "jar",
-		"https://repo1.maven.org/maven2/com/madgag/bfg/1.14.0/bfg-1.14.0.jar")
-	return err
-}
-
 func removeSecret(secret string) error {
-	err := downloadBfg()
+	err := dependencies.DownloadBfg()
 	if err != nil {
 		return err
 	}
 
-	pathReplacementsFile := dependenciesDir + "/" + "replacements"
+	pathReplacementsFile := dependencies.DependenciesDir + "/" + "replacements"
 
 	const filePermissions = 0600
 	defer os.Remove(pathReplacementsFile)
@@ -197,10 +196,10 @@ func removeSecret(secret string) error {
 		return err
 	}
 
-	pathBfg := dependenciesDir + "/bfg.jar"
+	pathBfg := dependencies.DependenciesDir + "/bfg.jar"
 
 	cmd := exec.Command("java", "-jar", pathBfg, "--replace-text", pathReplacementsFile, ".")
-	cmd.Dir = directoryToScan
+	cmd.Dir = config.DirectoryToScan
 	_, err = cmd.Output()
 
 	if err != nil {

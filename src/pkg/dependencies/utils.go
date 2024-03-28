@@ -1,4 +1,4 @@
-package main
+package dependencies
 
 import (
 	"context"
@@ -10,25 +10,25 @@ import (
 	"github.com/codeclysm/extract/v3"
 )
 
-const dependenciesDir = "/tmp/secguroDependencies"
+const DependenciesDir = "/tmp/secguroDependencies"
 
 func extractGzDependency(name string) error {
-	file, _ := os.Open(dependenciesDir + "/" + name + ".tar.gz")
-	return extract.Gz(context.Background(), file, dependenciesDir+"/"+name, nil)
+	file, _ := os.Open(DependenciesDir + "/" + name + ".tar.gz")
+	return extract.Gz(context.Background(), file, DependenciesDir+"/"+name, nil)
 }
 
 func extractZipDependency(name string) error {
-	file, _ := os.Open(dependenciesDir + "/" + name + ".zip")
-	return extract.Zip(context.Background(), file, dependenciesDir+"/"+name, nil)
+	file, _ := os.Open(DependenciesDir + "/" + name + ".zip")
+	return extract.Zip(context.Background(), file, DependenciesDir+"/"+name, nil)
 }
 
 func downloadDependency(name string, fileNameExtension string, url string) error {
-	err := os.MkdirAll(dependenciesDir, os.ModePerm)
+	err := os.MkdirAll(DependenciesDir, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	return downloadFile(dependenciesDir+"/"+name+"."+fileNameExtension, url)
+	return downloadFile(DependenciesDir+"/"+name+"."+fileNameExtension, url)
 }
 
 // https://stackoverflow.com/a/33853856

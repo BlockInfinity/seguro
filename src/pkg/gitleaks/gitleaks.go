@@ -1,11 +1,16 @@
-package main
+package gitleaks
 
 import (
 	"encoding/json"
 	"errors"
 	"os"
 	"os/exec"
-	"runtime"
+
+	"secguro.com/secguro/pkg/config"
+	"secguro.com/secguro/pkg/dependencies"
+	"secguro.com/secguro/pkg/functional"
+	"secguro.com/secguro/pkg/git"
+	"secguro.com/secguro/pkg/types"
 )
 
 type GitleaksFinding struct {
@@ -24,20 +29,20 @@ type GitleaksFinding struct {
 }
 
 func convertGitleaksFindingToUnifiedFinding(gitMode bool,
-	gitleaksFinding GitleaksFinding) (UnifiedFinding, error) {
-	gitInfo, err := getGitInfo(gitMode, gitleaksFinding.Commit,
+	gitleaksFinding GitleaksFinding) (types.UnifiedFinding, error) {
+	gitInfo, err := git.GetGitInfo(gitMode, gitleaksFinding.Commit,
 		gitleaksFinding.File, gitleaksFinding.StartLine, false)
 	if err != nil {
-		return UnifiedFinding{}, err
+		return types.UnifiedFinding{}, err
 	}
 
-	currentLocationGitInfo, err := getGitInfo(gitMode, gitleaksFinding.Commit,
+	currentLocationGitInfo, err := git.GetGitInfo(gitMode, gitleaksFinding.Commit,
 		gitleaksFinding.File, gitleaksFinding.StartLine, true)
 	if err != nil {
-		return UnifiedFinding{}, err
+		return types.UnifiedFinding{}, err
 	}
 
-	unifiedFinding := UnifiedFinding{
+	unifiedFinding := types.UnifiedFinding{
 		Detector:    "gitleaks",
 		Rule:        gitleaksFinding.RuleID,
 		File:        gitleaksFinding.File,
@@ -51,9 +56,9 @@ func convertGitleaksFindingToUnifiedFinding(gitMode bool,
 	}
 
 	if currentLocationGitInfo != nil {
-		latestCommitHash, err := getLatestCommitHash()
+		latestCommitHash, err := git.GetLatestCommitHash()
 		if err != nil {
-			return UnifiedFinding{}, err
+			return types.UnifiedFinding{}, err
 		}
 
 		if currentLocationGitInfo.CommitHash == latestCommitHash {
@@ -72,20 +77,20 @@ func convertGitleaksFindingToUnifiedFinding(gitMode bool,
 }
 
 func getGitleaksOutputJson(gitMode bool) ([]byte, error) {
-	gitleaksOutputJsonPath := dependenciesDir + "/gitleaksOutput.json"
+	gitleaksOutputJsonPath := dependencies.DependenciesDir + "/gitleaksOutput.json"
 
 	cmd := (func() *exec.Cmd {
 		if gitMode {
 			// secguro-ignore-next-line
-			return exec.Command(dependenciesDir+"/gitleaks/gitleaks",
+			return exec.Command(dependencies.DependenciesDir+"/gitleaks/gitleaks",
 				"detect", "--report-format", "json", "--report-path", gitleaksOutputJsonPath)
 		} else {
 			// secguro-ignore-next-line
-			return exec.Command(dependenciesDir+"/gitleaks/gitleaks",
+			return exec.Command(dependencies.DependenciesDir+"/gitleaks/gitleaks",
 				"detect", "--no-git", "--report-format", "json", "--report-path", gitleaksOutputJsonPath)
 		}
 	})()
-	cmd.Dir = directoryToScan
+	cmd.Dir = config.DirectoryToScan
 	// Ignore error because this is expected to deliver an exit code not equal to 0 and write to stderr.
 	out, _ := cmd.Output()
 	if out == nil {
@@ -97,7 +102,7 @@ func getGitleaksOutputJson(gitMode bool) ([]byte, error) {
 	return gitleaksOutputJson, err
 }
 
-func getGitleaksFindingsAsUnified(gitMode bool) ([]UnifiedFinding, error) {
+func GetGitleaksFindingsAsUnified(gitMode bool) ([]types.UnifiedFinding, error) {
 	gitleaksOutputJson, err := getGitleaksOutputJson(gitMode)
 	if err != nil {
 		return nil, err
@@ -109,34 +114,13 @@ func getGitleaksFindingsAsUnified(gitMode bool) ([]UnifiedFinding, error) {
 		return nil, err
 	}
 
-	unifiedFindings, err := MapWithError(gitleaksFindings,
-		func(gitleaksFinding GitleaksFinding) (UnifiedFinding, error) {
+	unifiedFindings, err := functional.MapWithError(gitleaksFindings,
+		func(gitleaksFinding GitleaksFinding) (types.UnifiedFinding, error) {
 			return convertGitleaksFindingToUnifiedFinding(gitMode, gitleaksFinding)
 		})
 	if err != nil {
-		return make([]UnifiedFinding, 0), err
+		return make([]types.UnifiedFinding, 0), err
 	}
 
 	return unifiedFindings, nil
-}
-
-func downloadAndExtractGitleaks() error {
-	var url string
-	switch runtime.GOOS {
-	case "linux":
-		url = "https://github.com/gitleaks/gitleaks/releases/download/v8.18.2/gitleaks_8.18.2_linux_x64.tar.gz"
-	case "darwin":
-		url = "https://github.com/gitleaks/gitleaks/releases/download/v8.18.2/gitleaks_8.18.2_darwin_arm64.tar.gz"
-	default:
-		return errors.New("Unsupported platform")
-	}
-
-	err := downloadDependency("gitleaks", "tar.gz", url)
-	if err != nil {
-		return err
-	}
-
-	err = extractGzDependency("gitleaks")
-
-	return err
 }

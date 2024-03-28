@@ -1,4 +1,4 @@
-package main
+package scan
 
 import (
 	"fmt"
@@ -6,38 +6,21 @@ import (
 	"strings"
 
 	ignore "github.com/sabhiram/go-gitignore"
+	"secguro.com/secguro/pkg/dependencies"
+	"secguro.com/secguro/pkg/dependencycheck"
+	"secguro.com/secguro/pkg/functional"
+	"secguro.com/secguro/pkg/gitleaks"
+	"secguro.com/secguro/pkg/ignoring"
+	"secguro.com/secguro/pkg/output"
+	"secguro.com/secguro/pkg/semgrep"
+	"secguro.com/secguro/pkg/types"
 )
 
 const maxFindingsIndicatingExitCode = 250
 
-type GitInfo struct {
-	CommitHash         string
-	CommitDate         string
-	AuthorName         string
-	AuthorEmailAddress string
-	CommitSummary      string
-	File               string
-	Line               int
-}
-
-// The attributes need to start with capital letter because
-// otherwise the JSON formatter cannot see them.
-type UnifiedFinding struct {
-	Detector    string
-	Rule        string
-	File        string
-	LineStart   int
-	LineEnd     int
-	ColumnStart int
-	ColumnEnd   int
-	Match       string
-	Hint        string
-	GitInfo     *GitInfo
-}
-
-func commandScan(gitMode bool, disabledDetectors []string,
+func CommandScan(gitMode bool, disabledDetectors []string,
 	printAsJson bool, outputDestination string, tolerance int) error {
-	unifiedFindingsNotIgnored, err := performScan(gitMode, disabledDetectors)
+	unifiedFindingsNotIgnored, err := PerformScan(gitMode, disabledDetectors)
 	if err != nil {
 		return err
 	}
@@ -52,9 +35,9 @@ func commandScan(gitMode bool, disabledDetectors []string,
 	return nil
 }
 
-func performScan(gitMode bool, disabledDetectors []string) ([]UnifiedFinding, error) {
+func PerformScan(gitMode bool, disabledDetectors []string) ([]types.UnifiedFinding, error) {
 	fmt.Print("Downloading and extracting dependencies...")
-	err := installDependencies(disabledDetectors)
+	err := dependencies.InstallDependencies(disabledDetectors)
 	if err != nil {
 		return nil, err
 	}
@@ -87,52 +70,27 @@ func exitWithAppropriateExitCode(numberOfFindingsNotIgnored int, tolerance int) 
 	os.Exit(numberOfFindingsNotIgnored)
 }
 
-func installDependencies(disabledDetectors []string) error {
-	if !arrayIncludes(disabledDetectors, "gitleaks") {
-		err := downloadAndExtractGitleaks()
-		if err != nil {
-			return err
-		}
-	}
+func getUnifiedFindings(gitMode bool, disabledDetectors []string) ([]types.UnifiedFinding, error) {
+	unifiedFindings := make([]types.UnifiedFinding, 0)
 
-	if !arrayIncludes(disabledDetectors, "semgrep") {
-		err := installSemgrep()
-		if err != nil {
-			return err
-		}
-	}
-
-	if !arrayIncludes(disabledDetectors, "dependencycheck") {
-		err := downloadAndExtractDependencycheck()
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func getUnifiedFindings(gitMode bool, disabledDetectors []string) ([]UnifiedFinding, error) {
-	unifiedFindings := make([]UnifiedFinding, 0)
-
-	if !arrayIncludes(disabledDetectors, "gitleaks") {
-		unifiedFindingsGitleaks, err := getGitleaksFindingsAsUnified(gitMode)
+	if !functional.ArrayIncludes(disabledDetectors, "gitleaks") {
+		unifiedFindingsGitleaks, err := gitleaks.GetGitleaksFindingsAsUnified(gitMode)
 		if err != nil {
 			return unifiedFindings, err
 		}
 		unifiedFindings = append(unifiedFindings, unifiedFindingsGitleaks...)
 	}
 
-	if !arrayIncludes(disabledDetectors, "semgrep") {
-		unifiedFindingsSemgrep, err := getSemgrepFindingsAsUnified(gitMode)
+	if !functional.ArrayIncludes(disabledDetectors, "semgrep") {
+		unifiedFindingsSemgrep, err := semgrep.GetSemgrepFindingsAsUnified(gitMode)
 		if err != nil {
 			return unifiedFindings, err
 		}
 		unifiedFindings = append(unifiedFindings, unifiedFindingsSemgrep...)
 	}
 
-	if !arrayIncludes(disabledDetectors, "dependencycheck") {
-		unifiedFindingsDependencycheck, err := getDependencycheckFindingsAsUnified(gitMode)
+	if !functional.ArrayIncludes(disabledDetectors, "dependencycheck") {
+		unifiedFindingsDependencycheck, err := dependencycheck.GetDependencycheckFindingsAsUnified(gitMode)
 		if err != nil {
 			return unifiedFindings, err
 		}
@@ -142,24 +100,24 @@ func getUnifiedFindings(gitMode bool, disabledDetectors []string) ([]UnifiedFind
 	return unifiedFindings, nil
 }
 
-func getFindingsNotIgnored(unifiedFindings []UnifiedFinding) ([]UnifiedFinding, error) { //nolint: cyclop
-	lineBasedIgnoreInstructions := getLineBasedIgnoreInstructions(unifiedFindings)
-	fileBasedIgnoreInstructions, err := getFileBasedIgnoreInstructions()
+func getFindingsNotIgnored(unifiedFindings []types.UnifiedFinding) ([]types.UnifiedFinding, error) { //nolint: cyclop
+	lineBasedIgnoreInstructions := ignoring.GetLineBasedIgnoreInstructions(unifiedFindings)
+	fileBasedIgnoreInstructions, err := ignoring.GetFileBasedIgnoreInstructions()
 	if err != nil {
-		return make([]UnifiedFinding, 0), err
+		return make([]types.UnifiedFinding, 0), err
 	}
 
-	ignoreInstructions := []IgnoreInstruction{
+	ignoreInstructions := []ignoring.IgnoreInstruction{
 		// Ignore .secguroignore and .secguroignore-secrets in case
 		// a detector finds something in there in the future (does
 		// not currently appear to be the case).
 		{
-			FilePath:   "/" + ignoreFileName,
+			FilePath:   "/" + ignoring.IgnoreFileName,
 			LineNumber: -1,
 			Rules:      make([]string, 0),
 		},
 		{
-			FilePath:   "/" + secretsIgnoreFileName,
+			FilePath:   "/" + ignoring.SecretsIgnoreFileName,
 			LineNumber: -1,
 			Rules:      make([]string, 0),
 		},
@@ -167,25 +125,25 @@ func getFindingsNotIgnored(unifiedFindings []UnifiedFinding) ([]UnifiedFinding, 
 	ignoreInstructions = append(ignoreInstructions, lineBasedIgnoreInstructions...)
 	ignoreInstructions = append(ignoreInstructions, fileBasedIgnoreInstructions...)
 
-	ignoredSecrets, err := getIgnoredSecrets()
+	ignoredSecrets, err := ignoring.GetIgnoredSecrets()
 	if err != nil {
-		return make([]UnifiedFinding, 0), err
+		return make([]types.UnifiedFinding, 0), err
 	}
 
-	unifiedFindingsNotIgnored := Filter(unifiedFindings, func(unifiedFinding UnifiedFinding) bool {
+	unifiedFindingsNotIgnored := functional.Filter(unifiedFindings, func(unifiedFinding types.UnifiedFinding) bool {
 		// Filter findings based on rules ignored for specific paths as well as on specific lines.
 		for _, ii := range ignoreInstructions {
 			gitIgnoreMatcher := ignore.CompileIgnoreLines(ii.FilePath)
 			if gitIgnoreMatcher.MatchesPath(unifiedFinding.File) &&
 				(ii.LineNumber == unifiedFinding.LineStart || ii.LineNumber == -1) &&
-				(len(ii.Rules) == 0 || arrayIncludes(ii.Rules, unifiedFinding.Rule)) {
+				(len(ii.Rules) == 0 || functional.ArrayIncludes(ii.Rules, unifiedFinding.Rule)) {
 				return false
 			}
 		}
 
 		// Filter findings based on ignored secrets
 		for _, ignoredSecret := range ignoredSecrets {
-			if !isSecretDetectionRule(unifiedFinding.Rule) {
+			if !IsSecretDetectionRule(unifiedFinding.Rule) {
 				continue
 			}
 
@@ -201,24 +159,24 @@ func getFindingsNotIgnored(unifiedFindings []UnifiedFinding) ([]UnifiedFinding, 
 }
 
 func writeOutput(gitMode bool, printAsJson bool,
-	outputDestination string, unifiedFindingsNotIgnored []UnifiedFinding) error {
-	var output string
+	outputDestination string, unifiedFindingsNotIgnored []types.UnifiedFinding) error {
+	var outputString string
 	if printAsJson {
 		var err error
-		output, err = printJson(unifiedFindingsNotIgnored, gitMode)
+		outputString, err = output.PrintJson(unifiedFindingsNotIgnored, gitMode)
 		if err != nil {
 			return err
 		}
 	} else {
-		output = printText(unifiedFindingsNotIgnored, gitMode)
+		outputString = output.PrintText(unifiedFindingsNotIgnored, gitMode)
 	}
 
 	if outputDestination == "" {
 		fmt.Println("Findings:")
-		fmt.Println(output)
+		fmt.Println(outputString)
 	} else {
 		const filePermissions = 0644
-		err := os.WriteFile(outputDestination, []byte(output), filePermissions)
+		err := os.WriteFile(outputDestination, []byte(outputString), filePermissions)
 		if err != nil {
 			return err
 		}

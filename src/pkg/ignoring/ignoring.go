@@ -1,14 +1,18 @@
-package main
+package ignoring
 
 import (
 	"bufio"
 	"os"
 	"regexp"
 	"strings"
+
+	"secguro.com/secguro/pkg/config"
+	"secguro.com/secguro/pkg/functional"
+	"secguro.com/secguro/pkg/types"
 )
 
-const ignoreFileName = ".secguroignore"
-const secretsIgnoreFileName = ignoreFileName + "-secrets"
+const IgnoreFileName = ".secguroignore"
+const SecretsIgnoreFileName = IgnoreFileName + "-secrets"
 
 type IgnoreInstruction struct {
 	FilePath   string
@@ -16,10 +20,10 @@ type IgnoreInstruction struct {
 	Rules      []string // empty array signifies ignoring all rules
 }
 
-func getLineBasedIgnoreInstructions(unifiedFindings []UnifiedFinding) []IgnoreInstruction {
+func GetLineBasedIgnoreInstructions(unifiedFindings []types.UnifiedFinding) []IgnoreInstruction {
 	filePathsWithResults := make([]string, 0)
 	for _, unifiedFinding := range unifiedFindings {
-		if arrayIncludes(filePathsWithResults, unifiedFinding.File) {
+		if functional.ArrayIncludes(filePathsWithResults, unifiedFinding.File) {
 			continue
 		}
 
@@ -28,7 +32,8 @@ func getLineBasedIgnoreInstructions(unifiedFindings []UnifiedFinding) []IgnoreIn
 
 	ignoreInstructions := make([]IgnoreInstruction, 0)
 	for _, filePath := range filePathsWithResults {
-		lineNumbers, err := getNumbersOfMatchingLines(directoryToScan+"/"+filePath, "secguro-ignore-next-line")
+		lineNumbers, err := getNumbersOfMatchingLines(config.DirectoryToScan+"/"+filePath,
+			"secguro-ignore-next-line")
 		if err != nil {
 			// Ignore failing file reads because this happens in git mode if the file has been deleted.
 			continue
@@ -78,10 +83,10 @@ func getNumbersOfMatchingLines(filePath string, pattern string) ([]int, error) {
 	return matchingLines, nil
 }
 
-func getFileBasedIgnoreInstructions() ([]IgnoreInstruction, error) {
+func GetFileBasedIgnoreInstructions() ([]IgnoreInstruction, error) {
 	ignoreInstructions := make([]IgnoreInstruction, 0)
 
-	file, err := os.Open(directoryToScan + "/" + ignoreFileName)
+	file, err := os.Open(config.DirectoryToScan + "/" + IgnoreFileName)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return ignoreInstructions, nil
@@ -123,10 +128,10 @@ func getFileBasedIgnoreInstructions() ([]IgnoreInstruction, error) {
 	return ignoreInstructions, nil
 }
 
-func getIgnoredSecrets() ([]string, error) {
+func GetIgnoredSecrets() ([]string, error) {
 	ignoredSecrets := make([]string, 0)
 
-	file, err := os.Open(directoryToScan + "/" + secretsIgnoreFileName)
+	file, err := os.Open(config.DirectoryToScan + "/" + SecretsIgnoreFileName)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return ignoredSecrets, nil

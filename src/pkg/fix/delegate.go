@@ -1,9 +1,10 @@
-package main
+package fix
 
 import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"secguro.com/secguro/pkg/types"
 )
 
 // Display 5 lines per item description; i.e. 6 lines per item.
@@ -16,7 +17,7 @@ func newItemDelegate(keys *delegateKeyMap) list.DefaultDelegate {
 	//nolint: varnamelen
 	d.UpdateFunc = func(msg tea.Msg, m *list.Model) tea.Cmd {
 		var title string
-		var unifiedFinding UnifiedFinding
+		var unifiedFinding types.UnifiedFinding
 
 		if i, ok := m.SelectedItem().(item); ok {
 			title = i.Title()
