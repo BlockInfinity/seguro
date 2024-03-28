@@ -12,6 +12,7 @@ import (
 	"secguro.com/secguro/pkg/fix"
 	"secguro.com/secguro/pkg/functional"
 	"secguro.com/secguro/pkg/github"
+	"secguro.com/secguro/pkg/login"
 	"secguro.com/secguro/pkg/scan"
 )
 
@@ -28,7 +29,11 @@ func main() { //nolint: funlen, cyclop
 	var flagTolerance int
 	var flagDisabledDetectors []string
 
-	flagsAllModes := []cli.Flag{
+	loginAction := func(cCtx *cli.Context) error {
+		return login.CommandLogin()
+	}
+
+	flagsScanAndFixMode := []cli.Flag{
 		&cli.BoolFlag{ //nolint: exhaustruct
 			Name:        "git",
 			Usage:       "set to scan git history and print commit information",
@@ -66,7 +71,7 @@ func main() { //nolint: funlen, cyclop
 		},
 	}
 
-	action := func(cCtx *cli.Context) error {
+	scanOrFixAction := func(cCtx *cli.Context) error {
 		if cCtx.NArg() > 0 {
 			config.DirectoryToScan = cCtx.Args().Get(0)
 		}
@@ -119,16 +124,21 @@ func main() { //nolint: funlen, cyclop
 	app := &cli.App{ //nolint: exhaustruct
 		Commands: []*cli.Command{
 			{
+				Name:   "login",
+				Usage:  "log in to report findings to secguro web",
+				Action: loginAction,
+			},
+			{
 				Name:   "scan",
 				Usage:  "scan for problems",
-				Flags:  append(append([]cli.Flag{}, flagsAllModes...), flagsOnlyScanMode...),
-				Action: action,
+				Flags:  append(append([]cli.Flag{}, flagsScanAndFixMode...), flagsOnlyScanMode...),
+				Action: scanOrFixAction,
 			},
 			{
 				Name:   "fix",
 				Usage:  "scan for problems and then switch to an interactive mode to fix them",
-				Flags:  flagsAllModes,
-				Action: action,
+				Flags:  flagsScanAndFixMode,
+				Action: scanOrFixAction,
 			},
 		},
 		Action: func(cCtx *cli.Context) error {
