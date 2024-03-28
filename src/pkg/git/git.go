@@ -44,7 +44,7 @@ func GetGitInfo(gitMode bool, revision string,
 func getGitBlameOutput(revision string, filePath string, lineNumber int, reverse bool) ([]byte, error) {
 	lineRange := fmt.Sprintf("%d,%d", lineNumber, lineNumber)
 
-	args := []string{"git", "blame", "-p", "-L", lineRange}
+	args := []string{"blame", "-p", "-L", lineRange}
 	if revision == "" { //nolint: nestif
 		if reverse {
 			return make([]byte, 0), errors.New(
