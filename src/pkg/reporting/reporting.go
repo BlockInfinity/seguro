@@ -35,11 +35,11 @@ func ReportScan(unifiedFindings []types.UnifiedFinding) error {
 		return err
 	}
 
-	if response.StatusCode() != http.StatusOK {
+	if response.StatusCode() != http.StatusCreated {
 		return errors.New("received bad status code")
 	}
 
-	if result.Status != "ok" {
+	if result.Status != "created" {
 		return errors.New("received bad status response")
 	}
 
