@@ -1,7 +1,7 @@
 default: compile
 
 compile:
-	(cd src && go build -o ../build/secguro .)
+	go build -o build/secguro .
 
 lint:
-	(cd src && golangci-lint run)
+	golangci-lint run
