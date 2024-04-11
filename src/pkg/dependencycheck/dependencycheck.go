@@ -8,9 +8,9 @@ import (
 	"os/exec"
 	"strings"
 
-	"secguro.com/secguro/pkg/config"
-	"secguro.com/secguro/pkg/dependencies"
-	"secguro.com/secguro/pkg/types"
+	"github.com/secguro/secguro-cli/pkg/config"
+	"github.com/secguro/secguro-cli/pkg/dependencies"
+	"github.com/secguro/secguro-cli/pkg/types"
 )
 
 type Meta_DependencycheckFinding struct {

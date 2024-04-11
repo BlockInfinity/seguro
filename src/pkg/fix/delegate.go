@@ -4,7 +4,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"secguro.com/secguro/pkg/types"
+	"github.com/secguro/secguro-cli/pkg/types"
 )
 
 // Display 5 lines per item description; i.e. 6 lines per item.

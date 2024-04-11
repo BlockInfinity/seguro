@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"secguro.com/secguro/pkg/functional"
-	"secguro.com/secguro/pkg/types"
+	"github.com/secguro/secguro-cli/pkg/functional"
+	"github.com/secguro/secguro-cli/pkg/types"
 )
 
 type UnifiedFindingSansGitInfo struct {

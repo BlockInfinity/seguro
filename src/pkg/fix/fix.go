@@ -5,10 +5,10 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"secguro.com/secguro/pkg/functional"
-	"secguro.com/secguro/pkg/output"
-	"secguro.com/secguro/pkg/scan"
-	"secguro.com/secguro/pkg/types"
+	"github.com/secguro/secguro-cli/pkg/functional"
+	"github.com/secguro/secguro-cli/pkg/output"
+	"github.com/secguro/secguro-cli/pkg/scan"
+	"github.com/secguro/secguro-cli/pkg/types"
 )
 
 var (

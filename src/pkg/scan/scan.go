@@ -6,16 +6,16 @@ import (
 	"strings"
 
 	ignore "github.com/sabhiram/go-gitignore"
-	"secguro.com/secguro/pkg/dependencies"
-	"secguro.com/secguro/pkg/dependencycheck"
-	"secguro.com/secguro/pkg/functional"
-	"secguro.com/secguro/pkg/gitleaks"
-	"secguro.com/secguro/pkg/ignoring"
-	"secguro.com/secguro/pkg/login"
-	"secguro.com/secguro/pkg/output"
-	"secguro.com/secguro/pkg/reporting"
-	"secguro.com/secguro/pkg/semgrep"
-	"secguro.com/secguro/pkg/types"
+	"github.com/secguro/secguro-cli/pkg/dependencies"
+	"github.com/secguro/secguro-cli/pkg/dependencycheck"
+	"github.com/secguro/secguro-cli/pkg/functional"
+	"github.com/secguro/secguro-cli/pkg/gitleaks"
+	"github.com/secguro/secguro-cli/pkg/ignoring"
+	"github.com/secguro/secguro-cli/pkg/login"
+	"github.com/secguro/secguro-cli/pkg/output"
+	"github.com/secguro/secguro-cli/pkg/reporting"
+	"github.com/secguro/secguro-cli/pkg/semgrep"
+	"github.com/secguro/secguro-cli/pkg/types"
 )
 
 const maxFindingsIndicatingExitCode = 250
