@@ -9,10 +9,10 @@ import (
 	"strings"
 
 	openai "github.com/sashabaranov/go-openai"
+	"github.com/secguro/secguro-cli/pkg/config"
+	"github.com/secguro/secguro-cli/pkg/output"
+	"github.com/secguro/secguro-cli/pkg/types"
 	"github.com/sergi/go-diff/diffmatchpatch"
-	"secguro.com/secguro/pkg/config"
-	"secguro.com/secguro/pkg/output"
-	"secguro.com/secguro/pkg/types"
 )
 
 const openAiApiKeyEnvVarName = "OPEN_AI_API_KEY"

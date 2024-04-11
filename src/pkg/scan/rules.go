@@ -1,6 +1,6 @@
 package scan
 
-import "secguro.com/secguro/pkg/functional"
+import "github.com/secguro/secguro-cli/pkg/functional"
 
 func IsSecretDetectionRule(rule string) bool {
 	secretDetectionRules := []string{

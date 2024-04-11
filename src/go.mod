@@ -1,4 +1,4 @@
-module secguro.com/secguro
+module github.com/secguro/secguro-cli
 
 go 1.21.7
 

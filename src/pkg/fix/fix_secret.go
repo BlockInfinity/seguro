@@ -6,10 +6,10 @@ import (
 	"os"
 	"os/exec"
 
-	"secguro.com/secguro/pkg/config"
-	"secguro.com/secguro/pkg/dependencies"
-	"secguro.com/secguro/pkg/ignoring"
-	"secguro.com/secguro/pkg/types"
+	"github.com/secguro/secguro-cli/pkg/config"
+	"github.com/secguro/secguro-cli/pkg/dependencies"
+	"github.com/secguro/secguro-cli/pkg/ignoring"
+	"github.com/secguro/secguro-cli/pkg/types"
 )
 
 func fixSecret(previousStep func() error, unifiedFinding types.UnifiedFinding) error {

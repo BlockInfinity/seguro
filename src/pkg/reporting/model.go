@@ -1,6 +1,6 @@
 package reporting
 
-import "secguro.com/secguro/pkg/types"
+import "github.com/secguro/secguro-cli/pkg/types"
 
 type ScanPostReq struct {
 	ProjectName string

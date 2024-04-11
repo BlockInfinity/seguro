@@ -6,11 +6,11 @@ import (
 	"os"
 	"os/exec"
 
-	"secguro.com/secguro/pkg/config"
-	"secguro.com/secguro/pkg/dependencies"
-	"secguro.com/secguro/pkg/functional"
-	"secguro.com/secguro/pkg/git"
-	"secguro.com/secguro/pkg/types"
+	"github.com/secguro/secguro-cli/pkg/config"
+	"github.com/secguro/secguro-cli/pkg/dependencies"
+	"github.com/secguro/secguro-cli/pkg/functional"
+	"github.com/secguro/secguro-cli/pkg/git"
+	"github.com/secguro/secguro-cli/pkg/types"
 )
 
 type GitleaksFinding struct {

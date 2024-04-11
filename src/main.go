@@ -6,14 +6,14 @@ import (
 	"log"
 	"os"
 
+	"github.com/secguro/secguro-cli/pkg/config"
+	"github.com/secguro/secguro-cli/pkg/dependencycheck"
+	"github.com/secguro/secguro-cli/pkg/fix"
+	"github.com/secguro/secguro-cli/pkg/functional"
+	"github.com/secguro/secguro-cli/pkg/github"
+	"github.com/secguro/secguro-cli/pkg/login"
+	"github.com/secguro/secguro-cli/pkg/scan"
 	"github.com/urfave/cli/v2"
-	"secguro.com/secguro/pkg/config"
-	"secguro.com/secguro/pkg/dependencycheck"
-	"secguro.com/secguro/pkg/fix"
-	"secguro.com/secguro/pkg/functional"
-	"secguro.com/secguro/pkg/github"
-	"secguro.com/secguro/pkg/login"
-	"secguro.com/secguro/pkg/scan"
 )
 
 func main() { //nolint: funlen, cyclop

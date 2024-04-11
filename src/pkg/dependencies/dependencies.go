@@ -1,7 +1,7 @@
 package dependencies
 
 import (
-	"secguro.com/secguro/pkg/functional"
+	"github.com/secguro/secguro-cli/pkg/functional"
 )
 
 func InstallDependencies(disabledDetectors []string) error {
