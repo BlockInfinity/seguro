@@ -21,7 +21,12 @@ func ReportScan(authToken string, unifiedFindings []types.UnifiedFinding) error 
 
 	revision, err := git.GetLatestCommitHash()
 	if err != nil {
-		return err
+		// Set revision to empty string for paths that are not in git repos.
+		if err.Error() == "exit status 128" {
+			revision = ""
+		} else {
+			return err
+		}
 	}
 
 	urlEndpointSaveScan := config.ServerUrl + "/" + endpointSaveScan
