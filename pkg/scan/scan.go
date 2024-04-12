@@ -32,12 +32,12 @@ func CommandScan(gitMode bool, disabledDetectors []string,
 		return err
 	}
 
-	isLoggedIn, err := login.IsUserLoggedIn()
+	deviceToken, err := login.GetDeviceToken()
 	if err != nil {
 		return err
 	}
-	if isLoggedIn {
-		err = reporting.ReportScan(unifiedFindingsNotIgnored)
+	if deviceToken != "" {
+		err = reporting.ReportScan(deviceToken, unifiedFindingsNotIgnored)
 		if err != nil {
 			return err
 		}

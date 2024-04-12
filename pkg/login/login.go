@@ -9,7 +9,8 @@ const deviceTokenFileName = "device_token"
 const secguroConfigDirName = ".secguro"
 
 func CommandLogin() error {
-	deviceToken := "sample device token"
+	// email address is auth token until auth method has been decided upon
+	deviceToken := "bob@trashmail.com"
 
 	pathSecguroConfigDir, err := getSecguroConfigDirPath()
 	if err != nil {
@@ -30,18 +31,25 @@ func CommandLogin() error {
 	return nil
 }
 
-func IsUserLoggedIn() (bool, error) {
+func GetDeviceToken() (string, error) {
 	pathSecguroConfigDir, err := getSecguroConfigDirPath()
 	if err != nil {
-		return false, err
+		return "", err
 	}
 
 	if _, err := os.Stat(pathSecguroConfigDir + "/" + deviceTokenFileName); err == nil {
-		return true, nil
+		authTokenBytes, err := os.ReadFile(pathSecguroConfigDir + "/" + deviceTokenFileName)
+		if err != nil {
+			return "", err
+		}
+
+		authToken := string(authTokenBytes)
+
+		return authToken, nil
 	} else if errors.Is(err, os.ErrNotExist) {
-		return false, nil
+		return "", nil
 	} else {
-		return false, errors.New("cannot determine whether user is logged in")
+		return "", errors.New("cannot determine whether user is logged in")
 	}
 }
 
