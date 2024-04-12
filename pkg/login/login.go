@@ -1,7 +1,6 @@
 package login
 
 import (
-	"errors"
 	"os"
 )
 
@@ -30,19 +29,20 @@ func CommandLogin() error {
 	return nil
 }
 
-func IsUserLoggedIn() (bool, error) {
+func GetDeviceToken() (string, error) {
 	pathSecguroConfigDir, err := getSecguroConfigDirPath()
 	if err != nil {
-		return false, err
+		return "", err
 	}
 
-	if _, err := os.Stat(pathSecguroConfigDir + "/" + deviceTokenFileName); err == nil {
-		return true, nil
-	} else if errors.Is(err, os.ErrNotExist) {
-		return false, nil
-	} else {
-		return false, errors.New("cannot determine whether user is logged in")
+	authTokenBytes, err := os.ReadFile(pathSecguroConfigDir + "/" + deviceTokenFileName)
+	if err != nil {
+		return "", err
 	}
+
+	authToken := string(authTokenBytes)
+
+	return authToken, nil
 }
 
 func ensureDirectoryExists(path string) error {

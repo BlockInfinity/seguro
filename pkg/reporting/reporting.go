@@ -12,7 +12,7 @@ import (
 
 const endpointSaveScan = "saveScan"
 
-func ReportScan(unifiedFindings []types.UnifiedFinding) error {
+func ReportScan(authToken string, unifiedFindings []types.UnifiedFinding) error {
 	fmt.Print("Sending scan report to server...")
 
 	urlEndpointSaveScan := config.ServerUrl + "/" + endpointSaveScan
@@ -25,10 +25,9 @@ func ReportScan(unifiedFindings []types.UnifiedFinding) error {
 
 	result := ConfirmationRes{} //nolint: exhaustruct
 	client := resty.New()
-	// email address is auth token until auth method has been decided upon
 	response, err := client.R().
 		SetHeader("Content-Type", "application/json").
-		SetHeader("Authorization", "bob@trashmail.com").
+		SetHeader("Authorization", authToken).
 		SetBody(scanPostReq).
 		SetResult(&result).
 		Post(urlEndpointSaveScan)
