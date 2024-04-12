@@ -6,11 +6,9 @@ import (
 	"strings"
 
 	ignore "github.com/sabhiram/go-gitignore"
-	"github.com/secguro/secguro-cli/pkg/config"
 	"github.com/secguro/secguro-cli/pkg/dependencies"
 	"github.com/secguro/secguro-cli/pkg/dependencycheck"
 	"github.com/secguro/secguro-cli/pkg/functional"
-	"github.com/secguro/secguro-cli/pkg/git"
 	"github.com/secguro/secguro-cli/pkg/gitleaks"
 	"github.com/secguro/secguro-cli/pkg/ignoring"
 	"github.com/secguro/secguro-cli/pkg/login"
@@ -39,15 +37,8 @@ func CommandScan(gitMode bool, disabledDetectors []string,
 		return err
 	}
 
-	projectName := config.DirectoryToScan[strings.LastIndex(config.DirectoryToScan, "/")+1:]
-
-	revision, err := git.GetLatestCommitHash()
-	if err != nil {
-		return err
-	}
-
 	if deviceToken != "" {
-		err = reporting.ReportScan(deviceToken, projectName, revision, unifiedFindingsNotIgnored)
+		err = reporting.ReportScan(deviceToken, unifiedFindingsNotIgnored)
 		if err != nil {
 			return err
 		}
