@@ -12,14 +12,15 @@ import (
 
 const endpointSaveScan = "saveScan"
 
-func ReportScan(authToken string, unifiedFindings []types.UnifiedFinding) error {
+func ReportScan(authToken string, projectName string, revision string,
+	unifiedFindings []types.UnifiedFinding) error {
 	fmt.Print("Sending scan report to server...")
 
 	urlEndpointSaveScan := config.ServerUrl + "/" + endpointSaveScan
 
 	scanPostReq := ScanPostReq{
-		ProjectName: "example project",
-		Revision:    "example revision",
+		ProjectName: projectName,
+		Revision:    revision,
 		Findings:    unifiedFindings,
 	}
 
