@@ -8,7 +8,8 @@ const deviceTokenFileName = "device_token"
 const secguroConfigDirName = ".secguro"
 
 func CommandLogin() error {
-	deviceToken := "sample device token"
+	// email address is auth token until auth method has been decided upon
+	deviceToken := "bob@trashmail.com"
 
 	pathSecguroConfigDir, err := getSecguroConfigDirPath()
 	if err != nil {
