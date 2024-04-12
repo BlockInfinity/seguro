@@ -25,8 +25,10 @@ func ReportScan(unifiedFindings []types.UnifiedFinding) error {
 
 	result := ConfirmationRes{} //nolint: exhaustruct
 	client := resty.New()
+	// email address is auth token until auth method has been decided upon
 	response, err := client.R().
 		SetHeader("Content-Type", "application/json").
+		SetHeader("Authorization", "bob@trashmail.com").
 		SetBody(scanPostReq).
 		SetResult(&result).
 		Post(urlEndpointSaveScan)
