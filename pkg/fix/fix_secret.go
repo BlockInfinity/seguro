@@ -188,7 +188,12 @@ func removeSecret(directoryToScan string, secret string) error {
 		return err
 	}
 
-	pathReplacementsFile := dependencies.DependenciesDir + "/" + "replacements"
+	tmpDir, err := os.MkdirTemp("", "")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmpDir)
+	pathReplacementsFile := tmpDir + "/" + "replacements"
 
 	const filePermissions = 0600
 	defer os.Remove(pathReplacementsFile)
