@@ -62,16 +62,16 @@ func convertDependencycheckFindingToUnifiedFinding(dependencycheckFinding Depend
 	}
 }
 
-func getDependencycheckOutputJson(_gitMode bool) ([]byte, error) {
+func getDependencycheckOutputJson(directoryToScan string, _gitMode bool) ([]byte, error) {
 	dependencycheckOutputDirPath := dependencies.DependenciesDir + "/dependencycheckOutput"
 	dependencycheckOutputJsonPath := dependencycheckOutputDirPath + "/dependency-check-report.json"
 
 	// secguro-ignore-next-line
 	cmd := exec.Command(dependencies.DependenciesDir+"/dependencycheck/dependency-check/bin/dependency-check.sh",
 		"--enableExperimental", // necessary for support of go dependencies
-		"--scan", config.DirectoryToScan+"/**/package.json",
-		"--scan", config.DirectoryToScan+"/**/package-lock.json",
-		"--scan", config.DirectoryToScan+"/**/go.mod", // .sum files are not considered by dependencycheck
+		"--scan", directoryToScan+"/**/package.json",
+		"--scan", directoryToScan+"/**/package-lock.json",
+		"--scan", directoryToScan+"/**/go.mod", // .sum files are not considered by dependencycheck
 		"--format", "JSON", "--out", dependencycheckOutputDirPath,
 		"--nvdApiKey", os.Getenv(NvdApiKeyEnvVarName))
 	out, err := cmd.Output()
@@ -97,8 +97,8 @@ func getDependencycheckOutputJson(_gitMode bool) ([]byte, error) {
 	return dependencycheckOutputJson, err
 }
 
-func GetDependencycheckFindingsAsUnified(gitMode bool) ([]types.UnifiedFinding, error) {
-	dependencycheckOutputJson, err := getDependencycheckOutputJson(gitMode)
+func GetDependencycheckFindingsAsUnified(directoryToScan string, gitMode bool) ([]types.UnifiedFinding, error) {
+	dependencycheckOutputJson, err := getDependencycheckOutputJson(directoryToScan, gitMode)
 	if err != nil {
 		return nil, err
 	}

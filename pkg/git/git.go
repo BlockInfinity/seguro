@@ -9,20 +9,19 @@ import (
 	"strings"
 	"time"
 
-	"github.com/secguro/secguro-cli/pkg/config"
 	"github.com/secguro/secguro-cli/pkg/types"
 )
 
 /**
  * Returns git info if in git mode; otherwise returns nil.
  */
-func GetGitInfo(gitMode bool, revision string,
+func GetGitInfo(directoryToScan string, gitMode bool, revision string,
 	filePath string, lineNumber int, reverse bool) (*types.GitInfo, error) {
 	if !gitMode {
 		return nil, nil //nolint: nilnil
 	}
 
-	gitBlameOutput, err := getGitBlameOutput(revision, filePath, lineNumber, reverse)
+	gitBlameOutput, err := getGitBlameOutput(directoryToScan, revision, filePath, lineNumber, reverse)
 
 	// If the file is not tracked with git, getGitBlameOutput() returns an error
 	// because `git blame` exits with exit code 128. However, this behavior does
@@ -41,7 +40,8 @@ func GetGitInfo(gitMode bool, revision string,
 /**
  * Empty string for revision means working directory.
  */
-func getGitBlameOutput(revision string, filePath string, lineNumber int, reverse bool) ([]byte, error) {
+func getGitBlameOutput(directoryToScan string,
+	revision string, filePath string, lineNumber int, reverse bool) ([]byte, error) {
 	lineRange := fmt.Sprintf("%d,%d", lineNumber, lineNumber)
 
 	args := []string{"blame", "-p", "-L", lineRange}
@@ -63,7 +63,7 @@ func getGitBlameOutput(revision string, filePath string, lineNumber int, reverse
 	args = append(args, "--", filePath)
 
 	cmd := exec.Command("git", args...)
-	cmd.Dir = config.DirectoryToScan
+	cmd.Dir = directoryToScan
 	gitBlameOutput, err := cmd.Output()
 
 	return gitBlameOutput, err
@@ -122,9 +122,9 @@ func parseGitBlameOutput(gitBlameOutput []byte) (types.GitInfo, error) { //nolin
 	return gitInfo, nil
 }
 
-func GetLatestCommitHash() (string, error) {
+func GetLatestCommitHash(directoryToScan string) (string, error) {
 	cmd := exec.Command("git", "rev-parse", "HEAD")
-	cmd.Dir = config.DirectoryToScan
+	cmd.Dir = directoryToScan
 	gitRevParseOutput, err := cmd.Output()
 	if err != nil {
 		return "", err

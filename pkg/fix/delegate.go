@@ -10,7 +10,7 @@ import (
 // Display 5 lines per item description; i.e. 6 lines per item.
 const numberOfLinesOfItemDescription = 5
 
-func newItemDelegate(keys *delegateKeyMap) list.DefaultDelegate {
+func newItemDelegate(directoryToScan string, keys *delegateKeyMap) list.DefaultDelegate {
 	d := list.NewDefaultDelegate() //nolint: varnamelen
 	d.SetHeight(numberOfLinesOfItemDescription + 1)
 
@@ -32,7 +32,7 @@ func newItemDelegate(keys *delegateKeyMap) list.DefaultDelegate {
 			case key.Matches(msg, keys.choose):
 				{
 					actionPastFixSelection = func() error {
-						return fixUnifiedFinding(showProblemsList, unifiedFinding)
+						return fixUnifiedFinding(directoryToScan, showProblemsList, unifiedFinding)
 					}
 
 					return tea.Quit

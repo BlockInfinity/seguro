@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	openai "github.com/sashabaranov/go-openai"
-	"github.com/secguro/secguro-cli/pkg/config"
 	"github.com/secguro/secguro-cli/pkg/output"
 	"github.com/secguro/secguro-cli/pkg/types"
 	"github.com/sergi/go-diff/diffmatchpatch"
@@ -17,22 +16,24 @@ import (
 
 const openAiApiKeyEnvVarName = "OPEN_AI_API_KEY"
 
-func fixProblemViaAi(previousStep func() error, unifiedFinding types.UnifiedFinding) error {
-	return fixProblemViaAiStep1(previousStep, unifiedFinding)
+func fixProblemViaAi(directoryToScan string,
+	previousStep func() error, unifiedFinding types.UnifiedFinding) error {
+	return fixProblemViaAiStep1(directoryToScan, previousStep, unifiedFinding)
 }
 
-func fixProblemViaAiStep1(previousStep func() error, unifiedFinding types.UnifiedFinding) error {
-	newFileContent, diff, err := getFixedFileContentAndDiff(unifiedFinding)
+func fixProblemViaAiStep1(directoryToScan string,
+	previousStep func() error, unifiedFinding types.UnifiedFinding) error {
+	newFileContent, diff, err := getFixedFileContentAndDiff(directoryToScan, unifiedFinding)
 	if err != nil {
 		return err
 	}
 
-	return fixProblemViaAiStep2(previousStep,
-		func() error { return fixProblemViaAiStep1(previousStep, unifiedFinding) },
+	return fixProblemViaAiStep2(directoryToScan, previousStep,
+		func() error { return fixProblemViaAiStep1(directoryToScan, previousStep, unifiedFinding) },
 		unifiedFinding.File, newFileContent, diff)
 }
 
-func fixProblemViaAiStep2(previousStep func() error, retry func() error,
+func fixProblemViaAiStep2(directoryToScan string, previousStep func() error, retry func() error,
 	filePath string, newFileContent string, diff string) error {
 	prompt := "Does the following fix of file " + filePath + " look okay?\n\n" + diff
 
@@ -49,7 +50,7 @@ func fixProblemViaAiStep2(previousStep func() error, retry func() error,
 		return retry()
 	case 2:
 		fmt.Print("Applying fix...")
-		err := replaceFileContents(filePath, newFileContent)
+		err := replaceFileContents(directoryToScan, filePath, newFileContent)
 		if err != nil {
 			return err
 		}
@@ -61,8 +62,9 @@ func fixProblemViaAiStep2(previousStep func() error, retry func() error,
 	return errors.New("unexpected choice index")
 }
 
-func getFixedFileContentAndDiff(unifiedFinding types.UnifiedFinding) (string, string, error) {
-	fileContentByteArr, err := os.ReadFile(config.DirectoryToScan + "/" + unifiedFinding.File)
+func getFixedFileContentAndDiff(directoryToScan string,
+	unifiedFinding types.UnifiedFinding) (string, string, error) {
+	fileContentByteArr, err := os.ReadFile(directoryToScan + "/" + unifiedFinding.File)
 	if err != nil {
 		return "", "", err
 	}
@@ -198,9 +200,9 @@ func getDiffSplitByLines(diff []diffmatchpatch.Diff) []diffmatchpatch.Diff {
 	return result
 }
 
-func replaceFileContents(filePath string, newFileContent string) error {
+func replaceFileContents(directoryToScan string, filePath string, newFileContent string) error {
 	const fileMode fs.FileMode = 0666
-	file, err := os.OpenFile(config.DirectoryToScan+"/"+filePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, fileMode)
+	file, err := os.OpenFile(directoryToScan+"/"+filePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, fileMode)
 	if err != nil {
 		return err
 	}

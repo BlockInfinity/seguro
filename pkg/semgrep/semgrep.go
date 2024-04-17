@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/secguro/secguro-cli/pkg/config"
 	"github.com/secguro/secguro-cli/pkg/dependencies"
 	"github.com/secguro/secguro-cli/pkg/functional"
 	"github.com/secguro/secguro-cli/pkg/git"
@@ -35,8 +34,10 @@ type SemgrepFinding_extra struct {
 	Message string
 }
 
-func convertSemgrepFindingToUnifiedFinding(gitMode bool, semgrepFinding SemgrepFinding) (types.UnifiedFinding, error) {
-	gitInfo, err := git.GetGitInfo(gitMode, "", semgrepFinding.Path, semgrepFinding.Start.Line, false)
+func convertSemgrepFindingToUnifiedFinding(directoryToScan string, gitMode bool,
+	semgrepFinding SemgrepFinding) (types.UnifiedFinding, error) {
+	gitInfo, err := git.GetGitInfo(directoryToScan, gitMode,
+		"", semgrepFinding.Path, semgrepFinding.Start.Line, false)
 	if err != nil {
 		return types.UnifiedFinding{}, err
 	}
@@ -57,11 +58,11 @@ func convertSemgrepFindingToUnifiedFinding(gitMode bool, semgrepFinding SemgrepF
 	return unifiedFinding, nil
 }
 
-func getSemgrepOutputJson() ([]byte, error) {
+func getSemgrepOutputJson(directoryToScan string) ([]byte, error) {
 	semgrepOutputJsonPath := dependencies.DependenciesDir + "/semgrepOutput.json"
 
 	cmd := exec.Command("semgrep", "scan", "--json", "-o", semgrepOutputJsonPath)
-	cmd.Dir = config.DirectoryToScan
+	cmd.Dir = directoryToScan
 	// Ignore error because this is expected to deliver an exit code not equal to 0 and write to stderr.
 	out, _ := cmd.Output()
 	if len(out) != 0 {
@@ -73,8 +74,8 @@ func getSemgrepOutputJson() ([]byte, error) {
 	return semgrepOutputJson, err
 }
 
-func GetSemgrepFindingsAsUnified(gitMode bool) ([]types.UnifiedFinding, error) {
-	semgrepOutputJson, err := getSemgrepOutputJson()
+func GetSemgrepFindingsAsUnified(directoryToScan string, gitMode bool) ([]types.UnifiedFinding, error) {
+	semgrepOutputJson, err := getSemgrepOutputJson(directoryToScan)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +90,7 @@ func GetSemgrepFindingsAsUnified(gitMode bool) ([]types.UnifiedFinding, error) {
 
 	unifiedFindings, err := functional.MapWithError(semgrepFindings,
 		func(semgrepFinding SemgrepFinding) (types.UnifiedFinding, error) {
-			return convertSemgrepFindingToUnifiedFinding(gitMode, semgrepFinding)
+			return convertSemgrepFindingToUnifiedFinding(directoryToScan, gitMode, semgrepFinding)
 		})
 	if err != nil {
 		return make([]types.UnifiedFinding, 0), err

@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/secguro/secguro-cli/pkg/config"
 	"github.com/secguro/secguro-cli/pkg/dependencies"
 	"github.com/secguro/secguro-cli/pkg/functional"
 	"github.com/secguro/secguro-cli/pkg/git"
@@ -28,15 +27,15 @@ type GitleaksFinding struct {
 	Message     string
 }
 
-func convertGitleaksFindingToUnifiedFinding(gitMode bool,
+func convertGitleaksFindingToUnifiedFinding(directoryToScan string, gitMode bool,
 	gitleaksFinding GitleaksFinding) (types.UnifiedFinding, error) {
-	gitInfo, err := git.GetGitInfo(gitMode, gitleaksFinding.Commit,
+	gitInfo, err := git.GetGitInfo(directoryToScan, gitMode, gitleaksFinding.Commit,
 		gitleaksFinding.File, gitleaksFinding.StartLine, false)
 	if err != nil {
 		return types.UnifiedFinding{}, err
 	}
 
-	currentLocationGitInfo, err := git.GetGitInfo(gitMode, gitleaksFinding.Commit,
+	currentLocationGitInfo, err := git.GetGitInfo(directoryToScan, gitMode, gitleaksFinding.Commit,
 		gitleaksFinding.File, gitleaksFinding.StartLine, true)
 	if err != nil {
 		return types.UnifiedFinding{}, err
@@ -56,7 +55,7 @@ func convertGitleaksFindingToUnifiedFinding(gitMode bool,
 	}
 
 	if currentLocationGitInfo != nil {
-		latestCommitHash, err := git.GetLatestCommitHash()
+		latestCommitHash, err := git.GetLatestCommitHash(directoryToScan)
 		if err != nil {
 			return types.UnifiedFinding{}, err
 		}
@@ -76,7 +75,7 @@ func convertGitleaksFindingToUnifiedFinding(gitMode bool,
 	return unifiedFinding, nil
 }
 
-func getGitleaksOutputJson(gitMode bool) ([]byte, error) {
+func getGitleaksOutputJson(directoryToScan string, gitMode bool) ([]byte, error) {
 	gitleaksOutputJsonPath := dependencies.DependenciesDir + "/gitleaksOutput.json"
 
 	cmd := (func() *exec.Cmd {
@@ -90,7 +89,7 @@ func getGitleaksOutputJson(gitMode bool) ([]byte, error) {
 				"detect", "--no-git", "--report-format", "json", "--report-path", gitleaksOutputJsonPath)
 		}
 	})()
-	cmd.Dir = config.DirectoryToScan
+	cmd.Dir = directoryToScan
 	// Ignore error because this is expected to deliver an exit code not equal to 0 and write to stderr.
 	out, _ := cmd.Output()
 	if out == nil {
@@ -102,8 +101,8 @@ func getGitleaksOutputJson(gitMode bool) ([]byte, error) {
 	return gitleaksOutputJson, err
 }
 
-func GetGitleaksFindingsAsUnified(gitMode bool) ([]types.UnifiedFinding, error) {
-	gitleaksOutputJson, err := getGitleaksOutputJson(gitMode)
+func GetGitleaksFindingsAsUnified(directoryToScan string, gitMode bool) ([]types.UnifiedFinding, error) {
+	gitleaksOutputJson, err := getGitleaksOutputJson(directoryToScan, gitMode)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +115,7 @@ func GetGitleaksFindingsAsUnified(gitMode bool) ([]types.UnifiedFinding, error) 
 
 	unifiedFindings, err := functional.MapWithError(gitleaksFindings,
 		func(gitleaksFinding GitleaksFinding) (types.UnifiedFinding, error) {
-			return convertGitleaksFindingToUnifiedFinding(gitMode, gitleaksFinding)
+			return convertGitleaksFindingToUnifiedFinding(directoryToScan, gitMode, gitleaksFinding)
 		})
 	if err != nil {
 		return make([]types.UnifiedFinding, 0), err

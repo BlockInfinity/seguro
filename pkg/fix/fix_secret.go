@@ -6,17 +6,17 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/secguro/secguro-cli/pkg/config"
 	"github.com/secguro/secguro-cli/pkg/dependencies"
 	"github.com/secguro/secguro-cli/pkg/ignoring"
 	"github.com/secguro/secguro-cli/pkg/types"
 )
 
-func fixSecret(previousStep func() error, unifiedFinding types.UnifiedFinding) error {
-	return fixSecretStep1(previousStep, unifiedFinding)
+func fixSecret(directoryToScan string, previousStep func() error, unifiedFinding types.UnifiedFinding) error {
+	return fixSecretStep1(directoryToScan, previousStep, unifiedFinding)
 }
 
-func fixSecretStep1(previousStep func() error, unifiedFinding types.UnifiedFinding) error {
+func fixSecretStep1(directoryToScan string,
+	previousStep func() error, unifiedFinding types.UnifiedFinding) error {
 	prompt := "Please specify the secret in question. " +
 		"Note that we are not always able to determine the exact bounds of " +
 		"the secret, so it's important you specify the secret exactly."
@@ -34,10 +34,11 @@ func fixSecretStep1(previousStep func() error, unifiedFinding types.UnifiedFindi
 		}
 	}
 
-	return fixSecretStep2(func() error { return fixSecretStep1(previousStep, unifiedFinding) }, secret)
+	return fixSecretStep2(directoryToScan,
+		func() error { return fixSecretStep1(directoryToScan, previousStep, unifiedFinding) }, secret)
 }
 
-func fixSecretStep2(previousStep func() error, secret string) error {
+func fixSecretStep2(directoryToScan string, previousStep func() error, secret string) error {
 	prompt := "Secret: " + secret +
 		"\n\n" +
 		"Replace how you access this secret now." +
@@ -59,15 +60,16 @@ func fixSecretStep2(previousStep func() error, secret string) error {
 	case -1, 0:
 		return previousStep()
 	case 1:
-		return fixSecretStep3(func() error { return fixSecretStep2(previousStep, secret) }, secret)
+		return fixSecretStep3(directoryToScan,
+			func() error { return fixSecretStep2(directoryToScan, previousStep, secret) }, secret)
 	case 2:
-		return addSecretToIgnoreList(secret)
+		return addSecretToIgnoreList(directoryToScan, secret)
 	}
 
 	return errors.New("unexpected choice index")
 }
 
-func fixSecretStep3(previousStep func() error, secret string) error {
+func fixSecretStep3(directoryToScan string, previousStep func() error, secret string) error {
 	prompt := "Secret: " + secret +
 		"\n\n" +
 		"If you were not able to invalidate the secret, the git history needs " +
@@ -97,9 +99,10 @@ func fixSecretStep3(previousStep func() error, secret string) error {
 	case -1, 0:
 		return previousStep()
 	case 1:
-		return addSecretToIgnoreList(secret)
+		return addSecretToIgnoreList(directoryToScan, secret)
 	case 2:
-		return fixSecretStepB3(func() error { return fixSecretStep3(previousStep, secret) }, secret)
+		return fixSecretStepB3(directoryToScan,
+			func() error { return fixSecretStep3(directoryToScan, previousStep, secret) }, secret)
 	case 3:
 		return nil
 	}
@@ -107,11 +110,11 @@ func fixSecretStep3(previousStep func() error, secret string) error {
 	return errors.New("unexpected choice index")
 }
 
-func addSecretToIgnoreList(secret string) error {
+func addSecretToIgnoreList(directoryToScan string, secret string) error {
 	fmt.Print("Adding secret to ignore list...")
 
 	const filePermissions = 0644
-	file, err := os.OpenFile(config.DirectoryToScan+"/"+ignoring.SecretsIgnoreFileName,
+	file, err := os.OpenFile(directoryToScan+"/"+ignoring.SecretsIgnoreFileName,
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY, filePermissions)
 	if err != nil {
 		return err
@@ -129,9 +132,9 @@ func addSecretToIgnoreList(secret string) error {
 	return nil
 }
 
-func fixSecretStepB3(previousStep func() error, secret string) error {
+func fixSecretStepB3(directoryToScan string, previousStep func() error, secret string) error {
 	for {
-		searchResult, err := findStringInGitIndex(secret)
+		searchResult, err := findStringInGitIndex(directoryToScan, secret)
 		if err != nil {
 			return err
 		}
@@ -160,12 +163,12 @@ func fixSecretStepB3(previousStep func() error, secret string) error {
 		}
 	}
 
-	return removeSecret(secret)
+	return removeSecret(directoryToScan, secret)
 }
 
-func findStringInGitIndex(secret string) (string, error) {
+func findStringInGitIndex(directoryToScan string, secret string) (string, error) {
 	cmd := exec.Command("git", "grep", "--color", secret, "HEAD", "--", ".")
-	cmd.Dir = config.DirectoryToScan
+	cmd.Dir = directoryToScan
 	out, err := cmd.Output()
 	if err != nil {
 		// This is expected to happen when there are no search results.
@@ -179,7 +182,7 @@ func findStringInGitIndex(secret string) (string, error) {
 	return string(out), nil
 }
 
-func removeSecret(secret string) error {
+func removeSecret(directoryToScan string, secret string) error {
 	err := dependencies.DownloadBfg()
 	if err != nil {
 		return err
@@ -199,7 +202,7 @@ func removeSecret(secret string) error {
 	pathBfg := dependencies.DependenciesDir + "/bfg.jar"
 
 	cmd := exec.Command("java", "-jar", pathBfg, "--replace-text", pathReplacementsFile, ".")
-	cmd.Dir = config.DirectoryToScan
+	cmd.Dir = directoryToScan
 	_, err = cmd.Output()
 
 	if err != nil {
