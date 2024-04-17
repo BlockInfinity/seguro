@@ -63,7 +63,12 @@ func convertDependencycheckFindingToUnifiedFinding(dependencycheckFinding Depend
 }
 
 func getDependencycheckOutputJson(directoryToScan string, _gitMode bool) ([]byte, error) {
-	dependencycheckOutputDirPath := dependencies.DependenciesDir + "/dependencycheckOutput"
+	tmpDir, err := os.MkdirTemp("", "")
+	if err != nil {
+		return nil, err
+	}
+	defer os.RemoveAll(tmpDir)
+	dependencycheckOutputDirPath := tmpDir
 	dependencycheckOutputJsonPath := dependencycheckOutputDirPath + "/dependency-check-report.json"
 
 	// secguro-ignore-next-line

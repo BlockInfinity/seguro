@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/secguro/secguro-cli/pkg/dependencies"
 	"github.com/secguro/secguro-cli/pkg/functional"
 	"github.com/secguro/secguro-cli/pkg/git"
 	"github.com/secguro/secguro-cli/pkg/types"
@@ -59,7 +58,12 @@ func convertSemgrepFindingToUnifiedFinding(directoryToScan string, gitMode bool,
 }
 
 func getSemgrepOutputJson(directoryToScan string) ([]byte, error) {
-	semgrepOutputJsonPath := dependencies.DependenciesDir + "/semgrepOutput.json"
+	tmpDir, err := os.MkdirTemp("", "")
+	if err != nil {
+		return nil, err
+	}
+	defer os.RemoveAll(tmpDir)
+	semgrepOutputJsonPath := tmpDir + "/semgrepOutput.json"
 
 	cmd := exec.Command("semgrep", "scan", "--json", "-o", semgrepOutputJsonPath)
 	cmd.Dir = directoryToScan

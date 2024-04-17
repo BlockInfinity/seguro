@@ -76,7 +76,12 @@ func convertGitleaksFindingToUnifiedFinding(directoryToScan string, gitMode bool
 }
 
 func getGitleaksOutputJson(directoryToScan string, gitMode bool) ([]byte, error) {
-	gitleaksOutputJsonPath := dependencies.DependenciesDir + "/gitleaksOutput.json"
+	tmpDir, err := os.MkdirTemp("", "")
+	if err != nil {
+		return nil, err
+	}
+	defer os.RemoveAll(tmpDir)
+	gitleaksOutputJsonPath := tmpDir + "/gitleaksOutput.json"
 
 	cmd := (func() *exec.Cmd {
 		if gitMode {
