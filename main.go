@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/secguro/secguro-cli/pkg/config"
 	"github.com/secguro/secguro-cli/pkg/dependencycheck"
 	"github.com/secguro/secguro-cli/pkg/fix"
 	"github.com/secguro/secguro-cli/pkg/functional"
@@ -71,9 +70,11 @@ func main() { //nolint: funlen, cyclop
 		},
 	}
 
+	directoryToScan := "."
+
 	scanOrFixAction := func(cCtx *cli.Context) error {
 		if cCtx.NArg() > 0 {
-			config.DirectoryToScan = cCtx.Args().Get(0)
+			directoryToScan = cCtx.Args().Get(0)
 		}
 
 		if cCtx.NArg() > 1 {
@@ -99,7 +100,7 @@ func main() { //nolint: funlen, cyclop
 				}
 				printAsJson := flagFormat == "json"
 
-				err := scan.CommandScan(flagGitMode, flagDisabledDetectors,
+				err := scan.CommandScan(directoryToScan, flagGitMode, flagDisabledDetectors,
 					printAsJson, flagOutput, flagTolerance)
 				if err != nil {
 					return err
@@ -107,7 +108,7 @@ func main() { //nolint: funlen, cyclop
 			}
 		case "fix":
 			{
-				err := fix.CommandFix(flagGitMode, flagDisabledDetectors)
+				err := fix.CommandFix(directoryToScan, flagGitMode, flagDisabledDetectors)
 				if err != nil {
 					return err
 				}

@@ -73,7 +73,7 @@ type model struct {
 	delegateKeys *delegateKeyMap
 }
 
-func newModel(unifiedFindingsNotIgnored []types.UnifiedFinding) model {
+func newModel(directoryToScan string, unifiedFindingsNotIgnored []types.UnifiedFinding) model {
 	var (
 		delegateKeys = newDelegateKeyMap()
 		listKeys     = newListKeyMap()
@@ -90,7 +90,7 @@ func newModel(unifiedFindingsNotIgnored []types.UnifiedFinding) model {
 		})
 
 	// Setup list
-	delegate := newItemDelegate(delegateKeys)
+	delegate := newItemDelegate(directoryToScan, delegateKeys)
 	findingsList := list.New(items, delegate, 0, 0)
 	findingsList.Title = "Findings"
 	findingsList.Styles.Title = titleStyle
@@ -172,14 +172,15 @@ var actionPastFixSelection func() error = nil
 
 var showProblemsList func() error = nil
 
-func CommandFix(gitMode bool, disabledDetectors []string) error {
-	unifiedFindingsNotIgnored, err := scan.PerformScan(gitMode, disabledDetectors)
+func CommandFix(directoryToScan string, gitMode bool, disabledDetectors []string) error {
+	unifiedFindingsNotIgnored, err := scan.PerformScan(directoryToScan, gitMode, disabledDetectors)
 	if err != nil {
 		return err
 	}
 
 	showProblemsList = func() error {
-		if _, err := tea.NewProgram(newModel(unifiedFindingsNotIgnored), tea.WithAltScreen()).Run(); err != nil {
+		model := newModel(directoryToScan, unifiedFindingsNotIgnored)
+		if _, err := tea.NewProgram(model, tea.WithAltScreen()).Run(); err != nil {
 			return err
 		}
 
@@ -195,10 +196,11 @@ func CommandFix(gitMode bool, disabledDetectors []string) error {
 	return showProblemsList()
 }
 
-func fixUnifiedFinding(previousStep func() error, unifiedFinding types.UnifiedFinding) error {
+func fixUnifiedFinding(directoryToScan string,
+	previousStep func() error, unifiedFinding types.UnifiedFinding) error {
 	if scan.IsSecretDetectionRule(unifiedFinding.Rule) {
-		return fixSecret(previousStep, unifiedFinding)
+		return fixSecret(directoryToScan, previousStep, unifiedFinding)
 	}
 
-	return fixProblemViaAi(previousStep, unifiedFinding)
+	return fixProblemViaAi(directoryToScan, previousStep, unifiedFinding)
 }
