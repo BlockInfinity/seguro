@@ -10,13 +10,13 @@ import (
 	"github.com/secguro/secguro-cli/pkg/types"
 )
 
-const endpointSaveScan = "saveScan"
+const endpointPostScan = "scans"
 
 func ReportScan(authToken string, projectName string, revision string,
 	unifiedFindings []types.UnifiedFinding) error {
 	fmt.Print("Sending scan report to server...")
 
-	urlEndpointSaveScan := config.ServerUrl + "/" + endpointSaveScan
+	urlEndpointPostScan := config.ServerUrl + "/" + endpointPostScan
 
 	scanPostReq := ScanPostReq{
 		ProjectName: projectName,
@@ -31,7 +31,7 @@ func ReportScan(authToken string, projectName string, revision string,
 		SetHeader("Authorization", authToken).
 		SetBody(scanPostReq).
 		SetResult(&result).
-		Post(urlEndpointSaveScan)
+		Post(urlEndpointPostScan)
 
 	if err != nil {
 		return err
