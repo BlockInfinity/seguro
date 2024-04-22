@@ -71,7 +71,7 @@ func getFixedFileContentAndDiff(directoryToScan string,
 
 	fileContent := string(fileContentByteArr)
 
-	newFileContent, err := getFixedFileContentFromChatGpt(fileContent,
+	newFileContent, err := GetFixedFileContentFromChatGpt(fileContent,
 		unifiedFinding.LineStart, unifiedFinding.Hint)
 	if err != nil {
 		return "", "", err
@@ -82,7 +82,7 @@ func getFixedFileContentAndDiff(directoryToScan string,
 	return newFileContent, diff, nil
 }
 
-func getFixedFileContentFromChatGpt(fileContent string, problemLineNumber int, hint string) (string, error) {
+func GetFixedFileContentFromChatGpt(fileContent string, problemLineNumber int, hint string) (string, error) {
 	fmt.Print("Requesting fix suggestion...")
 
 	client := openai.NewClient(os.Getenv(openAiApiKeyEnvVarName))
