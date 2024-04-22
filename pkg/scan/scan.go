@@ -50,8 +50,19 @@ func CommandScan(directoryToScan string, gitMode bool, disabledDetectors []strin
 		}
 	}
 
+	projectRemoteUrls, err := git.GetProjectRemoteUrls(directoryToScan)
+	if err != nil {
+		// Set project remote URLs to empty array for paths that are not in git repos.
+		if err.Error() == "exit status 128" {
+			projectRemoteUrls = make([]string, 0)
+		} else {
+			return err
+		}
+	}
+
 	if deviceToken != "" {
-		err = reporting.ReportScan(deviceToken, projectName, revision, unifiedFindingsNotIgnored)
+		err = reporting.ReportScan(deviceToken, projectName, projectRemoteUrls,
+			revision, unifiedFindingsNotIgnored)
 		if err != nil {
 			return err
 		}

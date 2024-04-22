@@ -12,16 +12,17 @@ import (
 
 const endpointPostScan = "scans"
 
-func ReportScan(authToken string, projectName string, revision string,
-	unifiedFindings []types.UnifiedFinding) error {
+func ReportScan(authToken string, projectName string, projectRemoteUrls []string,
+	revision string, unifiedFindings []types.UnifiedFinding) error {
 	fmt.Print("Sending scan report to server...")
 
 	urlEndpointPostScan := config.ServerUrl + "/" + endpointPostScan
 
 	scanPostReq := ScanPostReq{
-		ProjectName: projectName,
-		Revision:    revision,
-		Findings:    unifiedFindings,
+		ProjectName:       projectName,
+		ProjectRemoteUrls: projectRemoteUrls,
+		Revision:          revision,
+		Findings:          unifiedFindings,
 	}
 
 	result := ConfirmationRes{} //nolint: exhaustruct

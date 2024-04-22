@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/secguro/secguro-cli/pkg/functional"
 	"github.com/secguro/secguro-cli/pkg/types"
 )
 
@@ -133,4 +134,47 @@ func GetLatestCommitHash(directoryToScan string) (string, error) {
 	latestCommitHash := strings.TrimSuffix(string(gitRevParseOutput), "\n")
 
 	return latestCommitHash, nil
+}
+
+func GetProjectRemoteUrls(directoryToScan string) ([]string, error) {
+	cmd := exec.Command("git", "remote", "-v")
+	cmd.Dir = directoryToScan
+	gitRemoteOutput, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+
+	projectRemoteUrls, err := parseGitRemoteOutput(gitRemoteOutput)
+	if err != nil {
+		return nil, err
+	}
+
+	return projectRemoteUrls, nil
+}
+
+func parseGitRemoteOutput(gitRemoteOutput []byte) ([]string, error) {
+	scanner := bufio.NewScanner(strings.NewReader(string(gitRemoteOutput)))
+	projectRemoteUrls := make([]string, 0)
+	for scanner.Scan() {
+		line := scanner.Text()
+		lineFields := strings.Fields(line)
+		projectRemoteUrl := lineFields[1]
+
+		if functional.ArrayIncludes(projectRemoteUrls, projectRemoteUrl) {
+			continue
+		}
+
+		projectRemoteUrls = append(projectRemoteUrls, projectRemoteUrl)
+	}
+
+	if err := scanner.Err(); err != nil {
+		// Ignore this error because it can only happen with the last line of the output
+		// (the line git blame was called on) as the others are always short enough.
+		// This line is not used by this function.
+		if err.Error() != "bufio.Scanner: token too long" {
+			return nil, err
+		}
+	}
+
+	return projectRemoteUrls, nil
 }
