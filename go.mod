@@ -8,13 +8,11 @@ require (
 	github.com/charmbracelet/lipgloss v0.10.0
 	github.com/codeclysm/extract/v3 v3.1.1
 	github.com/go-resty/resty/v2 v2.12.0
-	github.com/google/go-github v17.0.0+incompatible
 	github.com/muesli/reflow v0.3.0
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/sashabaranov/go-openai v1.20.4
 	github.com/sergi/go-diff v1.3.1
 	github.com/urfave/cli/v2 v2.27.1
-	golang.org/x/oauth2 v0.18.0
 )
 
 require (
@@ -22,8 +20,6 @@ require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/containerd/console v1.0.4-0.20230313162750-1ae8d489ac81 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
-	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/juju/errors v1.0.0 // indirect
 	github.com/klauspost/compress v1.15.13 // indirect
@@ -45,6 +41,4 @@ require (
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/term v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.31.0 // indirect
 )

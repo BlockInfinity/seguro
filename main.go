@@ -9,19 +9,12 @@ import (
 	"github.com/secguro/secguro-cli/pkg/dependencycheck"
 	"github.com/secguro/secguro-cli/pkg/fix"
 	"github.com/secguro/secguro-cli/pkg/functional"
-	"github.com/secguro/secguro-cli/pkg/github"
 	"github.com/secguro/secguro-cli/pkg/login"
 	"github.com/secguro/secguro-cli/pkg/scan"
 	"github.com/urfave/cli/v2"
 )
 
 func main() { //nolint: funlen, cyclop
-	// call otherwise unused function to suppress linting violations
-	// due to unused symbols
-	if false {
-		github.CreatePrTest()
-	}
-
 	var flagGitMode bool
 	var flagFormat string
 	var flagOutput string
