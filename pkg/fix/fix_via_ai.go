@@ -9,12 +9,15 @@ import (
 	"strings"
 
 	openai "github.com/sashabaranov/go-openai"
+	"github.com/secguro/secguro-cli/pkg/config"
 	"github.com/secguro/secguro-cli/pkg/output"
 	"github.com/secguro/secguro-cli/pkg/types"
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
 const openAiApiKeyEnvVarName = "OPEN_AI_API_KEY"
+
+var linefeed = rune("\n"[0])
 
 func fixProblemViaAi(directoryToScan string,
 	previousStep func() error, unifiedFinding types.UnifiedFinding) error {
@@ -85,6 +88,20 @@ func getFixedFileContentAndDiff(directoryToScan string,
 func GetFixedFileContentFromChatGpt(fileContent string, problemLineNumber int, hint string) (string, error) {
 	fmt.Print("Requesting fix suggestion...")
 
+	// Only submit a small part of the file to ChatGPT because ChatGPT's execution
+	// time mainly depends on the size of the output. Howevr, ChatGPT is bad at
+	// creating diffs, making this approach unviable.
+	preceding, relevantPart, following, newProblemLineNumber :=
+		splitFileContentByRelevantPart(fileContent, problemLineNumber)
+
+	query := fmt.Sprintf("Fix the problem in line %d of the following code:\n",
+		newProblemLineNumber) +
+		"```\n" + relevantPart + "\n```\n\nHint: " + hint + "\n\n" +
+		"Just provide the corrected code nicely formatted without any further explanation.\n" +
+		"Do not remove comments.\n" +
+		"Do not remove unnecessary whitespace.\n" +
+		"Under all circumstances make sure that you do not introduce any new security vulnerability.\n"
+
 	client := openai.NewClient(os.Getenv(openAiApiKeyEnvVarName))
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
@@ -92,14 +109,8 @@ func GetFixedFileContentFromChatGpt(fileContent string, problemLineNumber int, h
 			Model: openai.GPT3Dot5Turbo,
 			Messages: []openai.ChatCompletionMessage{
 				{ //nolint: exhaustruct
-					Role: openai.ChatMessageRoleUser,
-					Content: fmt.Sprintf("Fix the problem in line %d of the following code:\n",
-						problemLineNumber) +
-						"```\n" + fileContent + "\n```\n\nHint: " + hint + "\n\n" +
-						"Just provide the corrected code nicely formatted without any further explanation.\n" +
-						"Do not remove comments.\n" +
-						"Do not remove unnecessary whitespace.\n" +
-						"Under all circumstances make sure that you do not introduce any new security vulnerability.\n",
+					Role:    openai.ChatMessageRoleUser,
+					Content: query,
 				},
 			},
 		},
@@ -111,8 +122,10 @@ func GetFixedFileContentFromChatGpt(fileContent string, problemLineNumber int, h
 
 	fmt.Println("done")
 
-	newFileContent := assimilateEnding(fileContent,
+	newRelevantPart := assimilateEnding(fileContent,
 		removeCodeBlockBackticksIfAny(resp.Choices[0].Message.Content))
+
+	newFileContent := preceding + newRelevantPart + following
 
 	return newFileContent, nil
 }
@@ -234,4 +247,70 @@ func assimilateEnding(sample string, s string) string {
 	}
 
 	return s[0 : len(s)-1]
+}
+
+func splitFileContentByRelevantPart(fileContent string,
+	relevantLineNumber int) (preceding, relevantPart, following string, newRelevantLineNumber int) {
+	indexRelevantPartStart, indexFollowingPartStart :=
+		getRawIndexesRelevantAndFollowingParts(fileContent, relevantLineNumber)
+
+	// Start in the beginning of the file content if there are fewer than
+	// FileContentRelevantPartNumberOfLinesPreceding available preceding the relevant line.
+	if indexRelevantPartStart == -1 {
+		indexRelevantPartStart = 0
+	}
+
+	// First condition: Confer if statement for indexRelevantPartStart
+	// Second condition: Handling case of file content ending in a linefeed
+	if indexFollowingPartStart == -1 || indexFollowingPartStart > len(fileContent) {
+		indexFollowingPartStart = len(fileContent)
+	}
+
+	newRelevantLineNumber = config.FileContentRelevantPartNumberOfLinesPreceding + 1
+	if newRelevantLineNumber > relevantLineNumber {
+		newRelevantLineNumber = relevantLineNumber
+	}
+
+	// Move dangling linefeeds to the surrounding parts because ChatGPT sometimes
+	// discards them if they are in the relevant part.
+	for rune(fileContent[indexRelevantPartStart:(indexRelevantPartStart + 1)][0]) == linefeed {
+		indexRelevantPartStart++
+		newRelevantLineNumber--
+	}
+	for rune(fileContent[(indexFollowingPartStart - 1):indexFollowingPartStart][0]) == linefeed {
+		// Stop at end of fileContent.
+		if indexFollowingPartStart == len(fileContent) {
+			break
+		}
+
+		indexFollowingPartStart++
+	}
+
+	preceding = fileContent[:indexRelevantPartStart]
+	relevantPart = fileContent[indexRelevantPartStart:indexFollowingPartStart]
+	following = fileContent[indexFollowingPartStart:]
+
+	return //nolint: nakedret // makes it easier to read in this case
+}
+
+func getRawIndexesRelevantAndFollowingParts(fileContent string, relevantLineNumber int) (int, int) {
+	indexRelevantPartStart := -1
+	indexFollowingPartStart := -1
+
+	lineNumber := 1
+	for index, character := range fileContent {
+		if character == linefeed {
+			lineNumber++
+
+			if lineNumber == relevantLineNumber-config.FileContentRelevantPartNumberOfLinesPreceding {
+				indexRelevantPartStart = index + 1
+			}
+
+			if lineNumber == relevantLineNumber+config.FileContentRelevantPartNumberOfLinesFollowing {
+				indexFollowingPartStart = index + 1
+			}
+		}
+	}
+
+	return indexRelevantPartStart, indexFollowingPartStart
 }
