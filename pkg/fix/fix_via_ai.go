@@ -83,23 +83,46 @@ func getFixedFileContentAndDiff(directoryToScan string,
 }
 
 func GetFixedFileContentFromChatGpt(fileContent string, problemLineNumber int, hint string) (string, error) {
+	patchStr, err := GetFileContentPatchFromChatGpt(fileContent, problemLineNumber, hint)
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Println(patchStr)
+	dmp := diffmatchpatch.New()
+	patches, err := dmp.PatchFromText(removeDiffCodeBlockBackticksIfAny(patchStr))
+	if err != nil {
+		return "", err
+	}
+	newContent, patchAppliedArr := dmp.PatchApply(patches, fileContent)
+	fmt.Println(patchAppliedArr)
+	fmt.Println(newContent)
+
+	return newContent, nil
+}
+
+func GetFileContentPatchFromChatGpt(fileContent string, problemLineNumber int, hint string) (string, error) {
 	fmt.Print("Requesting fix suggestion...")
 
 	client := openai.NewClient(os.Getenv(openAiApiKeyEnvVarName))
+	query := fmt.Sprintf("Fix the problem in line %d of the following code:\n",
+		problemLineNumber) +
+		"```\n" + fileContent + "\n```\n\nHint: " + hint + "\n\n" +
+		"Only provide the changes in git's diff format. Make sure to include the patch header. " +
+		"The file's name is: file.txt\n" +
+		"Do not provide any explanation.\n" +
+		"Do not remove comments.\n" +
+		"Do not remove unnecessary whitespace.\n" +
+		"Under all circumstances make sure that you do not introduce any new security vulnerability.\n"
+	fmt.Println(query)
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{ //nolint: exhaustruct
 			Model: openai.GPT3Dot5Turbo,
 			Messages: []openai.ChatCompletionMessage{
 				{ //nolint: exhaustruct
-					Role: openai.ChatMessageRoleUser,
-					Content: fmt.Sprintf("Fix the problem in line %d of the following code:\n",
-						problemLineNumber) +
-						"```\n" + fileContent + "\n```\n\nHint: " + hint + "\n\n" +
-						"Just provide the corrected code nicely formatted without any further explanation.\n" +
-						"Do not remove comments.\n" +
-						"Do not remove unnecessary whitespace.\n" +
-						"Under all circumstances make sure that you do not introduce any new security vulnerability.\n",
+					Role:    openai.ChatMessageRoleUser,
+					Content: query,
 				},
 			},
 		},
@@ -111,10 +134,9 @@ func GetFixedFileContentFromChatGpt(fileContent string, problemLineNumber int, h
 
 	fmt.Println("done")
 
-	newFileContent := assimilateEnding(fileContent,
-		removeCodeBlockBackticksIfAny(resp.Choices[0].Message.Content))
+	patch := resp.Choices[0].Message.Content
 
-	return newFileContent, nil
+	return patch, nil
 }
 
 func getDiff(contentBefore string, contentAfter string) string {
@@ -213,12 +235,19 @@ func replaceFileContents(directoryToScan string, filePath string, newFileContent
 	return err
 }
 
-func removeCodeBlockBackticksIfAny(s string) string {
-	if len(s) >= 7 && s[0:4] == "```\n" && s[len(s)-3:] == "```" {
-		return s[4 : len(s)-3]
-	}
+func removeDiffCodeBlockBackticksIfAny(s string) string {
+	indexOfFirstHunk := strings.Index(s, "@@")
+	sWithoutPrefix := s[indexOfFirstHunk:]
 
-	return s
+	if sWithoutPrefix[len(sWithoutPrefix)-3:] == "```" {
+		fmt.Println("case 1")
+		fmt.Println(sWithoutPrefix[:len(sWithoutPrefix)-3])
+		return sWithoutPrefix[:len(sWithoutPrefix)-3]
+	} else {
+		fmt.Println("case 2")
+		fmt.Println(sWithoutPrefix)
+		return sWithoutPrefix
+	}
 }
 
 func assimilateEnding(sample string, s string) string {
