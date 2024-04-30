@@ -29,8 +29,9 @@ type SemgrepFinding_startAndEnd struct {
 }
 
 type SemgrepFinding_extra struct {
-	Lines   string
-	Message string
+	Lines    string
+	Message  string
+	Severity string
 }
 
 func convertSemgrepFindingToUnifiedFinding(directoryToScan string, gitMode bool,
@@ -51,6 +52,7 @@ func convertSemgrepFindingToUnifiedFinding(directoryToScan string, gitMode bool,
 		ColumnEnd:   semgrepFinding.End.Col,
 		Match:       semgrepFinding.Extra.Lines,
 		Hint:        semgrepFinding.Extra.Message,
+		Severity:    semgrepFinding.Extra.Severity,
 		GitInfo:     gitInfo,
 	}
 

@@ -20,5 +20,6 @@ type UnifiedFinding struct {
 	ColumnEnd   int
 	Match       string
 	Hint        string
+	Severity    string
 	GitInfo     *GitInfo
 }

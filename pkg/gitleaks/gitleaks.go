@@ -51,6 +51,7 @@ func convertGitleaksFindingToUnifiedFinding(directoryToScan string, gitMode bool
 		ColumnEnd:   gitleaksFinding.EndColumn,
 		Match:       gitleaksFinding.Match,
 		Hint:        "",
+		Severity:    "ERROR",
 		GitInfo:     gitInfo,
 	}
 

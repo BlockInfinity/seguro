@@ -58,6 +58,7 @@ func convertDependencycheckFindingToUnifiedFinding(dependencycheckFinding Depend
 		ColumnEnd:   -1,
 		Match:       packageAndVersion,
 		Hint:        "",
+		Severity:    "WARNING", // TODO: differentiate severity for dependencycheck
 		GitInfo:     nil,
 	}
 }
