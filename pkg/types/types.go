@@ -10,8 +10,6 @@ type GitInfo struct {
 	Line               int
 }
 
-// The attributes need to start with capital letter because
-// otherwise the JSON formatter cannot see them.
 type UnifiedFinding struct {
 	Detector    string
 	Rule        string
@@ -22,5 +20,6 @@ type UnifiedFinding struct {
 	ColumnEnd   int
 	Match       string
 	Hint        string
+	Severity    string
 	GitInfo     *GitInfo
 }
