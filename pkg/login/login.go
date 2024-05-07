@@ -5,6 +5,8 @@ import (
 	"os"
 )
 
+const ciTokenEnvVarName = "SECGURO_CI_TOKEN"
+
 const deviceTokenFileName = "device_token"
 const secguroConfigDirName = ".secguro"
 
@@ -31,7 +33,16 @@ func CommandLogin() error {
 	return nil
 }
 
-func GetDeviceToken() (string, error) {
+func GetAuthToken() (string, error) {
+	ciToken := os.Getenv(ciTokenEnvVarName)
+	if ciToken != "" {
+		return ciToken, nil
+	}
+
+	return getDeviceToken()
+}
+
+func getDeviceToken() (string, error) {
 	pathSecguroConfigDir, err := getSecguroConfigDirPath()
 	if err != nil {
 		return "", err
