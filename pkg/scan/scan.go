@@ -33,7 +33,7 @@ func CommandScan(directoryToScan string, gitMode bool, disabledDetectors []strin
 		return err
 	}
 
-	deviceToken, err := login.GetDeviceToken()
+	authToken, err := login.GetAuthToken()
 	if err != nil {
 		return err
 	}
@@ -60,8 +60,8 @@ func CommandScan(directoryToScan string, gitMode bool, disabledDetectors []strin
 		}
 	}
 
-	if deviceToken != "" {
-		err = reporting.ReportScan(deviceToken, projectName, projectRemoteUrls,
+	if authToken != "" {
+		err = reporting.ReportScan(authToken, projectName, projectRemoteUrls,
 			revision, unifiedFindingsNotIgnored)
 		if err != nil {
 			return err

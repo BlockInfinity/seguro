@@ -18,14 +18,14 @@ func ReportScan(authToken string, projectName string, projectRemoteUrls []string
 
 	urlEndpointPostScan := config.ServerUrl + "/" + endpointPostScan
 
-	scanPostReq := ScanPostReq{
+	scanPostReq := types.ScanPostReq{
 		ProjectName:       projectName,
 		ProjectRemoteUrls: projectRemoteUrls,
 		Revision:          revision,
 		Findings:          unifiedFindings,
 	}
 
-	result := ConfirmationRes{} //nolint: exhaustruct
+	result := types.ConfirmationRes{} //nolint: exhaustruct
 	client := resty.New()
 	response, err := client.R().
 		SetHeader("Content-Type", "application/json").
