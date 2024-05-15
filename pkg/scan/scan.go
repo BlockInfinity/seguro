@@ -3,17 +3,14 @@ package scan
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
 	ignore "github.com/sabhiram/go-gitignore"
 	"github.com/secguro/secguro-cli/pkg/dependencies"
 	"github.com/secguro/secguro-cli/pkg/dependencycheck"
 	"github.com/secguro/secguro-cli/pkg/functional"
-	"github.com/secguro/secguro-cli/pkg/git"
 	"github.com/secguro/secguro-cli/pkg/gitleaks"
 	"github.com/secguro/secguro-cli/pkg/ignoring"
-	"github.com/secguro/secguro-cli/pkg/login"
 	"github.com/secguro/secguro-cli/pkg/output"
 	"github.com/secguro/secguro-cli/pkg/reporting"
 	"github.com/secguro/secguro-cli/pkg/semgrep"
@@ -22,7 +19,7 @@ import (
 
 const maxFindingsIndicatingExitCode = 250
 
-func CommandScan(directoryToScan string, gitMode bool, disabledDetectors []string, //nolint: cyclop
+func CommandScan(directoryToScan string, gitMode bool, disabledDetectors []string,
 	printAsJson bool, outputDestination string, tolerance int) error {
 	unifiedFindingsNotIgnored, err := PerformScan(directoryToScan, gitMode, disabledDetectors)
 	if err != nil {
@@ -34,42 +31,9 @@ func CommandScan(directoryToScan string, gitMode bool, disabledDetectors []strin
 		return err
 	}
 
-	authToken, err := login.GetAuthToken()
+	err = reporting.ReportScanIfApplicable(directoryToScan, unifiedFindingsNotIgnored)
 	if err != nil {
 		return err
-	}
-
-	projectName, err := getProjectName(directoryToScan)
-	if err != nil {
-		return err
-	}
-
-	revision, err := git.GetLatestCommitHash(directoryToScan)
-	if err != nil {
-		// Set revision to empty string for paths that are not in git repos.
-		if err.Error() == "exit status 128" {
-			revision = ""
-		} else {
-			return err
-		}
-	}
-
-	projectRemoteUrls, err := git.GetProjectRemoteUrls(directoryToScan)
-	if err != nil {
-		// Set project remote URLs to empty array for paths that are not in git repos.
-		if err.Error() == "exit status 128" {
-			projectRemoteUrls = make([]string, 0)
-		} else {
-			return err
-		}
-	}
-
-	if authToken != "" {
-		err = reporting.ReportScan(authToken, projectName, projectRemoteUrls,
-			revision, unifiedFindingsNotIgnored)
-		if err != nil {
-			return err
-		}
 	}
 
 	exitWithAppropriateExitCode(len(unifiedFindingsNotIgnored), tolerance)
@@ -231,27 +195,4 @@ func writeOutput(gitMode bool, printAsJson bool,
 	}
 
 	return nil
-}
-
-func getProjectName(directoryToScan string) (string, error) {
-	absPath, err := filepath.Abs(directoryToScan)
-	if err != nil {
-		return "", err
-	}
-
-	fileInfo, err := os.Stat(absPath)
-	if err != nil {
-		return "", err
-	}
-
-	var dirAbsPath string
-	if fileInfo.IsDir() {
-		dirAbsPath = absPath
-	} else {
-		dirAbsPath = filepath.Dir(absPath)
-	}
-
-	dirName := filepath.Base(dirAbsPath)
-
-	return dirName, nil
 }
