@@ -3,6 +3,7 @@ package scan
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	ignore "github.com/sabhiram/go-gitignore"
@@ -21,7 +22,7 @@ import (
 
 const maxFindingsIndicatingExitCode = 250
 
-func CommandScan(directoryToScan string, gitMode bool, disabledDetectors []string,
+func CommandScan(directoryToScan string, gitMode bool, disabledDetectors []string, //nolint: cyclop
 	printAsJson bool, outputDestination string, tolerance int) error {
 	unifiedFindingsNotIgnored, err := PerformScan(directoryToScan, gitMode, disabledDetectors)
 	if err != nil {
@@ -38,7 +39,10 @@ func CommandScan(directoryToScan string, gitMode bool, disabledDetectors []strin
 		return err
 	}
 
-	projectName := directoryToScan[strings.LastIndex(directoryToScan, "/")+1:]
+	projectName, err := getProjectName(directoryToScan)
+	if err != nil {
+		return err
+	}
 
 	revision, err := git.GetLatestCommitHash(directoryToScan)
 	if err != nil {
@@ -227,4 +231,27 @@ func writeOutput(gitMode bool, printAsJson bool,
 	}
 
 	return nil
+}
+
+func getProjectName(directoryToScan string) (string, error) {
+	absPath, err := filepath.Abs(directoryToScan)
+	if err != nil {
+		return "", err
+	}
+
+	fileInfo, err := os.Stat(absPath)
+	if err != nil {
+		return "", err
+	}
+
+	var dirAbsPath string
+	if fileInfo.IsDir() {
+		dirAbsPath = absPath
+	} else {
+		dirAbsPath = filepath.Dir(absPath)
+	}
+
+	dirName := filepath.Base(dirAbsPath)
+
+	return dirName, nil
 }
