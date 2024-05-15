@@ -6,3 +6,7 @@ type ScanPostReq struct {
 	Revision          string
 	Findings          []UnifiedFinding
 }
+
+type DevicePostReq struct {
+	DeviceName string
+}
