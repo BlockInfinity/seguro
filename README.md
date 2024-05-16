@@ -91,8 +91,14 @@ OPTIONS:
 - Activation of pre-push hook: `git config core.hooksPath hooks`
 
 ### Compilation
+To generate a binary that communicates with the CD server, run:
 ```bash
 make
 ```
 
-Location of generated binary: `build/secguro`
+For a developer build that communicates with localhost, run:
+```bash
+make compile-dev
+```
+
+Location of the generated binary: `build/secguro`
