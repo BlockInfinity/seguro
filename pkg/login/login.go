@@ -27,7 +27,7 @@ func CommandLogin() error {
 		return err
 	}
 
-	loginUrl := fmt.Sprintf("http://localhost:3000/devices?deviceRegistrationId=%d", deviceId)
+	loginUrl := fmt.Sprintf("%v/devices?deviceRegistrationId=%d", config.WebappUrl, deviceId)
 	fmt.Println("Please follow this link to register this device: " + loginUrl)
 
 	for {
