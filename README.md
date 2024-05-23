@@ -7,7 +7,7 @@ Either:
 ### Dependencies for Use
 - Python 3 + pipx
 - Java 8 or above; If Java 8, update version must be 251 or above
-- Git (only necessary when using git mode)
+- Git (only necessary when using git mode or detector gitleaks)
 
 ### Dependencies for Development
 - [Dependencies for use](#dependencies-for-use)
