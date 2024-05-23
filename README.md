@@ -27,7 +27,7 @@ secguro scan [path]
 ### Github Workflow
 ```yaml
     - name: Check for Secguro Violations
-      run: wget 'https://secguro.github.io/secguro-cli/secguro' && chmod +x secguro &&  ./secguro scan
+      run: wget 'https://secguro.github.io/secguro-cli/secguro' && chmod +x secguro && SECGURO_CI_TOKEN="GET THIS TOKEN FROM THE SECGURO WEBAPP" ./secguro scan
 ```
 
 ### Azure Pipeline
@@ -35,7 +35,7 @@ secguro scan [path]
     - task: CmdLine@2
       displayName: Check for Secguro Violations
       inputs:
-        script: wget 'https://secguro.github.io/secguro-cli/secguro' && chmod +x secguro &&  ./secguro scan
+        script: wget 'https://secguro.github.io/secguro-cli/secguro' && chmod +x secguro && SECGURO_CI_TOKEN="GET THIS TOKEN FROM THE SECGURO WEBAPP" ./secguro scan
         workingDirectory: .
         failOnStderr: false # because wget writes to stderr
 ```
