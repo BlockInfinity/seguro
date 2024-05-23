@@ -7,7 +7,7 @@ Either:
 ### Dependencies for Use
 - Python 3 + pipx
 - Java 8 or above; If Java 8, update version must be 251 or above
-- Git (only necessary when using git mode)
+- Git (only necessary when using git mode or detector gitleaks)
 
 ### Dependencies for Development
 - [Dependencies for use](#dependencies-for-use)
@@ -27,7 +27,7 @@ secguro scan [path]
 ### Github Workflow
 ```yaml
     - name: Check for Secguro Violations
-      run: wget 'https://secguro.github.io/secguro-cli/secguro' && chmod +x secguro &&  ./secguro scan
+      run: wget 'https://secguro.github.io/secguro-cli/secguro' && chmod +x secguro && SECGURO_CI_TOKEN="GET THIS TOKEN FROM THE SECGURO WEBAPP" ./secguro scan
 ```
 
 ### Azure Pipeline
@@ -35,7 +35,7 @@ secguro scan [path]
     - task: CmdLine@2
       displayName: Check for Secguro Violations
       inputs:
-        script: wget 'https://secguro.github.io/secguro-cli/secguro' && chmod +x secguro &&  ./secguro scan
+        script: wget 'https://secguro.github.io/secguro-cli/secguro' && chmod +x secguro && SECGURO_CI_TOKEN="GET THIS TOKEN FROM THE SECGURO WEBAPP" ./secguro scan
         workingDirectory: .
         failOnStderr: false # because wget writes to stderr
 ```
