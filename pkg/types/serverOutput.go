@@ -15,3 +15,7 @@ type DeviceRegistrationRes struct {
 	ID           uint
 	IsRegistered bool
 }
+
+type DependencycheckScanRes struct {
+	UnifiedFindings []UnifiedFinding
+}

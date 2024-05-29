@@ -2,13 +2,10 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"os"
 
-	"github.com/secguro/secguro-cli/pkg/dependencycheck"
 	"github.com/secguro/secguro-cli/pkg/fix"
-	"github.com/secguro/secguro-cli/pkg/functional"
 	"github.com/secguro/secguro-cli/pkg/login"
 	"github.com/secguro/secguro-cli/pkg/scan"
 	"github.com/urfave/cli/v2"
@@ -72,17 +69,6 @@ func main() { //nolint: funlen, cyclop
 
 		if cCtx.NArg() > 1 {
 			return errors.New("too many arguments")
-		}
-
-		if !functional.ArrayIncludes(flagDisabledDetectors, "dependencycheck") {
-			if os.Getenv(dependencycheck.NvdApiKeyEnvVarName) == "" {
-				fmt.Printf("Disabling detector dependencycheck because "+
-					"environment variable %s is not set or is empty. "+
-					"You may apply for an API key at: "+
-					"https://nvd.nist.gov/developers/request-an-api-key\n", dependencycheck.NvdApiKeyEnvVarName)
-
-				flagDisabledDetectors = append(flagDisabledDetectors, "dependencycheck")
-			}
 		}
 
 		switch cCtx.Command.Name {

@@ -103,7 +103,8 @@ func getDependencycheckOutputJson(directoryToScan string, _gitMode bool) ([]byte
 	return dependencycheckOutputJson, err
 }
 
-func GetDependencycheckFindingsAsUnified(directoryToScan string, gitMode bool) ([]types.UnifiedFinding, error) {
+func getDependencycheckFindingsAsUnifiedLocally(directoryToScan string,
+	gitMode bool) ([]types.UnifiedFinding, error) {
 	dependencycheckOutputJson, err := getDependencycheckOutputJson(directoryToScan, gitMode)
 	if err != nil {
 		return nil, err
@@ -126,4 +127,13 @@ func GetDependencycheckFindingsAsUnified(directoryToScan string, gitMode bool) (
 	}
 
 	return unifiedFindings, nil
+}
+
+func GetDependencycheckFindingsAsUnified(directoryToScan string,
+	gitMode bool) ([]types.UnifiedFinding, error) {
+	if os.Getenv(NvdApiKeyEnvVarName) == "" {
+		return getDependencycheckFindingsAsUnifiedFromServer(directoryToScan, gitMode)
+	} else {
+		return getDependencycheckFindingsAsUnifiedLocally(directoryToScan, gitMode)
+	}
 }
