@@ -19,3 +19,9 @@ type FileReq struct {
 	Path    string
 	Content []byte
 }
+
+type FixedFileContentPostReq struct {
+	FileContent       string
+	ProblemLineNumber int
+	Hint              string
+}
