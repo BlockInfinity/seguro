@@ -10,3 +10,12 @@ type ScanPostReq struct {
 type DevicePostReq struct {
 	DeviceName string
 }
+
+type DependencycheckScanPostReq struct {
+	ManifestFiles []FileReq
+}
+
+type FileReq struct {
+	Path    string
+	Content []byte
+}
