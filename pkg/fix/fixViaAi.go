@@ -15,7 +15,7 @@ import (
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
-const openAiApiKeyEnvVarName = "OPEN_AI_API_KEY"
+const OpenAiApiKeyEnvVarName = "OPEN_AI_API_KEY"
 
 var linefeed = rune("\n"[0])
 
@@ -85,7 +85,8 @@ func getFixedFileContentAndDiff(directoryToScan string,
 	return newFileContent, diff, nil
 }
 
-func GetFixedFileContentFromChatGpt(fileContent string, problemLineNumber int, hint string) (string, error) {
+func getFixedFileContentFromChatGptLocally(fileContent string,
+	problemLineNumber int, hint string) (string, error) {
 	fmt.Print("Requesting fix suggestion...")
 
 	// Only submit a small part of the file to ChatGPT because ChatGPT's execution
@@ -102,7 +103,7 @@ func GetFixedFileContentFromChatGpt(fileContent string, problemLineNumber int, h
 		"Do not remove unnecessary whitespace.\n" +
 		"Under all circumstances make sure that you do not introduce any new security vulnerability.\n"
 
-	client := openai.NewClient(os.Getenv(openAiApiKeyEnvVarName))
+	client := openai.NewClient(os.Getenv(OpenAiApiKeyEnvVarName))
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{ //nolint: exhaustruct
@@ -128,6 +129,15 @@ func GetFixedFileContentFromChatGpt(fileContent string, problemLineNumber int, h
 	newFileContent := preceding + newRelevantPart + following
 
 	return newFileContent, nil
+}
+
+func GetFixedFileContentFromChatGpt(fileContent string,
+	problemLineNumber int, hint string) (string, error) {
+	if os.Getenv(OpenAiApiKeyEnvVarName) == "" {
+		return getFixedFileContentFromChatGptFromServer(fileContent, problemLineNumber, hint)
+	} else {
+		return getFixedFileContentFromChatGptLocally(fileContent, problemLineNumber, hint)
+	}
 }
 
 func getDiff(contentBefore string, contentAfter string) string {

@@ -19,3 +19,7 @@ type DeviceRegistrationRes struct {
 type DependencycheckScanRes struct {
 	UnifiedFindings []UnifiedFinding
 }
+
+type FixedFileContentRes struct {
+	FixedFileContent string
+}
