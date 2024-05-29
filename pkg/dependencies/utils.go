@@ -23,7 +23,8 @@ func extractZipDependency(name string) error {
 }
 
 func downloadDependency(name string, fileNameExtension string, url string) error {
-	err := os.MkdirAll(DependenciesDir, os.ModePerm)
+	const directoryPermissions = 0700
+	err := os.MkdirAll(DependenciesDir, directoryPermissions)
 	if err != nil {
 		return err
 	}
