@@ -173,7 +173,7 @@ var actionPastFixSelection func() error = nil
 var showProblemsList func() error = nil
 
 func CommandFix(directoryToScan string, gitMode bool, disabledDetectors []string) error {
-	unifiedFindingsNotIgnored, err := scan.PerformScan(directoryToScan, gitMode, disabledDetectors)
+	unifiedFindingsNotIgnored, _, err := scan.PerformScan(directoryToScan, gitMode, disabledDetectors)
 	if err != nil {
 		return err
 	}
