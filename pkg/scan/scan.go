@@ -31,7 +31,7 @@ func CommandScan(directoryToScan string, gitMode bool, disabledDetectors []strin
 		return err
 	}
 
-	err = reporting.ReportScanIfApplicable(directoryToScan, unifiedFindingsNotIgnored)
+	err = reporting.ReportScanIfApplicable(directoryToScan, unifiedFindingsNotIgnored, failedDetectors)
 	if err != nil {
 		return err
 	}
