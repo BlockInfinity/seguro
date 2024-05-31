@@ -28,8 +28,8 @@ type DependencycheckFinding_Vulnerabilities struct {
 
 const NvdApiKeyEnvVarName = "NVD_API_KEY"
 
-func convertDependencycheckFindingToUnifiedFinding(dependencycheckFinding DependencycheckFinding,
-	vulnerabilityIndex int) types.UnifiedFinding {
+func convertDependencycheckFindingToUnifiedFinding(directoryToScan string,
+	dependencycheckFinding DependencycheckFinding, vulnerabilityIndex int) types.UnifiedFinding {
 	// dependencycheck uses "?" for npm dependencies but ":" or none at att for go dependencies.
 	separator := "?"
 	separatorIndex := strings.LastIndex(dependencycheckFinding.FilePath, separator)
@@ -44,7 +44,10 @@ func convertDependencycheckFindingToUnifiedFinding(dependencycheckFinding Depend
 		separatorIndex = len(dependencycheckFinding.FilePath) - 1
 	}
 
-	file := dependencycheckFinding.FilePath[:separatorIndex]
+	fileFullPath := dependencycheckFinding.FilePath[:separatorIndex]
+	// Contrary to the other detectors, dependencycheck returns the path
+	// including the path of the directory to scan.
+	file := strings.TrimPrefix(fileFullPath, directoryToScan)
 	packageAndVersionPossiblePrefixed := dependencycheckFinding.FilePath[separatorIndex+len(separator):]
 	packageAndVersion := strings.TrimPrefix(packageAndVersionPossiblePrefixed, "/")
 
@@ -120,7 +123,7 @@ func getDependencycheckFindingsAsUnifiedLocally(directoryToScan string,
 	unifiedFindings := make([]types.UnifiedFinding, 0)
 	for _, dependencycheckFinding := range dependencycheckFindings {
 		for vulnerabilityIndex := range dependencycheckFinding.Vulnerabilities {
-			unifiedFinding := convertDependencycheckFindingToUnifiedFinding(
+			unifiedFinding := convertDependencycheckFindingToUnifiedFinding(directoryToScan,
 				dependencycheckFinding, vulnerabilityIndex)
 			unifiedFindings = append(unifiedFindings, unifiedFinding)
 		}
