@@ -30,7 +30,7 @@ const NvdApiKeyEnvVarName = "NVD_API_KEY"
 
 func convertDependencycheckFindingToUnifiedFinding(directoryToScan string,
 	dependencycheckFinding DependencycheckFinding, vulnerabilityIndex int) types.UnifiedFinding {
-	// dependencycheck uses "?" for npm dependencies but ":" or none at att for go dependencies.
+	// dependencycheck uses "?" for npm dependencies but ":" or none at all for go dependencies.
 	separator := "?"
 	separatorIndex := strings.LastIndex(dependencycheckFinding.FilePath, separator)
 	if separatorIndex == -1 {
