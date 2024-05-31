@@ -21,7 +21,7 @@ const maxFindingsIndicatingExitCode = 250
 
 func CommandScan(directoryToScan string, gitMode bool, disabledDetectors []string,
 	printAsJson bool, outputDestination string, tolerance int) error {
-	unifiedFindingsNotIgnored, err := PerformScan(directoryToScan, gitMode, disabledDetectors)
+	unifiedFindingsNotIgnored, failedDetectors, err := PerformScan(directoryToScan, gitMode, disabledDetectors)
 	if err != nil {
 		return err
 	}
@@ -31,9 +31,13 @@ func CommandScan(directoryToScan string, gitMode bool, disabledDetectors []strin
 		return err
 	}
 
-	err = reporting.ReportScanIfApplicable(directoryToScan, unifiedFindingsNotIgnored)
+	err = reporting.ReportScanIfApplicable(directoryToScan, unifiedFindingsNotIgnored, failedDetectors)
 	if err != nil {
 		return err
+	}
+
+	if len(failedDetectors) != 0 {
+		fmt.Println("Be mindful that some detectors have failed. Confer top of output.")
 	}
 
 	exitWithAppropriateExitCode(len(unifiedFindingsNotIgnored), tolerance)
@@ -42,11 +46,11 @@ func CommandScan(directoryToScan string, gitMode bool, disabledDetectors []strin
 }
 
 func PerformScan(directoryToScan string,
-	gitMode bool, disabledDetectors []string) ([]types.UnifiedFinding, error) {
+	gitMode bool, disabledDetectors []string) ([]types.UnifiedFinding, []string, error) {
 	fmt.Print("Downloading and extracting dependencies...")
 	err := dependencies.InstallDependencies(disabledDetectors)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	fmt.Println("done")
 
@@ -63,10 +67,10 @@ func PerformScan(directoryToScan string,
 
 	unifiedFindingsNotIgnored, err := getFindingsNotIgnored(directoryToScan, unifiedFindings)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return unifiedFindingsNotIgnored, nil
+	return unifiedFindingsNotIgnored, failedDetectors, nil
 }
 
 func exitWithAppropriateExitCode(numberOfFindingsNotIgnored int, tolerance int) {

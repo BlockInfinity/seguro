@@ -5,6 +5,7 @@ type ScanPostReq struct {
 	ProjectRemoteUrls []string
 	Revision          string
 	Findings          []UnifiedFinding
+	FailedDetectors   []string
 }
 
 type DevicePostReq struct {

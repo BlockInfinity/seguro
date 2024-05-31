@@ -17,7 +17,7 @@ import (
 const endpointPostScan = "scans"
 
 func ReportScan(authToken string, projectName string, projectRemoteUrls []string,
-	revision string, unifiedFindings []types.UnifiedFinding) error {
+	revision string, unifiedFindings []types.UnifiedFinding, failedDetectors []string) error {
 	fmt.Print("Sending scan report to server...")
 
 	urlEndpointPostScan := config.ServerUrl + "/" + endpointPostScan
@@ -27,6 +27,7 @@ func ReportScan(authToken string, projectName string, projectRemoteUrls []string
 		ProjectRemoteUrls: projectRemoteUrls,
 		Revision:          revision,
 		Findings:          unifiedFindings,
+		FailedDetectors:   failedDetectors,
 	}
 
 	result := types.ConfirmationRes{} //nolint: exhaustruct
@@ -55,7 +56,8 @@ func ReportScan(authToken string, projectName string, projectRemoteUrls []string
 	return nil
 }
 
-func ReportScanIfApplicable(directoryToScan string, unifiedFindingsNotIgnored []types.UnifiedFinding) error {
+func ReportScanIfApplicable(directoryToScan string,
+	unifiedFindingsNotIgnored []types.UnifiedFinding, failedDetectors []string) error {
 	authToken, err := login.GetAuthToken()
 	if err != nil {
 		return err
@@ -88,7 +90,7 @@ func ReportScanIfApplicable(directoryToScan string, unifiedFindingsNotIgnored []
 
 	if authToken != "" {
 		err = ReportScan(authToken, projectName, projectRemoteUrls,
-			revision, unifiedFindingsNotIgnored)
+			revision, unifiedFindingsNotIgnored, failedDetectors)
 		if err != nil {
 			return err
 		}
