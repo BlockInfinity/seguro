@@ -26,11 +26,9 @@ type DependencycheckFinding_Vulnerabilities struct {
 	Name string
 }
 
-const NvdApiKeyEnvVarName = "NVD_API_KEY"
-
-func convertDependencycheckFindingToUnifiedFinding(dependencycheckFinding DependencycheckFinding,
-	vulnerabilityIndex int) types.UnifiedFinding {
-	// dependencycheck uses "?" for npm dependencies but ":" or none at att for go dependencies.
+func convertDependencycheckFindingToUnifiedFinding(directoryToScan string,
+	dependencycheckFinding DependencycheckFinding, vulnerabilityIndex int) types.UnifiedFinding {
+	// dependencycheck uses "?" for npm dependencies but ":" or none at all for go dependencies.
 	separator := "?"
 	separatorIndex := strings.LastIndex(dependencycheckFinding.FilePath, separator)
 	if separatorIndex == -1 {
@@ -44,7 +42,10 @@ func convertDependencycheckFindingToUnifiedFinding(dependencycheckFinding Depend
 		separatorIndex = len(dependencycheckFinding.FilePath) - 1
 	}
 
-	file := dependencycheckFinding.FilePath[:separatorIndex]
+	fileFullPath := dependencycheckFinding.FilePath[:separatorIndex]
+	// Contrary to the other detectors, dependencycheck returns the path
+	// including the path of the directory to scan.
+	file := strings.TrimPrefix(fileFullPath, directoryToScan)
 	packageAndVersionPossiblePrefixed := dependencycheckFinding.FilePath[separatorIndex+len(separator):]
 	packageAndVersion := strings.TrimPrefix(packageAndVersionPossiblePrefixed, "/")
 
@@ -79,7 +80,7 @@ func getDependencycheckOutputJson(directoryToScan string, _gitMode bool) ([]byte
 		"--scan", directoryToScan+"/**/package-lock.json",
 		"--scan", directoryToScan+"/**/go.mod", // .sum files are not considered by dependencycheck
 		"--format", "JSON", "--out", dependencycheckOutputDirPath,
-		"--nvdApiKey", os.Getenv(NvdApiKeyEnvVarName))
+		"--nvdApiKey", os.Getenv(config.NvdApiKeyEnvVarName))
 	out, err := cmd.Output()
 	if err != nil {
 		if !config.TolerateDependecycheckErrorExitCodes {
@@ -120,7 +121,7 @@ func getDependencycheckFindingsAsUnifiedLocally(directoryToScan string,
 	unifiedFindings := make([]types.UnifiedFinding, 0)
 	for _, dependencycheckFinding := range dependencycheckFindings {
 		for vulnerabilityIndex := range dependencycheckFinding.Vulnerabilities {
-			unifiedFinding := convertDependencycheckFindingToUnifiedFinding(
+			unifiedFinding := convertDependencycheckFindingToUnifiedFinding(directoryToScan,
 				dependencycheckFinding, vulnerabilityIndex)
 			unifiedFindings = append(unifiedFindings, unifiedFinding)
 		}
@@ -131,7 +132,7 @@ func getDependencycheckFindingsAsUnifiedLocally(directoryToScan string,
 
 func GetDependencycheckFindingsAsUnified(directoryToScan string,
 	gitMode bool) ([]types.UnifiedFinding, error) {
-	if os.Getenv(NvdApiKeyEnvVarName) == "" {
+	if os.Getenv(config.NvdApiKeyEnvVarName) == "" {
 		return getDependencycheckFindingsAsUnifiedFromServer(directoryToScan, gitMode)
 	} else {
 		return getDependencycheckFindingsAsUnifiedLocally(directoryToScan, gitMode)

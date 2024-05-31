@@ -15,8 +15,6 @@ import (
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
-const OpenAiApiKeyEnvVarName = "OPEN_AI_API_KEY"
-
 var linefeed = rune("\n"[0])
 
 func fixProblemViaAi(directoryToScan string,
@@ -103,7 +101,7 @@ func getFixedFileContentFromChatGptLocally(fileContent string,
 		"Do not remove unnecessary whitespace.\n" +
 		"Under all circumstances make sure that you do not introduce any new security vulnerability.\n"
 
-	client := openai.NewClient(os.Getenv(OpenAiApiKeyEnvVarName))
+	client := openai.NewClient(os.Getenv(config.OpenAiApiKeyEnvVarName))
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{ //nolint: exhaustruct
@@ -133,7 +131,7 @@ func getFixedFileContentFromChatGptLocally(fileContent string,
 
 func GetFixedFileContentFromChatGpt(fileContent string,
 	problemLineNumber int, hint string) (string, error) {
-	if os.Getenv(OpenAiApiKeyEnvVarName) == "" {
+	if os.Getenv(config.OpenAiApiKeyEnvVarName) == "" {
 		return getFixedFileContentFromChatGptFromServer(fileContent, problemLineNumber, hint)
 	} else {
 		return getFixedFileContentFromChatGptLocally(fileContent, problemLineNumber, hint)
