@@ -13,8 +13,6 @@ import (
 	"github.com/secguro/secguro-cli/pkg/types"
 )
 
-const ciTokenEnvVarName = "SECGURO_CI_TOKEN"
-
 const deviceTokenFileName = "device_token"
 const secguroConfigDirName = ".secguro"
 
@@ -128,7 +126,7 @@ func isDeviceRegistered(deviceId uint) (bool, error) {
 }
 
 func GetAuthToken() (string, error) {
-	ciToken := os.Getenv(ciTokenEnvVarName)
+	ciToken := os.Getenv(config.CiTokenEnvVarName)
 	if ciToken != "" {
 		return ciToken, nil
 	}

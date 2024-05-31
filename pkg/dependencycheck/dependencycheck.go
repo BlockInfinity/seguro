@@ -26,8 +26,6 @@ type DependencycheckFinding_Vulnerabilities struct {
 	Name string
 }
 
-const NvdApiKeyEnvVarName = "NVD_API_KEY"
-
 func convertDependencycheckFindingToUnifiedFinding(directoryToScan string,
 	dependencycheckFinding DependencycheckFinding, vulnerabilityIndex int) types.UnifiedFinding {
 	// dependencycheck uses "?" for npm dependencies but ":" or none at all for go dependencies.
@@ -82,7 +80,7 @@ func getDependencycheckOutputJson(directoryToScan string, _gitMode bool) ([]byte
 		"--scan", directoryToScan+"/**/package-lock.json",
 		"--scan", directoryToScan+"/**/go.mod", // .sum files are not considered by dependencycheck
 		"--format", "JSON", "--out", dependencycheckOutputDirPath,
-		"--nvdApiKey", os.Getenv(NvdApiKeyEnvVarName))
+		"--nvdApiKey", os.Getenv(config.NvdApiKeyEnvVarName))
 	out, err := cmd.Output()
 	if err != nil {
 		if !config.TolerateDependecycheckErrorExitCodes {
@@ -134,7 +132,7 @@ func getDependencycheckFindingsAsUnifiedLocally(directoryToScan string,
 
 func GetDependencycheckFindingsAsUnified(directoryToScan string,
 	gitMode bool) ([]types.UnifiedFinding, error) {
-	if os.Getenv(NvdApiKeyEnvVarName) == "" {
+	if os.Getenv(config.NvdApiKeyEnvVarName) == "" {
 		return getDependencycheckFindingsAsUnifiedFromServer(directoryToScan, gitMode)
 	} else {
 		return getDependencycheckFindingsAsUnifiedLocally(directoryToScan, gitMode)
