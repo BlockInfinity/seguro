@@ -45,7 +45,7 @@ func convertSemgrepFindingToUnifiedFinding(directoryToScan string, gitMode bool,
 	unifiedFinding := types.UnifiedFinding{
 		Detector:    "semgrep",
 		Rule:        semgrepFinding.Check_id,
-		File:        semgrepFinding.Path,
+		File:        "/" + semgrepFinding.Path,
 		LineStart:   semgrepFinding.Start.Line,
 		LineEnd:     semgrepFinding.End.Line,
 		ColumnStart: semgrepFinding.Start.Col,
