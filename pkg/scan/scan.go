@@ -51,11 +51,15 @@ func PerformScan(directoryToScan string,
 	fmt.Println("done")
 
 	fmt.Print("Scanning...")
-	unifiedFindings, err := getUnifiedFindings(directoryToScan, gitMode, disabledDetectors)
-	if err != nil {
-		return nil, err
+	unifiedFindings, failedDetectors := getUnifiedFindings(directoryToScan, gitMode, disabledDetectors)
+	if len(failedDetectors) == 0 {
+		fmt.Println("done")
+	} else {
+		fmt.Println("done with errors: the following detectors failed:")
+		for _, failedDetector := range failedDetectors {
+			fmt.Println("  • " + failedDetector)
+		}
 	}
-	fmt.Println("done")
 
 	unifiedFindingsNotIgnored, err := getFindingsNotIgnored(directoryToScan, unifiedFindings)
 	if err != nil {
@@ -78,35 +82,39 @@ func exitWithAppropriateExitCode(numberOfFindingsNotIgnored int, tolerance int) 
 }
 
 func getUnifiedFindings(directoryToScan string,
-	gitMode bool, disabledDetectors []string) ([]types.UnifiedFinding, error) {
+	gitMode bool, disabledDetectors []string) ([]types.UnifiedFinding, []string) {
+	failedDetectors := make([]string, 0)
 	unifiedFindings := make([]types.UnifiedFinding, 0)
 
 	if !functional.ArrayIncludes(disabledDetectors, "gitleaks") {
 		unifiedFindingsGitleaks, err := gitleaks.GetGitleaksFindingsAsUnified(directoryToScan, gitMode)
 		if err != nil {
-			return unifiedFindings, err
+			failedDetectors = append(failedDetectors, "gitleaks")
+		} else {
+			unifiedFindings = append(unifiedFindings, unifiedFindingsGitleaks...)
 		}
-		unifiedFindings = append(unifiedFindings, unifiedFindingsGitleaks...)
 	}
 
 	if !functional.ArrayIncludes(disabledDetectors, "semgrep") {
 		unifiedFindingsSemgrep, err := semgrep.GetSemgrepFindingsAsUnified(directoryToScan, gitMode)
 		if err != nil {
-			return unifiedFindings, err
+			failedDetectors = append(failedDetectors, "semgrep")
+		} else {
+			unifiedFindings = append(unifiedFindings, unifiedFindingsSemgrep...)
 		}
-		unifiedFindings = append(unifiedFindings, unifiedFindingsSemgrep...)
 	}
 
 	if !functional.ArrayIncludes(disabledDetectors, "dependencycheck") {
 		unifiedFindingsDependencycheck, err :=
 			dependencycheck.GetDependencycheckFindingsAsUnified(directoryToScan, gitMode)
 		if err != nil {
-			return unifiedFindings, err
+			failedDetectors = append(failedDetectors, "dependencycheck")
+		} else {
+			unifiedFindings = append(unifiedFindings, unifiedFindingsDependencycheck...)
 		}
-		unifiedFindings = append(unifiedFindings, unifiedFindingsDependencycheck...)
 	}
 
-	return unifiedFindings, nil
+	return unifiedFindings, failedDetectors
 }
 
 func getFindingsNotIgnored(directoryToScan string, //nolint: cyclop
