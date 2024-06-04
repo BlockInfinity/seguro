@@ -3,6 +3,7 @@ package types
 type ScanPostReq struct {
 	ProjectName       string
 	ProjectRemoteUrls []string
+	Branch            string
 	Revision          string
 	Findings          []UnifiedFinding
 	FailedDetectors   []string
