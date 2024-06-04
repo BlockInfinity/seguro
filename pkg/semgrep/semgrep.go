@@ -3,6 +3,7 @@ package semgrep
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 
@@ -80,16 +81,26 @@ func getSemgrepOutputJson(directoryToScan string) ([]byte, error) {
 	return semgrepOutputJson, err
 }
 
-func GetSemgrepFindingsAsUnified(directoryToScan string, gitMode bool) ([]types.UnifiedFinding, error) {
+func GetSemgrepFindingsAsUnified(directoryToScan string, gitMode bool,
+	unifiedFindingsChannel chan types.UnifiedFinding,
+	detectorTerminationChannel chan types.DetectorTermination) {
 	semgrepOutputJson, err := getSemgrepOutputJson(directoryToScan)
 	if err != nil {
-		return nil, err
+		fmt.Println(err)
+		detectorTerminationChannel <- types.DetectorTermination{
+			Detector:   "semgrep",
+			Successful: false,
+		}
 	}
 
 	var metaSemgrepFindings Meta_SemgrepFinding
 	err = json.Unmarshal(semgrepOutputJson, &metaSemgrepFindings)
 	if err != nil {
-		return nil, err
+		fmt.Println(err)
+		detectorTerminationChannel <- types.DetectorTermination{
+			Detector:   "semgrep",
+			Successful: false,
+		}
 	}
 
 	semgrepFindings := metaSemgrepFindings.Results
@@ -99,8 +110,19 @@ func GetSemgrepFindingsAsUnified(directoryToScan string, gitMode bool) ([]types.
 			return convertSemgrepFindingToUnifiedFinding(directoryToScan, gitMode, semgrepFinding)
 		})
 	if err != nil {
-		return make([]types.UnifiedFinding, 0), err
+		fmt.Println(err)
+		detectorTerminationChannel <- types.DetectorTermination{
+			Detector:   "semgrep",
+			Successful: false,
+		}
 	}
 
-	return unifiedFindings, nil
+	for _, unifiedFinding := range unifiedFindings {
+		unifiedFindingsChannel <- unifiedFinding
+	}
+
+	detectorTerminationChannel <- types.DetectorTermination{
+		Detector:   "semgrep",
+		Successful: true,
+	}
 }

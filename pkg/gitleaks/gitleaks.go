@@ -3,6 +3,7 @@ package gitleaks
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 
@@ -107,16 +108,26 @@ func getGitleaksOutputJson(directoryToScan string, gitMode bool) ([]byte, error)
 	return gitleaksOutputJson, err
 }
 
-func GetGitleaksFindingsAsUnified(directoryToScan string, gitMode bool) ([]types.UnifiedFinding, error) {
+func GetGitleaksFindingsAsUnified(directoryToScan string, gitMode bool,
+	unifiedFindingsChannel chan types.UnifiedFinding,
+	detectorTerminationChannel chan types.DetectorTermination) {
 	gitleaksOutputJson, err := getGitleaksOutputJson(directoryToScan, gitMode)
 	if err != nil {
-		return nil, err
+		fmt.Println(err)
+		detectorTerminationChannel <- types.DetectorTermination{
+			Detector:   "gitleaks",
+			Successful: false,
+		}
 	}
 
 	var gitleaksFindings []GitleaksFinding
 	err = json.Unmarshal(gitleaksOutputJson, &gitleaksFindings)
 	if err != nil {
-		return nil, err
+		fmt.Println(err)
+		detectorTerminationChannel <- types.DetectorTermination{
+			Detector:   "gitleaks",
+			Successful: false,
+		}
 	}
 
 	unifiedFindings, err := functional.MapWithError(gitleaksFindings,
@@ -124,8 +135,19 @@ func GetGitleaksFindingsAsUnified(directoryToScan string, gitMode bool) ([]types
 			return convertGitleaksFindingToUnifiedFinding(directoryToScan, gitMode, gitleaksFinding)
 		})
 	if err != nil {
-		return make([]types.UnifiedFinding, 0), err
+		fmt.Println(err)
+		detectorTerminationChannel <- types.DetectorTermination{
+			Detector:   "gitleaks",
+			Successful: false,
+		}
 	}
 
-	return unifiedFindings, nil
+	for _, unifiedFinding := range unifiedFindings {
+		unifiedFindingsChannel <- unifiedFinding
+	}
+
+	detectorTerminationChannel <- types.DetectorTermination{
+		Detector:   "gitleaks",
+		Successful: true,
+	}
 }

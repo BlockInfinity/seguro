@@ -23,3 +23,8 @@ type UnifiedFinding struct {
 	Severity    string
 	GitInfo     *GitInfo
 }
+
+type DetectorTermination struct {
+	Detector   string
+	Successful bool
+}
