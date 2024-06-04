@@ -123,15 +123,28 @@ func parseGitBlameOutput(gitBlameOutput []byte) (types.GitInfo, error) { //nolin
 	return gitInfo, nil
 }
 
-func GetLatestCommitHash(directoryToScan string) (string, error) {
-	cmd := exec.Command("git", "rev-parse", "HEAD")
+func GetBranchName(directoryToScan string) (string, error) {
+	cmd := exec.Command("git", "branch", "--show-current")
 	cmd.Dir = directoryToScan
-	gitRevParseOutput, err := cmd.Output()
+	output, err := cmd.Output()
 	if err != nil {
 		return "", err
 	}
 
-	latestCommitHash := strings.TrimSuffix(string(gitRevParseOutput), "\n")
+	latestCommitHash := strings.TrimSuffix(string(output), "\n")
+
+	return latestCommitHash, nil
+}
+
+func GetLatestCommitHash(directoryToScan string) (string, error) {
+	cmd := exec.Command("git", "rev-parse", "HEAD")
+	cmd.Dir = directoryToScan
+	output, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+
+	latestCommitHash := strings.TrimSuffix(string(output), "\n")
 
 	return latestCommitHash, nil
 }

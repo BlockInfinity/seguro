@@ -17,7 +17,7 @@ import (
 const endpointPostScan = "scans"
 
 func ReportScan(authToken string, projectName string, projectRemoteUrls []string,
-	revision string, unifiedFindings []types.UnifiedFinding, failedDetectors []string) error {
+	branch string, revision string, unifiedFindings []types.UnifiedFinding, failedDetectors []string) error {
 	fmt.Print("Sending scan report to server...")
 
 	urlEndpointPostScan := config.ServerUrl + "/" + endpointPostScan
@@ -25,6 +25,7 @@ func ReportScan(authToken string, projectName string, projectRemoteUrls []string
 	scanPostReq := types.ScanPostReq{
 		ProjectName:       projectName,
 		ProjectRemoteUrls: projectRemoteUrls,
+		Branch:            branch,
 		Revision:          revision,
 		Findings:          unifiedFindings,
 		FailedDetectors:   failedDetectors,
@@ -68,29 +69,14 @@ func ReportScanIfApplicable(directoryToScan string,
 		return err
 	}
 
-	revision, err := git.GetLatestCommitHash(directoryToScan)
+	branch, revision, projectRemoteUrls, err := getGitBasedScanMetadata(directoryToScan)
 	if err != nil {
-		// Set revision to empty string for paths that are not in git repos.
-		if err.Error() == "exit status 128" {
-			revision = ""
-		} else {
-			return err
-		}
-	}
-
-	projectRemoteUrls, err := git.GetProjectRemoteUrls(directoryToScan)
-	if err != nil {
-		// Set project remote URLs to empty array for paths that are not in git repos.
-		if err.Error() == "exit status 128" {
-			projectRemoteUrls = make([]string, 0)
-		} else {
-			return err
-		}
+		return err
 	}
 
 	if authToken != "" {
 		err = ReportScan(authToken, projectName, projectRemoteUrls,
-			revision, unifiedFindingsNotIgnored, failedDetectors)
+			branch, revision, unifiedFindingsNotIgnored, failedDetectors)
 		if err != nil {
 			return err
 		}
@@ -120,4 +106,41 @@ func getProjectName(directoryToScan string) (string, error) {
 	dirName := filepath.Base(dirAbsPath)
 
 	return dirName, nil
+}
+
+func getGitBasedScanMetadata(directoryToScan string) (branch string,
+	revision string, projectRemoteUrls []string, err error) {
+	errorStringIfNotInGitRepo := "exit status 128"
+
+	branch, err = git.GetBranchName(directoryToScan)
+	if err != nil {
+		// Set branch to empty string for paths that are not in git repos.
+		if err.Error() == errorStringIfNotInGitRepo {
+			branch = ""
+		} else {
+			return "", "", nil, err
+		}
+	}
+
+	revision, err = git.GetLatestCommitHash(directoryToScan)
+	if err != nil {
+		// Set revision to empty string for paths that are not in git repos.
+		if err.Error() == errorStringIfNotInGitRepo {
+			revision = ""
+		} else {
+			return "", "", nil, err
+		}
+	}
+
+	projectRemoteUrls, err = git.GetProjectRemoteUrls(directoryToScan)
+	if err != nil {
+		// Set project remote URLs to empty array for paths that are not in git repos.
+		if err.Error() == errorStringIfNotInGitRepo {
+			projectRemoteUrls = make([]string, 0)
+		} else {
+			return "", "", nil, err
+		}
+	}
+
+	return //nolint: nakedret
 }
