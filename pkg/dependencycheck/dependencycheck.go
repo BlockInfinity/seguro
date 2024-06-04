@@ -130,11 +130,31 @@ func getDependencycheckFindingsAsUnifiedLocally(directoryToScan string,
 	return unifiedFindings, nil
 }
 
-func GetDependencycheckFindingsAsUnified(directoryToScan string,
-	gitMode bool) ([]types.UnifiedFinding, error) {
+func GetDependencycheckFindingsAsUnified(directoryToScan string, gitMode bool,
+	unifiedFindingsChannel chan types.UnifiedFinding,
+	detectorTerminationChannel chan types.DetectorTermination) {
+	var f func(directoryToScan string, gitMode bool) ([]types.UnifiedFinding, error)
 	if os.Getenv(config.NvdApiKeyEnvVarName) == "" {
-		return getDependencycheckFindingsAsUnifiedFromServer(directoryToScan, gitMode)
+		f = getDependencycheckFindingsAsUnifiedFromServer
 	} else {
-		return getDependencycheckFindingsAsUnifiedLocally(directoryToScan, gitMode)
+		f = getDependencycheckFindingsAsUnifiedLocally
+	}
+
+	unifiedFindings, err := f(directoryToScan, gitMode)
+	if err != nil {
+		fmt.Println(err)
+		detectorTerminationChannel <- types.DetectorTermination{
+			Detector:   "dependencycheck",
+			Successful: false,
+		}
+	}
+
+	for _, unifiedFinding := range unifiedFindings {
+		unifiedFindingsChannel <- unifiedFinding
+	}
+
+	detectorTerminationChannel <- types.DetectorTermination{
+		Detector:   "dependencycheck",
+		Successful: true,
 	}
 }

@@ -85,40 +85,58 @@ func exitWithAppropriateExitCode(numberOfFindingsNotIgnored int, tolerance int) 
 	os.Exit(numberOfFindingsNotIgnored)
 }
 
-func getUnifiedFindings(directoryToScan string,
+func getUnifiedFindings(directoryToScan string, //nolint: cyclop
 	gitMode bool, disabledDetectors []string) ([]types.UnifiedFinding, []string) {
 	failedDetectors := make([]string, 0)
 	unifiedFindings := make([]types.UnifiedFinding, 0)
 
+	channelCapacity := 100
+	runningDetectors := 0
+	unifiedFindingsChannel := make(chan types.UnifiedFinding, channelCapacity)
+	detectorTerminationChannel := make(chan types.DetectorTermination, channelCapacity)
+
 	if !functional.ArrayIncludes(disabledDetectors, "gitleaks") {
-		unifiedFindingsGitleaks, err := gitleaks.GetGitleaksFindingsAsUnified(directoryToScan, gitMode)
-		if err != nil {
-			failedDetectors = append(failedDetectors, "gitleaks")
-		} else {
-			unifiedFindings = append(unifiedFindings, unifiedFindingsGitleaks...)
-		}
+		go gitleaks.GetGitleaksFindingsAsUnified(directoryToScan, gitMode,
+			unifiedFindingsChannel, detectorTerminationChannel)
+		runningDetectors++
 	}
 
 	if !functional.ArrayIncludes(disabledDetectors, "semgrep") {
-		unifiedFindingsSemgrep, err := semgrep.GetSemgrepFindingsAsUnified(directoryToScan, gitMode)
-		if err != nil {
-			failedDetectors = append(failedDetectors, "semgrep")
-		} else {
-			unifiedFindings = append(unifiedFindings, unifiedFindingsSemgrep...)
-		}
+		go semgrep.GetSemgrepFindingsAsUnified(directoryToScan, gitMode,
+			unifiedFindingsChannel, detectorTerminationChannel)
+		runningDetectors++
 	}
 
 	if !functional.ArrayIncludes(disabledDetectors, "dependencycheck") {
-		unifiedFindingsDependencycheck, err :=
-			dependencycheck.GetDependencycheckFindingsAsUnified(directoryToScan, gitMode)
-		if err != nil {
-			failedDetectors = append(failedDetectors, "dependencycheck")
-		} else {
-			unifiedFindings = append(unifiedFindings, unifiedFindingsDependencycheck...)
-		}
+		go dependencycheck.GetDependencycheckFindingsAsUnified(directoryToScan, gitMode,
+			unifiedFindingsChannel, detectorTerminationChannel)
+		runningDetectors++
 	}
 
-	return unifiedFindings, failedDetectors
+	for {
+		select {
+		case unifiedFinding, ok := <-unifiedFindingsChannel:
+			if ok {
+				unifiedFindings = append(unifiedFindings, unifiedFinding)
+			} else {
+				return unifiedFindings, failedDetectors
+			}
+
+		case detectorTermination := <-detectorTerminationChannel:
+			runningDetectors--
+			if !detectorTermination.Successful {
+				failedDetectors = append(failedDetectors, detectorTermination.Detector)
+			}
+			if runningDetectors == 0 {
+				close(unifiedFindingsChannel)
+			}
+
+		default:
+			if runningDetectors == 0 {
+				return unifiedFindings, failedDetectors
+			}
+		}
+	}
 }
 
 func getFindingsNotIgnored(directoryToScan string, //nolint: cyclop
