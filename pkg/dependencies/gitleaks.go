@@ -3,6 +3,8 @@ package dependencies
 import (
 	"errors"
 	"runtime"
+
+	"github.com/secguro/secguro-cli/pkg/utils"
 )
 
 func downloadAndExtractGitleaks() error {
@@ -16,7 +18,17 @@ func downloadAndExtractGitleaks() error {
 		return errors.New("Unsupported platform")
 	}
 
-	err := downloadDependency("gitleaks", "tar.gz", url)
+	filePath := DependenciesDir + "/" + "gitleaks.tar.gz"
+
+	doesAlreadExist, err := utils.DoesFileExist(filePath)
+	if err != nil {
+		return err
+	}
+	if doesAlreadExist {
+		return nil
+	}
+
+	err = downloadDependency(filePath, url)
 	if err != nil {
 		return err
 	}

@@ -11,6 +11,7 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/secguro/secguro-cli/pkg/config"
 	"github.com/secguro/secguro-cli/pkg/types"
+	"github.com/secguro/secguro-cli/pkg/utils"
 )
 
 const deviceTokenFileName = "device_token"
@@ -140,20 +141,25 @@ func getDeviceToken() (string, error) {
 		return "", err
 	}
 
-	if _, err := os.Stat(pathSecguroConfigDir + "/" + deviceTokenFileName); err == nil {
-		authTokenBytes, err := os.ReadFile(pathSecguroConfigDir + "/" + deviceTokenFileName)
-		if err != nil {
-			return "", err
-		}
+	deviceTokenFilePath := pathSecguroConfigDir + "/" + deviceTokenFileName
 
-		authToken := string(authTokenBytes)
-
-		return authToken, nil
-	} else if errors.Is(err, os.ErrNotExist) {
-		return "", nil
-	} else {
+	doesFileExist, err := utils.DoesFileExist(deviceTokenFilePath)
+	if err != nil {
 		return "", errors.New("cannot determine whether user is logged in")
 	}
+
+	if !doesFileExist {
+		return "", nil
+	}
+
+	authTokenBytes, err := os.ReadFile(deviceTokenFilePath)
+	if err != nil {
+		return "", err
+	}
+
+	authToken := string(authTokenBytes)
+
+	return authToken, nil
 }
 
 func ensureDirectoryExists(path string) error {
