@@ -29,13 +29,15 @@ func downloadDependency(name string, fileNameExtension string, url string) error
 		return err
 	}
 
-	return downloadFile(DependenciesDir+"/"+name+"."+fileNameExtension, url)
+	filePath := DependenciesDir + "/" + name + "." + fileNameExtension
+
+	return downloadFile(filePath, url)
 }
 
 // https://stackoverflow.com/a/33853856
-func downloadFile(filepath string, url string) error {
+func downloadFile(filePath string, url string) error {
 	// Create the file
-	out, err := os.Create(filepath)
+	out, err := os.Create(filePath)
 	if err != nil {
 		return err
 	}
