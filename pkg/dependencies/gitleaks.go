@@ -3,6 +3,8 @@ package dependencies
 import (
 	"errors"
 	"runtime"
+
+	"github.com/secguro/secguro-cli/pkg/utils"
 )
 
 func downloadAndExtractGitleaks() error {
@@ -18,7 +20,15 @@ func downloadAndExtractGitleaks() error {
 
 	filePath := DependenciesDir + "/" + "gitleaks.tar.gz"
 
-	err := downloadDependency(filePath, url)
+	doesAlreadExist, err := utils.DoesFileExist(filePath)
+	if err != nil {
+		return err
+	}
+	if doesAlreadExist {
+		return nil
+	}
+
+	err = downloadDependency(filePath, url)
 	if err != nil {
 		return err
 	}
