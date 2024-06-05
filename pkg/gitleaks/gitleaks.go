@@ -118,6 +118,8 @@ func GetGitleaksFindingsAsUnified(directoryToScan string, gitMode bool,
 			Detector:   "gitleaks",
 			Successful: false,
 		}
+
+		return
 	}
 
 	var gitleaksFindings []GitleaksFinding
@@ -128,6 +130,8 @@ func GetGitleaksFindingsAsUnified(directoryToScan string, gitMode bool,
 			Detector:   "gitleaks",
 			Successful: false,
 		}
+
+		return
 	}
 
 	unifiedFindings, err := functional.MapWithError(gitleaksFindings,
@@ -140,6 +144,8 @@ func GetGitleaksFindingsAsUnified(directoryToScan string, gitMode bool,
 			Detector:   "gitleaks",
 			Successful: false,
 		}
+
+		return
 	}
 
 	for _, unifiedFinding := range unifiedFindings {

@@ -147,6 +147,8 @@ func GetDependencycheckFindingsAsUnified(directoryToScan string, gitMode bool,
 			Detector:   "dependencycheck",
 			Successful: false,
 		}
+
+		return
 	}
 
 	for _, unifiedFinding := range unifiedFindings {

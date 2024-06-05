@@ -91,6 +91,8 @@ func GetSemgrepFindingsAsUnified(directoryToScan string, gitMode bool,
 			Detector:   "semgrep",
 			Successful: false,
 		}
+
+		return
 	}
 
 	var metaSemgrepFindings Meta_SemgrepFinding
@@ -101,6 +103,8 @@ func GetSemgrepFindingsAsUnified(directoryToScan string, gitMode bool,
 			Detector:   "semgrep",
 			Successful: false,
 		}
+
+		return
 	}
 
 	semgrepFindings := metaSemgrepFindings.Results
@@ -115,6 +119,8 @@ func GetSemgrepFindingsAsUnified(directoryToScan string, gitMode bool,
 			Detector:   "semgrep",
 			Successful: false,
 		}
+
+		return
 	}
 
 	for _, unifiedFinding := range unifiedFindings {
