@@ -47,7 +47,7 @@ func CommandLogin() error {
 		return err
 	}
 
-	fmt.Println("Device registration successful. Future scans will be visible in the seguro webapp.")
+	fmt.Println("Device registration successful. Future scans will be visible in the secguro webapp.")
 
 	return nil
 }
