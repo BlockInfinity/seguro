@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/codeclysm/extract/v3"
 )
@@ -22,14 +23,14 @@ func extractZipDependency(name string) error {
 	return extract.Zip(context.Background(), file, DependenciesDir+"/"+name, nil)
 }
 
-func downloadDependency(name string, fileNameExtension string, url string) error {
+func downloadDependency(filePath string, url string) error {
+	dirPath := filepath.Dir(filePath)
+
 	const directoryPermissions = 0700
-	err := os.MkdirAll(DependenciesDir, directoryPermissions)
+	err := os.MkdirAll(dirPath, directoryPermissions)
 	if err != nil {
 		return err
 	}
-
-	filePath := DependenciesDir + "/" + name + "." + fileNameExtension
 
 	return downloadFile(filePath, url)
 }

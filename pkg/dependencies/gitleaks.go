@@ -16,7 +16,9 @@ func downloadAndExtractGitleaks() error {
 		return errors.New("Unsupported platform")
 	}
 
-	err := downloadDependency("gitleaks", "tar.gz", url)
+	filePath := DependenciesDir + "/" + "gitleaks.tar.gz"
+
+	err := downloadDependency(filePath, url)
 	if err != nil {
 		return err
 	}
