@@ -143,7 +143,7 @@ func getDeviceToken() (string, error) {
 
 	deviceTokenFilePath := pathSecguroConfigDir + "/" + deviceTokenFileName
 
-	doesFileExist, err := utils.DoesFileExist(deviceTokenFileName)
+	doesFileExist, err := utils.DoesFileExist(deviceTokenFilePath)
 	if err != nil {
 		return "", errors.New("cannot determine whether user is logged in")
 	}
