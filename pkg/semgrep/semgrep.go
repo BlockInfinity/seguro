@@ -44,17 +44,18 @@ func convertSemgrepFindingToUnifiedFinding(directoryToScan string, gitMode bool,
 	}
 
 	unifiedFinding := types.UnifiedFinding{
-		Detector:    "semgrep",
-		Rule:        semgrepFinding.Check_id,
-		File:        "/" + semgrepFinding.Path,
-		LineStart:   semgrepFinding.Start.Line,
-		LineEnd:     semgrepFinding.End.Line,
-		ColumnStart: semgrepFinding.Start.Col,
-		ColumnEnd:   semgrepFinding.End.Col,
-		Match:       semgrepFinding.Extra.Lines,
-		Hint:        semgrepFinding.Extra.Message,
-		Severity:    semgrepFinding.Extra.Severity,
-		GitInfo:     gitInfo,
+		Detector:             "semgrep",
+		IdOnExternalPlatform: "",
+		Rule:                 semgrepFinding.Check_id,
+		File:                 "/" + semgrepFinding.Path,
+		LineStart:            semgrepFinding.Start.Line,
+		LineEnd:              semgrepFinding.End.Line,
+		ColumnStart:          semgrepFinding.Start.Col,
+		ColumnEnd:            semgrepFinding.End.Col,
+		Match:                semgrepFinding.Extra.Lines,
+		Hint:                 semgrepFinding.Extra.Message,
+		Severity:             semgrepFinding.Extra.Severity,
+		GitInfo:              gitInfo,
 	}
 
 	return unifiedFinding, nil

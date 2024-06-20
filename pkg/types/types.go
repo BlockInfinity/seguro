@@ -11,17 +11,18 @@ type GitInfo struct {
 }
 
 type UnifiedFinding struct {
-	Detector    string
-	Rule        string
-	File        string
-	LineStart   int
-	LineEnd     int
-	ColumnStart int
-	ColumnEnd   int
-	Match       string
-	Hint        string
-	Severity    string
-	GitInfo     *GitInfo
+	Detector             string
+	IdOnExternalPlatform string
+	Rule                 string
+	File                 string
+	LineStart            int
+	LineEnd              int
+	ColumnStart          int
+	ColumnEnd            int
+	Match                string
+	Hint                 string
+	Severity             string
+	GitInfo              *GitInfo
 }
 
 type DetectorTermination struct {
