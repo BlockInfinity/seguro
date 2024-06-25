@@ -1,12 +1,12 @@
 package types
 
 type ScanPostReq struct {
-	ProjectName       string
-	ProjectRemoteUrls []string
-	Branch            string
-	Revision          string
-	Findings          []UnifiedFinding
-	FailedDetectors   []string
+	ScannableObjectName       string
+	ScannableObjectRemoteUrls []string
+	Branch                    string
+	Revision                  string
+	Findings                  []UnifiedFinding
+	FailedDetectors           []string
 }
 
 type DevicePostReq struct {
