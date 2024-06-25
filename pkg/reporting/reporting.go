@@ -142,5 +142,7 @@ func getGitBasedScanMetadata(directoryToScan string) (branch string,
 		}
 	}
 
+	err = nil
+
 	return //nolint: nakedret
 }
