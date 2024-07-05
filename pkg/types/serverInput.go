@@ -1,12 +1,12 @@
 package types
 
 type ScanPostReq struct {
-	ScannableObjectName       string
-	ScannableObjectRemoteUrls []string
-	Branch                    string
-	Revision                  string
-	Findings                  []UnifiedFinding
-	FailedDetectors           []string
+	ScannableResourceName       string
+	ScannableResourceRemoteUrls []string
+	Branch                      string
+	Revision                    string
+	Findings                    []UnifiedFinding
+	FailedDetectors             []string
 }
 
 type DevicePostReq struct {

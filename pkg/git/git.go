@@ -149,7 +149,7 @@ func GetLatestCommitHash(directoryToScan string) (string, error) {
 	return latestCommitHash, nil
 }
 
-func GetScannableObjectRemoteUrls(directoryToScan string) ([]string, error) {
+func GetScannableResourceRemoteUrls(directoryToScan string) ([]string, error) {
 	cmd := exec.Command("git", "remote", "-v")
 	cmd.Dir = directoryToScan
 	gitRemoteOutput, err := cmd.Output()
@@ -157,27 +157,27 @@ func GetScannableObjectRemoteUrls(directoryToScan string) ([]string, error) {
 		return nil, err
 	}
 
-	scannableObjectRemoteUrls, err := parseGitRemoteOutput(gitRemoteOutput)
+	scannableResourceRemoteUrls, err := parseGitRemoteOutput(gitRemoteOutput)
 	if err != nil {
 		return nil, err
 	}
 
-	return scannableObjectRemoteUrls, nil
+	return scannableResourceRemoteUrls, nil
 }
 
 func parseGitRemoteOutput(gitRemoteOutput []byte) ([]string, error) {
 	scanner := bufio.NewScanner(strings.NewReader(string(gitRemoteOutput)))
-	scannableObjectRemoteUrls := make([]string, 0)
+	scannableResourceRemoteUrls := make([]string, 0)
 	for scanner.Scan() {
 		line := scanner.Text()
 		lineFields := strings.Fields(line)
-		scannableObjectRemoteUrl := lineFields[1]
+		scannableResourceRemoteUrl := lineFields[1]
 
-		if functional.ArrayIncludes(scannableObjectRemoteUrls, scannableObjectRemoteUrl) {
+		if functional.ArrayIncludes(scannableResourceRemoteUrls, scannableResourceRemoteUrl) {
 			continue
 		}
 
-		scannableObjectRemoteUrls = append(scannableObjectRemoteUrls, scannableObjectRemoteUrl)
+		scannableResourceRemoteUrls = append(scannableResourceRemoteUrls, scannableResourceRemoteUrl)
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -189,5 +189,5 @@ func parseGitRemoteOutput(gitRemoteOutput []byte) ([]string, error) {
 		}
 	}
 
-	return scannableObjectRemoteUrls, nil
+	return scannableResourceRemoteUrls, nil
 }
