@@ -20,6 +20,8 @@ func ReportScan(authToken string, scannableResourceName string, scannableResourc
 	branch string, revision string, unifiedFindings []types.UnifiedFinding, failedDetectors []string) error {
 	fmt.Print("Sending scan report to server...")
 
+	authProvider := "secguro"
+
 	urlEndpointPostScan := config.ServerUrl + "/" + endpointPostScan
 
 	scanPostReq := types.ScanPostReq{
@@ -35,7 +37,7 @@ func ReportScan(authToken string, scannableResourceName string, scannableResourc
 	client := resty.New()
 	response, err := client.R().
 		SetHeader("Content-Type", "application/json").
-		SetHeader("Authorization", authToken).
+		SetHeader("Authorization", authProvider+" "+authToken).
 		SetBody(scanPostReq).
 		SetResult(&result).
 		Post(urlEndpointPostScan)
