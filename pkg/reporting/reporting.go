@@ -16,7 +16,7 @@ import (
 
 const endpointPostScan = "scans"
 
-func ReportScan(authToken string, scannableResourceName string, scannableResourceRemoteUrls []string,
+func ReportScan(authToken string, assetName string, assetRemoteUrls []string,
 	branch string, revision string, unifiedFindings []types.UnifiedFinding, failedDetectors []string) error {
 	fmt.Print("Sending scan report to server...")
 
@@ -25,12 +25,12 @@ func ReportScan(authToken string, scannableResourceName string, scannableResourc
 	urlEndpointPostScan := config.ServerUrl + "/" + endpointPostScan
 
 	scanPostReq := types.ScanPostReq{
-		ScannableResourceName:       scannableResourceName,
-		ScannableResourceRemoteUrls: scannableResourceRemoteUrls,
-		Branch:                      branch,
-		Revision:                    revision,
-		Findings:                    unifiedFindings,
-		FailedDetectors:             failedDetectors,
+		AssetName:       assetName,
+		AssetRemoteUrls: assetRemoteUrls,
+		Branch:          branch,
+		Revision:        revision,
+		Findings:        unifiedFindings,
+		FailedDetectors: failedDetectors,
 	}
 
 	result := types.ConfirmationRes{} //nolint: exhaustruct
@@ -66,18 +66,18 @@ func ReportScanIfApplicable(directoryToScan string,
 		return err
 	}
 
-	scannableResourceName, err := getScannableResourceName(directoryToScan)
+	assetName, err := getAssetName(directoryToScan)
 	if err != nil {
 		return err
 	}
 
-	branch, revision, scannableResourceRemoteUrls, err := getGitBasedScanMetadata(directoryToScan)
+	branch, revision, assetRemoteUrls, err := getGitBasedScanMetadata(directoryToScan)
 	if err != nil {
 		return err
 	}
 
 	if authToken != "" {
-		err = ReportScan(authToken, scannableResourceName, scannableResourceRemoteUrls,
+		err = ReportScan(authToken, assetName, assetRemoteUrls,
 			branch, revision, unifiedFindingsNotIgnored, failedDetectors)
 		if err != nil {
 			return err
@@ -87,7 +87,7 @@ func ReportScanIfApplicable(directoryToScan string,
 	return nil
 }
 
-func getScannableResourceName(directoryToScan string) (string, error) {
+func getAssetName(directoryToScan string) (string, error) {
 	absPath, err := filepath.Abs(directoryToScan)
 	if err != nil {
 		return "", err
@@ -111,7 +111,7 @@ func getScannableResourceName(directoryToScan string) (string, error) {
 }
 
 func getGitBasedScanMetadata(directoryToScan string) (branch string,
-	revision string, scannableResourceRemoteUrls []string, err error) {
+	revision string, assetRemoteUrls []string, err error) {
 	errorStringIfNotInGitRepo := "exit status 128"
 
 	branch, err = git.GetBranchName(directoryToScan)
@@ -134,11 +134,11 @@ func getGitBasedScanMetadata(directoryToScan string) (branch string,
 		}
 	}
 
-	scannableResourceRemoteUrls, err = git.GetScannableResourceRemoteUrls(directoryToScan)
+	assetRemoteUrls, err = git.GetAssetRemoteUrls(directoryToScan)
 	if err != nil {
-		// Set scannableResource remote URLs to empty array for paths that are not in git repos.
+		// Set asset remote URLs to empty array for paths that are not in git repos.
 		if err.Error() == errorStringIfNotInGitRepo {
-			scannableResourceRemoteUrls = make([]string, 0)
+			assetRemoteUrls = make([]string, 0)
 		} else {
 			return "", "", nil, err
 		}
