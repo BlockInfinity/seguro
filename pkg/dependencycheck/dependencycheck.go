@@ -51,7 +51,7 @@ func convertDependencycheckFindingToUnifiedFinding(directoryToScan string,
 
 	return types.UnifiedFinding{
 		Detector:             "dependencycheck",
-		IdOnExternalPlatform: "",
+		IdOnExternalPlatform: nil,
 		Rule:                 dependencycheckFinding.Vulnerabilities[vulnerabilityIndex].Name,
 		File:                 file,
 		LineStart:            -1,

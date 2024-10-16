@@ -12,7 +12,7 @@ type GitInfo struct {
 
 type UnifiedFinding struct {
 	Detector             string
-	IdOnExternalPlatform string
+	IdOnExternalPlatform *string
 	Rule                 string
 	File                 string
 	LineStart            int
