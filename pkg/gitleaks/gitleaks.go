@@ -44,7 +44,7 @@ func convertGitleaksFindingToUnifiedFinding(directoryToScan string, gitMode bool
 
 	unifiedFinding := types.UnifiedFinding{
 		Detector:             "gitleaks",
-		IdOnExternalPlatform: "",
+		IdOnExternalPlatform: nil,
 		Rule:                 gitleaksFinding.RuleID,
 		File:                 "/" + gitleaksFinding.File,
 		LineStart:            gitleaksFinding.StartLine,
