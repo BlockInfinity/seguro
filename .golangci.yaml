@@ -16,8 +16,7 @@ linters:
     - errchkjson
     - errname
     - errorlint
-    - execinquery
-    - exportloopref
+    - copyloopvar
     - forcetypeassert
     - funlen
     - gci
@@ -32,7 +31,7 @@ linters:
 #    - goerr113
     - goheader
     - goimports
-    - gomnd
+    - mnd
     - gomoddirectives
 #    - gosec
     - gosmopolitan
@@ -97,7 +96,7 @@ linters-settings:
     initialisms: [""]
   varnamelen:
     max-distance: 16
-  gomnd:
+  mnd:
     ignored-numbers:
       - 2
       - 3

@@ -1,6 +1,6 @@
 module github.com/secguro/secguro-cli
 
-go 1.21.7
+go 1.23.3
 
 require (
 	github.com/charmbracelet/bubbles v0.18.0
